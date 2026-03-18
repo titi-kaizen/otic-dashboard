@@ -506,9 +506,8 @@ function App() {
     const ov=cs.length===0?"NONE":cs.some(c=>c==="Red")?"RED":cs.filter(c=>c==="Amber").length>1?"AMBER":"GREEN";
     const bl=Object.entries(wd).filter(([k,d])=>k!=='_global'&&d.blocked&&!d.blocked.toLowerCase().includes("sin bloqueo")).map(([k,d])=>({name:TEAM.find(t=>t.id===k)?.name,text:d.blocked}));
     const dc=Object.entries(wd).filter(([k,d])=>k!=='_global'&&d.decision&&d.decision.toLowerCase().startsWith("sí")).map(([k,d])=>({name:TEAM.find(t=>t.id===k)?.name,text:d.decision.replace(/^sí\s*[-—–]\s*/i,"")}));
-    // Calcula desde el inicio de la semana seleccionada hasta el 15 de mayo
-    const weekStart = new Date(2026, 2, 5 + (wk - 1) * 7);
-    const dr = getDaysRemaining("2026-05-15", weekStart);
+    // Días restantes desde HOY hasta el 15 de mayo (fecha de cierre del proyecto)
+    const dr = getDaysRemaining("2026-05-15", today);
     return { hm, am, ov, bl, dc, dr };
   }, [wd, wk, today]); // today como dependencia → recalcula cuando cambia la fecha
 
