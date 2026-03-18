@@ -461,7 +461,16 @@ function App() {
     const p = normalizarProgreso(newForm.progreso);
     if (newForm.fin&&newForm.inicio&&newForm.fin<newForm.inicio) return alert("La fecha de fin no puede ser menor a la de inicio.");
     const nuevoId = "usr_" + uid();
-    const payload = { ...newForm, progreso:p, estado:estadoTarea(p), updated_by:"Usuario" };
+    const payload = {
+      nombre:      newForm.nombre,
+      progreso:    p,
+      estado:      estadoTarea(p),
+      responsable: newForm.responsable || "",
+      inicio:      newForm.inicio || null,
+      fin:         newForm.fin    || null,
+      comentario:  newForm.comentario || "",
+      updated_by:  "Usuario"
+    };
     setSvTarea("saving");
     try {
       await dbUpsertTarea(nuevoId, payload);
