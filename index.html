@@ -304,7 +304,24 @@ async function dbLoadTareas() {
   const { data, error } = await sb.from("task_progress").select("*");
   if (error) throw error;
   const map = {};
-  (data||[]).forEach(r => { map[r.task_id] = r; });
+  (data||[]).forEach(r => {
+    map[r.task_id] = r;
+    // Re-inyectar tareas creadas por el usuario en el CRONOGRAMA
+    if (r.task_id.startsWith("usr_") && r.pantalla) {
+      const idx = CRONOGRAMA.findIndex(p => p.pantalla === r.pantalla);
+      if (idx !== -1 && !CRONOGRAMA[idx].tareas.find(t => t.id === r.task_id)) {
+        CRONOGRAMA[idx].tareas.push({
+          id:          r.task_id,
+          nombre:      r.nombre      || "",
+          progreso:    r.progreso    || 0,
+          responsable: r.responsable || "",
+          inicio:      r.inicio      || "",
+          fin:         r.fin         || "",
+          comentario:  r.comentario  || ""
+        });
+      }
+    }
+  });
   return map;
 }
 async function dbUpsertTarea(taskId, fields) {
@@ -485,6 +502,7 @@ function App() {
     const nuevoId = "usr_" + uid();
     const payload = {
       nombre:      newForm.nombre,
+      pantalla:    pantalla,        // ← guarda a qué pantalla pertenece
       progreso:    p,
       estado:      estadoTarea(p),
       responsable: newForm.responsable || "",
