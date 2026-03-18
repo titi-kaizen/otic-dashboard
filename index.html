@@ -1,16 +1,495 @@
-{
-  "name": "rtic-dashboard",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RTIC Dashboard — YPF Supply Chain</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { background: #e8ecf1; }</style>
+</head>
+<body>
+  <div id="root"></div>
+
+<script type="text/babel">
+const { useState, useMemo, useEffect, useCallback } = React;
+
+/* ─── STORAGE: usa localStorage en producción ─── */
+const storage = {
+  get: (key) => {
+    try { const v = localStorage.getItem(key); return v ? { value: v } : null; } catch { return null; }
   },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+  set: (key, value) => {
+    try { localStorage.setItem(key, value); return true; } catch { return false; }
   },
-  "devDependencies": {
-    "vite": "^5.0.0",
-    "@vitejs/plugin-react": "^4.0.0"
+  delete: (key) => {
+    try { localStorage.removeItem(key); return true; } catch { return false; }
   }
+};
+
+const TEAM = [
+  { id: "zsosa",     name: "Zahi Sosa",       role: "Analista RTIC" },
+  { id: "jsanda",    name: "Juli Sanda",       role: "Analista RTIC" },
+  { id: "fchavez",   name: "Flor Chavez",      role: "Analista RTIC" },
+  { id: "lnegri",    name: "Luciano Negri",    role: "Analista RTIC" },
+  { id: "hambrosio", name: "Hernan Ambrosio",  role: "Analista RTIC" },
+  { id: "pcosta",    name: "Pedro/Costa",      role: "Analista RTIC" },
+];
+
+const AREAS = [
+  "Datacenter","Template / Diseño Visual","Planificación","Abastecimiento","Contextual",
+  "Compre Neuquino","Tiempos Intermedios","Licitaciones","Ahorros","Gestiones de Compras",
+  "Salud Contractual","Pedidos","Almacenes","COMEX","Transporte","Stock","Spend","CAPEX",
+  "Inspección y Activación","Accidentes IFA/IFAT","Gestión Vehicular","Gestión Patrimonial",
+  "Costo Pozo","GIP (Proveedores)","Desarrollo Proveedores","Datos & Digitalización","Otro",
+];
+
+const SEED = {
+  zsosa: { items: [
+    { area: "Datacenter", text: "Determinación de KPIs de salud", type: "completed", _id: "s1" },
+    { area: "Datacenter", text: "Asignación de la construcción por analista", type: "completed", _id: "s2" },
+    { area: "Template / Diseño Visual", text: "Diseño visual del tablero — Finalizado", type: "completed", _id: "s3" },
+    { area: "Template / Diseño Visual", text: "Reunión con referente de diseño/imagen/marca", type: "completed", _id: "s4" },
+    { area: "Template / Diseño Visual", text: "Adaptación de recomendaciones al diseño actual", type: "completed", _id: "s5" },
+    { area: "Licitaciones", text: "Evaluación de fuente manual Sourcing para cálculo de KPIs", type: "completed", _id: "s6" },
+    { area: "Datacenter", text: "Diseño visual de las pantallas 16/03 + Validación de Template", type: "activity", _id: "s7" },
+    { area: "Salud Contractual", text: "Diseño de información a incluir + construcción", type: "activity", _id: "s8" },
+    { area: "Licitaciones", text: "Construcción de KPIs particulares", type: "activity", _id: "s9" },
+  ], blocked: "Espera validación e incorporación de columnas faltantes en la base de datos de Tecnología.", decision: "Sí — Necesitamos validación final del template de Imagen/Marca corporativa.", confidence: "Amber" },
+  jsanda: { items: [
+    { area: "Planificación", text: "Reunión de relevamiento de dashboards desarrollados", type: "completed", _id: "s10" },
+    { area: "Planificación", text: "Reunión interna para diseño visual", type: "completed", _id: "s11" },
+    { area: "Planificación", text: "Definición de formato visual y cantidad de pantallas", type: "completed", _id: "s12" },
+    { area: "Compre Neuquino", text: "Creación de base de datos y análisis de datos históricos", type: "completed", _id: "s13" },
+    { area: "Accidentes IFA/IFAT", text: "KPIs Accidentes IFA y IFAT relevados", type: "completed", _id: "s14" },
+    { area: "Planificación", text: "Desarrollo y adaptación visual de tableros", type: "activity", _id: "s15" },
+    { area: "Gestiones de Compras", text: "Inicio de adaptación y revisión de KPIs", type: "activity", _id: "s16" },
+    { area: "Ahorros", text: "A la espera de disponibilización de tablero para adaptación", type: "activity", _id: "s17" },
+  ], blocked: "Template final pendiente de aprobación para avanzar con adaptación visual.", decision: "No esta semana.", confidence: "Green" },
+  fchavez: { items: [
+    { area: "Accidentes IFA/IFAT", text: "Reunión con Dayana Mendez + Construcción de mockup — Finalizado", type: "completed", _id: "s18" },
+    { area: "Abastecimiento", text: "Reunión relevamiento de datos disponibles (90% avance)", type: "completed", _id: "s19" },
+    { area: "Transporte", text: "Análisis de tableros disponibles completado", type: "completed", _id: "s20" },
+    { area: "Abastecimiento", text: "Desarrollo y adaptación visual", type: "activity", _id: "s21" },
+    { area: "Transporte", text: "Desarrollo y adaptación visual", type: "activity", _id: "s22" },
+  ], blocked: "Pendiente recibir accesos al tablero y Excel de Fernando Gout.", decision: "Sí — Aprobación del template Power BI para distribución a referentes.", confidence: "Amber" },
+  lnegri: { items: [
+    { area: "COMEX", text: "Análisis de tableros + Reunión con referentes para planificar", type: "completed", _id: "s23" },
+    { area: "Stock", text: "Análisis de tableros disponibles con Santiago Curutchet", type: "completed", _id: "s24" },
+    { area: "COMEX", text: "Desarrollo y adaptación visual", type: "activity", _id: "s25" },
+    { area: "Almacenes", text: "Construcción de pantalla consolidada de KPIs", type: "activity", _id: "s26" },
+    { area: "CAPEX", text: "Adaptación/Desarrollo de tablero", type: "activity", _id: "s27" },
+  ], blocked: "Sin bloqueos esta semana.", decision: "No esta semana.", confidence: "Green" },
+  hambrosio: { items: [
+    { area: "Abastecimiento", text: "Identificación de pantallas a cargo y plan de trabajo", type: "completed", _id: "s28" },
+    { area: "Ahorros", text: "Adaptación del tablero a visuales y estética RTIC", type: "activity", _id: "s29" },
+    { area: "Costo Pozo", text: "Inicio de relevamiento y construcción", type: "activity", _id: "s30" },
+  ], blocked: "Sin bloqueos esta semana.", decision: "No esta semana.", confidence: "Amber" },
+  pcosta: { items: [
+    { area: "Contextual", text: "Reunión con Claus Drescher para determinar datos necesarios", type: "completed", _id: "s31" },
+    { area: "Contextual", text: "Obtención de orígenes y armado de pantalla", type: "activity", _id: "s32" },
+    { area: "Gestión Patrimonial", text: "Reunión con referentes 13/3", type: "activity", _id: "s33" },
+  ], blocked: "Sin bloqueos esta semana.", decision: "No esta semana.", confidence: "Green" },
+  _global: { items: [
+    { area: "Datos & Digitalización", text: "Identificación de 49 datos a disponibilizar", type: "completed", _id: "s34" },
+    { area: "Datos & Digitalización", text: "Avance del 40% en 7 KPIs de primera fase y 7% en 42 KPIs de segunda fase", type: "completed", _id: "s35" },
+    { area: "Datacenter", text: "Diseño Físico de la disposición de las pantallas por sección", type: "activity", _id: "s36" },
+  ], blocked: "", decision: "", confidence: "" },
+};
+
+const SK = "rtic-dash-v3";
+const INIT = { 1: SEED };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const WEEKS = Array.from({ length: 12 }, (_, i) => {
+  const s = new Date(2026, 2, 5 + i * 7), e = new Date(s);
+  e.setDate(e.getDate() + 6);
+  const f = d => d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
+  const ff = d => d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  return { n: i + 1, s: f(s), e: f(e), sf: ff(s), ef: ff(e) };
+});
+
+const C = { navy:"#0c1525",nl:"#131d30",teal:"#00bcd4",td:"#0097a7",gold:"#e8a838",grn:"#2e7d32",gl:"#4caf50",red:"#c62828",rl:"#ef5350",w:"#fff",g:"#8a9bb5",gl2:"#b0bec5",bd:"rgba(0,188,212,0.15)" };
+
+function ItemRow({ item, idx, onUp, onRm }) {
+  return (
+    <div style={{ display:"flex",gap:8,marginBottom:8,alignItems:"flex-start" }}>
+      <select value={item.area} onChange={e=>onUp(idx,"area",e.target.value)}
+        style={{ width:175,padding:"7px 6px",border:"1px solid #dde",borderRadius:4,fontSize:11,background:"#fff",flexShrink:0 }}>
+        {AREAS.map(a=><option key={a} value={a}>{a}</option>)}
+      </select>
+      <input value={item.text} onChange={e=>onUp(idx,"text",e.target.value)}
+        placeholder="Descripción del entregable o actividad..."
+        style={{ flex:1,padding:"7px 8px",border:"1px solid #dde",borderRadius:4,fontSize:12,fontFamily:"inherit" }} />
+      <button onClick={()=>onRm(idx)}
+        style={{ padding:"6px 10px",border:"none",background:"rgba(198,40,40,0.08)",color:C.red,borderRadius:4,cursor:"pointer",fontSize:12,flexShrink:0 }}>✕</button>
+    </div>
+  );
 }
+
+function App() {
+  const [pg, setPg]   = useState("cover");
+  const [wk, setWk]   = useState(1);
+  const [dt, setDt]   = useState(INIT);
+  const [ed, setEd]   = useState(null);
+  const [fi, setFi]   = useState([]);
+  const [fm, setFm]   = useState({ blocked:"", decision:"", confidence:"Green" });
+  const [ld, setLd]   = useState(true);
+  const [sv, setSv]   = useState(false);
+  const [svt, setSvt] = useState(null);
+
+  /* ── cargar desde localStorage al iniciar ── */
+  useEffect(() => {
+    try {
+      const r = storage.get(SK);
+      if (r && r.value) {
+        const p = JSON.parse(r.value);
+        setDt({ ...INIT, ...p, 1: { ...SEED, ...p[1] } });
+      } else {
+        storage.set(SK, JSON.stringify(INIT));
+      }
+    } catch {}
+    setLd(false);
+  }, []);
+
+  const persist = useCallback(async (d) => {
+    setSv(true);
+    try {
+      storage.set(SK, JSON.stringify(d));
+      setSvt(new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));
+    } catch {}
+    setSv(false);
+  }, []);
+
+  const wd = dt[wk] || {};
+  const wc = WEEKS[wk - 1];
+
+  const startEd = (id) => {
+    const d = wd[id];
+    setEd(id);
+    setFi(d?.items ? d.items.map(x=>({...x,_id:x._id||uid()})) : []);
+    setFm({ blocked:d?.blocked||"", decision:d?.decision||"", confidence:d?.confidence||"Green" });
+  };
+  const saveEd = async () => {
+    const u = { ...dt,[wk]:{ ...(dt[wk]||{}),[ed]:{ items:fi,...fm } } };
+    setDt(u); setEd(null); await persist(u);
+  };
+  const addI  = (t) => setFi(p=>[...p,{area:AREAS[0],text:"",type:t,_id:uid()}]);
+  const rmI   = (i) => setFi(p=>p.filter((_,j)=>j!==i));
+  const upI   = (i,f,v) => setFi(p=>p.map((x,j)=>j===i?{...x,[f]:v}:x));
+
+  const sum = useMemo(() => {
+    const all=[];
+    Object.entries(wd).forEach(([mid,d])=>{
+      if(!d?.items)return;
+      const nm=TEAM.find(t=>t.id===mid)?.name||"General";
+      d.items.forEach(it=>all.push({...it,who:nm}));
+    });
+    const hm={},am={};
+    all.forEach(it=>{ const t=it.type==="completed"?hm:am; if(!t[it.area])t[it.area]=[]; t[it.area].push(it); });
+    const cs=Object.entries(wd).filter(([k])=>k!=='_global').map(([,d])=>d.confidence).filter(Boolean);
+    const ov=cs.length===0?"NONE":cs.some(c=>c==="Red")?"RED":cs.filter(c=>c==="Amber").length>1?"AMBER":"GREEN";
+    const bl=Object.entries(wd).filter(([k,d])=>k!=='_global'&&d.blocked&&!d.blocked.toLowerCase().includes("sin bloqueo")).map(([k,d])=>({name:TEAM.find(t=>t.id===k)?.name,text:d.blocked}));
+    const dc=Object.entries(wd).filter(([k,d])=>k!=='_global'&&d.decision&&d.decision.toLowerCase().startsWith("sí")).map(([k,d])=>({name:TEAM.find(t=>t.id===k)?.name,text:d.decision.replace(/^sí\s*[-—–]\s*/i,"")}));
+    const dr=Math.max(0,Math.ceil((new Date(2026,3,30)-new Date())/86400000));
+    return { hm,am,ov,bl,dc,dr };
+  }, [wd, wk]);
+
+  const PH = t => (
+    <div style={{ background:C.navy,borderBottom:`3px solid ${C.teal}`,padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+      <h1 style={{ fontSize:20,fontWeight:300,letterSpacing:1,color:C.w,margin:0 }}>{t}</h1>
+      <div style={{ display:"flex",alignItems:"center",gap:14 }}>
+        {sv&&<span style={{ fontSize:10,color:C.gold }}>Guardando...</span>}
+        {svt&&!sv&&<span style={{ fontSize:10,color:C.gl }}>✓ {svt}</span>}
+        <span style={{ fontSize:12,color:C.g }}>RTIC | YPF S.A.</span>
+      </div>
+    </div>
+  );
+  const PF = <div style={{ background:C.navy,padding:"8px 28px",display:"flex",justifyContent:"space-between",fontSize:10,color:C.g,borderTop:`1px solid ${C.bd}` }}><span>RTIC | Supply Chain | YPF S.A.</span><span>PRIVADO — USO INTERNO</span></div>;
+  const SH = (t,col) => <div style={{ background:col,color:C.w,padding:"7px 14px",fontSize:12,fontWeight:700,letterSpacing:0.4,borderRadius:"4px 4px 0 0" }}>{t}</div>;
+
+  if (ld) return (
+    <div style={{ fontFamily:"'Segoe UI',sans-serif",background:C.navy,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:14 }}>
+      <div style={{ width:36,height:36,border:`3px solid ${C.bd}`,borderTop:`3px solid ${C.teal}`,borderRadius:"50%",animation:"sp 1s linear infinite" }}/>
+      <div style={{ color:C.teal,fontSize:13 }}>Cargando...</div>
+      <style>{`@keyframes sp{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  return (
+    <div style={{ fontFamily:"'Segoe UI','Helvetica Neue',sans-serif",background:"#e8ecf1",minHeight:"100vh" }}>
+      {/* ── NAV ── */}
+      <div style={{ background:C.navy,display:"flex",alignItems:"center",padding:"0 10px",borderBottom:`2px solid ${C.teal}`,position:"sticky",top:0,zIndex:100,flexWrap:"wrap" }}>
+        {[["cover","Portada"],["input","Carga Semanal"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px",border:"none",background:pg===k?C.nl:"transparent",color:pg===k?C.teal:C.gl2,fontSize:12,fontWeight:pg===k?600:400,cursor:"pointer",borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
+        ))}
+        <div style={{ marginLeft:"auto",padding:"6px 0" }}>
+          <select value={wk} onChange={e=>setWk(Number(e.target.value))}
+            style={{ background:C.nl,border:`1px solid ${C.bd}`,color:C.teal,padding:"5px 8px",borderRadius:4,fontSize:12,fontWeight:700,outline:"none" }}>
+            {WEEKS.map(w=><option key={w.n} value={w.n}>Sem {w.n} ({w.s}–{w.e})</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* ── PORTADA ── */}
+      {pg==="cover"&&<div style={{ background:C.navy,minHeight:"calc(100vh - 46px)",display:"flex",flexDirection:"column",justifyContent:"center",padding:"50px 70px",position:"relative" }}>
+        <div style={{ maxWidth:750 }}>
+          <h1 style={{ fontSize:48,fontWeight:300,color:C.w,lineHeight:1.1,margin:0 }}>REAL TIME INTELIGENCE CENTER</h1>
+          <div style={{ width:350,height:4,background:C.teal,margin:"28px 0" }}/>
+          <h2 style={{ fontSize:24,fontWeight:300,color:C.teal,margin:"0 0 40px" }}>Resumen Ejecutivo Semanal</h2>
+          <div style={{ background:C.nl,border:`1px solid ${C.bd}`,borderRadius:4,padding:"22px 26px",maxWidth:460 }}>
+            {[["SEMANA",`N°${wk} — ${wc.sf} al ${wc.ef}`],["RESPONSABLE","Claus Drescher"],["ÁREA","Supply Chain — Performance"],["VERSIÓN","v1.0"]].map(([l,v])=>(
+              <div key={l} style={{ marginBottom:11 }}><span style={{ fontSize:11,fontWeight:700,color:C.teal,letterSpacing:1.5,marginRight:10 }}>{l}</span><span style={{ fontSize:13,color:C.w }}>{v}</span></div>
+            ))}
+          </div>
+        </div>
+        <div style={{ position:"absolute",bottom:24,left:0,right:0,textAlign:"center",fontSize:11,color:C.g }}>PRIVADO — USO INTERNO</div>
+      </div>}
+
+      {/* ── CARGA SEMANAL ── */}
+      {pg==="input"&&<div style={{ background:"#e8ecf1" }}>{PH("CARGA SEMANAL — 5 Preguntas Clave")}
+        <div style={{ padding:"18px 24px" }}>
+          <div style={{ marginBottom:14,padding:"10px 12px",background:C.w,borderRadius:6,borderLeft:`4px solid ${C.teal}`,fontSize:12,color:"#546e7a" }}>
+            Cada integrante carga entregables y actividades <strong>asociados al KPI/pantalla</strong>.
+          </div>
+          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(380px, 1fr))",gap:12 }}>
+            {TEAM.map(m=>{
+              const d=wd[m.id],filled=!!d?.items?.length,isE=ed===m.id,conf=d?.confidence;
+              return <div key={m.id} style={{ background:C.w,borderRadius:6,overflow:"hidden",border:`1px solid ${filled?(conf==="Red"?C.rl:conf==="Amber"?C.gold:C.gl):"#ddd"}`,boxShadow:"0 1px 6px rgba(0,0,0,0.05)" }}>
+                <div style={{ background:C.navy,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                  <div><div style={{ fontSize:13,fontWeight:600,color:C.w }}>{m.name}</div><div style={{ fontSize:10,color:C.g }}>{m.role}</div></div>
+                  <div style={{ display:"flex",alignItems:"center",gap:6 }}>
+                    {filled&&<span style={{ padding:"2px 7px",borderRadius:99,fontSize:9,fontWeight:700,background:conf==="Red"?"rgba(198,40,40,0.15)":conf==="Amber"?"rgba(232,168,56,0.15)":"rgba(46,125,50,0.15)",color:conf==="Red"?C.rl:conf==="Amber"?C.gold:C.gl }}>{conf==="Red"?"🔴":conf==="Amber"?"🟡":"🟢"} {conf}</span>}
+                    {isE
+                      ? <div style={{ display:"flex",gap:3 }}>
+                          <button onClick={saveEd} style={{ padding:"4px 10px",borderRadius:4,border:"none",fontSize:10,fontWeight:600,cursor:"pointer",background:C.teal,color:C.w }}>Guardar</button>
+                          <button onClick={()=>setEd(null)} style={{ padding:"4px 7px",borderRadius:4,border:"none",fontSize:10,cursor:"pointer",background:C.nl,color:C.gl2 }}>✕</button>
+                        </div>
+                      : <button onClick={()=>startEd(m.id)} style={{ padding:"4px 10px",borderRadius:4,border:"none",fontSize:10,fontWeight:600,cursor:"pointer",background:C.nl,color:C.w }}>{filled?"Editar":"Cargar"}</button>
+                    }
+                  </div>
+                </div>
+                {isE
+                  ? <div style={{ padding:12 }}>
+                      <div style={{ marginBottom:12 }}>
+                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5 }}>
+                          <label style={{ fontSize:11,fontWeight:700,color:C.grn }}>1. ¿Qué entregaste esta semana?</label>
+                          <button onClick={()=>addI("completed")} style={{ padding:"2px 7px",border:`1px solid ${C.grn}`,borderRadius:4,background:"rgba(46,125,50,0.06)",color:C.grn,fontSize:10,fontWeight:600,cursor:"pointer" }}>+ Hito</button>
+                        </div>
+                        {fi.filter(x=>x.type==="completed").length===0&&<div style={{ fontSize:10,color:"#aaa",fontStyle:"italic" }}>Click "+ Hito" para agregar.</div>}
+                        {fi.map((x,i)=>x.type==="completed"?<ItemRow key={x._id} item={x} idx={i} onUp={upI} onRm={rmI}/>:null)}
+                      </div>
+                      <div style={{ marginBottom:12 }}>
+                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5 }}>
+                          <label style={{ fontSize:11,fontWeight:700,color:"#b8860b" }}>2. ¿Prioridad próxima semana?</label>
+                          <button onClick={()=>addI("activity")} style={{ padding:"2px 7px",border:`1px solid ${C.gold}`,borderRadius:4,background:"rgba(232,168,56,0.06)",color:"#b8860b",fontSize:10,fontWeight:600,cursor:"pointer" }}>+ Actividad</button>
+                        </div>
+                        {fi.filter(x=>x.type==="activity").length===0&&<div style={{ fontSize:10,color:"#aaa",fontStyle:"italic" }}>Click "+ Actividad".</div>}
+                        {fi.map((x,i)=>x.type==="activity"?<ItemRow key={x._id} item={x} idx={i} onUp={upI} onRm={rmI}/>:null)}
+                      </div>
+                      <div style={{ marginBottom:8 }}>
+                        <label style={{ fontSize:11,fontWeight:700,color:C.navy,display:"block",marginBottom:3 }}>3. ¿Algo bloqueado?</label>
+                        <textarea value={fm.blocked} onChange={e=>setFm(p=>({...p,blocked:e.target.value}))} rows={2}
+                          style={{ width:"100%",padding:6,border:"1px solid #dde",borderRadius:4,fontSize:11,resize:"vertical",fontFamily:"inherit",boxSizing:"border-box" }}/>
+                      </div>
+                      <div style={{ marginBottom:8 }}>
+                        <label style={{ fontSize:11,fontWeight:700,color:C.navy,display:"block",marginBottom:3 }}>4. ¿Decisión o escalamiento?</label>
+                        <textarea value={fm.decision} onChange={e=>setFm(p=>({...p,decision:e.target.value}))} rows={2}
+                          style={{ width:"100%",padding:6,border:"1px solid #dde",borderRadius:4,fontSize:11,resize:"vertical",fontFamily:"inherit",boxSizing:"border-box" }}/>
+                      </div>
+                      <div>
+                        <label style={{ fontSize:11,fontWeight:700,color:C.navy,display:"block",marginBottom:4 }}>5. Confidence</label>
+                        <div style={{ display:"flex",gap:6 }}>
+                          {["Green","Amber","Red"].map(c=>(
+                            <button key={c} onClick={()=>setFm(p=>({...p,confidence:c}))}
+                              style={{ flex:1,padding:"6px 0",borderRadius:4,border:`2px solid ${fm.confidence===c?(c==="Red"?C.red:c==="Amber"?C.gold:C.grn):"#ddd"}`,background:fm.confidence===c?(c==="Red"?"rgba(198,40,40,0.08)":c==="Amber"?"rgba(232,168,56,0.08)":"rgba(46,125,50,0.08)"):"#fff",fontSize:11,fontWeight:600,cursor:"pointer",color:c==="Red"?C.red:c==="Amber"?"#b8860b":C.grn }}>{c==="Red"?"🔴":c==="Amber"?"🟡":"🟢"} {c}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  : filled
+                    ? <div style={{ padding:12,fontSize:11,color:"#37474f" }}>
+                        <div style={{ display:"flex",gap:12,marginBottom:5 }}>
+                          <span style={{ color:C.grn,fontWeight:600 }}>{d.items.filter(x=>x.type==="completed").length} hitos</span>
+                          <span style={{ color:"#b8860b",fontWeight:600 }}>{d.items.filter(x=>x.type==="activity").length} actividades</span>
+                        </div>
+                        {d.items.slice(0,3).map((x,i)=>(
+                          <div key={i} style={{ fontSize:10,marginBottom:2,color:"#546e7a" }}>
+                            <span style={{ background:x.type==="completed"?"rgba(46,125,50,0.1)":"rgba(232,168,56,0.1)",padding:"1px 4px",borderRadius:3,fontSize:9,marginRight:4,fontWeight:600,color:x.type==="completed"?C.grn:"#b8860b" }}>{x.area}</span>
+                            {x.text.substring(0,65)}{x.text.length>65?"…":""}
+                          </div>
+                        ))}
+                        {d.items.length>3&&<div style={{ fontSize:9,color:"#90a4ae",marginTop:2 }}>+{d.items.length-3} más</div>}
+                        {d.blocked&&!d.blocked.toLowerCase().includes("sin bloqueo")&&<div style={{ marginTop:5,padding:"4px 6px",background:"rgba(198,40,40,0.05)",borderRadius:3,fontSize:10,color:C.red }}>⚠ {d.blocked.substring(0,80)}</div>}
+                      </div>
+                    : <div style={{ padding:18,textAlign:"center",color:"#90a4ae",fontSize:12 }}>Sin carga esta semana</div>
+                }
+              </div>;
+            })}
+          </div>
+        </div>
+        {PF}
+      </div>}
+
+      {/* ── CALENDARIO ── */}
+      {pg==="calendar"&&<div style={{ background:"#e8ecf1" }}>{PH("Calendario")}
+        <div style={{ padding:"18px 24px" }}>
+          <div style={{ background:"#f5f7fa",borderRadius:8,padding:18,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12 }}>
+            {WEEKS.map(w=>{
+              const d2=dt[w.n],f=d2?Object.keys(d2).filter(k=>k!=='_global').length:0,cur=w.n===wk;
+              return <div key={w.n} onClick={()=>{setWk(w.n);setPg("resumen");}} style={{ background:C.w,borderRadius:6,overflow:"hidden",cursor:"pointer",border:cur?`2px solid ${C.teal}`:"1px solid #e0e0e0",boxShadow:cur?"0 0 10px rgba(0,188,212,0.2)":"0 1px 3px rgba(0,0,0,0.04)" }}>
+                <div style={{ background:C.navy,padding:"6px 10px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                  <div style={{ width:7,height:7,borderRadius:99,background:f>3?C.gl:f>0?C.gold:"#546e7a" }}/>
+                  {cur&&<span style={{ fontSize:8,color:C.teal,fontWeight:700 }}>ACTUAL</span>}
+                </div>
+                <div style={{ padding:"12px 10px",textAlign:"center" }}>
+                  <div style={{ fontSize:18,fontWeight:300,color:C.navy }}>SEMANA {w.n}</div>
+                  <div style={{ fontSize:10,color:"#90a4ae",marginTop:3 }}>{w.s} — {w.e}</div>
+                  {f>0&&<div style={{ fontSize:9,color:C.teal,marginTop:4,fontWeight:600 }}>{f}/{TEAM.length} cargas</div>}
+                </div>
+              </div>;
+            })}
+          </div>
+        </div>
+        {PF}
+      </div>}
+
+      {/* ── RESUMEN ── */}
+      {pg==="resumen"&&<div style={{ background:"#e8ecf1" }}>{PH("RESUMEN EJECUTIVO")}
+        <div style={{ padding:"18px 24px" }}>
+          <div style={{ display:"grid",gridTemplateColumns:"2fr 1fr",gap:12,marginBottom:16 }}>
+            <div style={{ background:C.w,borderLeft:`5px solid ${sum.ov==="GREEN"?C.grn:sum.ov==="AMBER"?C.gold:sum.ov==="RED"?C.red:"#90a4ae"}`,borderRadius:"0 6px 6px 0",padding:"14px 20px" }}>
+              <div style={{ fontSize:12,color:C.g,fontWeight:500,letterSpacing:1 }}>ESTADO GENERAL</div>
+              <div style={{ fontSize:24,fontWeight:700,marginTop:3,color:sum.ov==="GREEN"?C.grn:sum.ov==="AMBER"?"#b8860b":sum.ov==="RED"?C.red:"#90a4ae" }}>{sum.ov==="GREEN"?"EN CURSO":sum.ov==="AMBER"?"EN RIESGO":sum.ov==="RED"?"CRÍTICO":"SIN DATOS"}</div>
+            </div>
+            <div style={{ background:C.w,borderRadius:6,padding:"14px 20px",borderTop:`3px solid ${C.gold}` }}>
+              <div style={{ fontSize:12,color:C.g,fontWeight:500,letterSpacing:1 }}>SEMANA</div>
+              <div style={{ fontSize:32,fontWeight:300,color:C.navy }}>N° {wk}</div>
+            </div>
+          </div>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+            <div style={{ background:C.w,borderRadius:6,overflow:"hidden" }}>{SH("HITOS ALCANZADOS",C.grn)}
+              <div style={{ padding:"12px 16px" }}>
+                {Object.keys(sum.hm).length===0
+                  ? <p style={{ color:"#90a4ae",fontSize:12,fontStyle:"italic" }}>Sin hitos.</p>
+                  : Object.entries(sum.hm).map(([a,its])=>(
+                      <div key={a} style={{ marginBottom:12 }}>
+                        <div style={{ fontSize:13,fontWeight:700,color:C.navy,marginBottom:3 }}>{a}</div>
+                        {its.map((x,i)=><div key={i} style={{ fontSize:11,color:"#546e7a",lineHeight:1.5,fontStyle:"italic",paddingLeft:9,borderLeft:"2px solid #e0e0e0",marginBottom:3 }}>{x.text}</div>)}
+                      </div>
+                    ))
+                }
+              </div>
+            </div>
+            <div style={{ background:C.w,borderRadius:6,overflow:"hidden" }}>{SH("ACTIVIDADES EN CURSO",C.gold)}
+              <div style={{ padding:"12px 16px" }}>
+                {Object.keys(sum.am).length===0
+                  ? <p style={{ color:"#90a4ae",fontSize:12,fontStyle:"italic" }}>Sin actividades.</p>
+                  : Object.entries(sum.am).map(([a,its])=>(
+                      <div key={a} style={{ marginBottom:12 }}>
+                        <div style={{ fontSize:13,fontWeight:700,color:C.navy,marginBottom:3 }}>{a}</div>
+                        {its.map((x,i)=><div key={i} style={{ fontSize:11,color:"#546e7a",lineHeight:1.5,fontStyle:"italic",paddingLeft:9,borderLeft:"2px solid #e0e0e0",marginBottom:3 }}>{x.text}</div>)}
+                      </div>
+                    ))
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        {PF}
+      </div>}
+
+      {/* ── MÉTRICAS ── */}
+      {pg==="metricas"&&<div style={{ background:"#e8ecf1" }}>{PH("MÉTRICAS DE AVANCE Y KPIs")}
+        <div style={{ padding:"18px 24px" }}>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:18 }}>
+            {[{v:sum.dr,l:"Días Restantes",bc:C.navy},{v:sum.bl.length,l:"Issues Abiertos",bc:C.red}].map((c,i)=>(
+              <div key={i} style={{ background:C.w,borderRadius:6,overflow:"hidden",textAlign:"center" }}>
+                <div style={{ height:5,background:c.bc }}/>
+                <div style={{ padding:"22px 16px" }}>
+                  <div style={{ fontSize:44,fontWeight:300,color:c.bc,fontFamily:"Georgia,serif" }}>[ {c.v} ]</div>
+                  <div style={{ fontSize:14,fontWeight:600,color:C.navy,marginTop:3 }}>{c.l}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12 }}>
+            <div style={{ background:C.w,borderRadius:6,overflow:"hidden" }}>{SH("PRÓXIMOS PASOS",C.td)}
+              <div style={{ padding:"12px 16px",minHeight:160 }}>
+                {Object.keys(sum.am).length===0?<p style={{ color:"#90a4ae",fontSize:11,fontStyle:"italic" }}>Sin datos.</p>:Object.entries(sum.am).slice(0,5).map(([a,its])=>(
+                  <div key={a} style={{ marginBottom:8 }}><div style={{ fontSize:12,fontWeight:700,color:C.navy }}>{a}</div>{its.slice(0,2).map((x,i)=><div key={i} style={{ fontSize:11,color:"#546e7a",fontStyle:"italic" }}>{x.text}</div>)}</div>
+                ))}
+              </div>
+            </div>
+            <div style={{ background:C.w,borderRadius:6,overflow:"hidden" }}>{SH("DECISIONES REQUERIDAS",C.navy)}
+              <div style={{ padding:"12px 16px",minHeight:160 }}>
+                {sum.dc.length===0?<p style={{ color:"#90a4ae",fontSize:11,fontStyle:"italic" }}>Sin decisiones.</p>:sum.dc.map((d,i)=>(
+                  <div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:12,fontWeight:700,color:C.navy }}>{d.text}</div><div style={{ fontSize:10,color:C.g }}>Solicitado: {d.name}</div></div>
+                ))}
+              </div>
+            </div>
+            <div style={{ background:C.w,borderRadius:6,overflow:"hidden" }}>{SH("RIESGOS / BLOQUEOS",C.red)}
+              <div style={{ padding:"12px 16px",minHeight:160 }}>
+                {sum.bl.length===0?<p style={{ color:"#90a4ae",fontSize:11,fontStyle:"italic" }}>Sin bloqueos.</p>:sum.bl.map((b,i)=>(
+                  <div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:12,fontWeight:700,color:C.navy }}>{b.text}</div><div style={{ fontSize:10,color:C.g }}>Reportado: {b.name}</div></div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop:16,background:C.w,borderRadius:6,padding:16 }}>
+            <div style={{ fontSize:12,fontWeight:600,color:C.navy,marginBottom:8 }}>Confidence — Semana {wk}</div>
+            <div style={{ display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6 }}>
+              {TEAM.map(m=>{
+                const c=wd[m.id]?.confidence;
+                return <div key={m.id} style={{ textAlign:"center",padding:"8px 4px",borderRadius:6,background:c==="Red"?"rgba(198,40,40,0.08)":c==="Amber"?"rgba(232,168,56,0.08)":c==="Green"?"rgba(46,125,50,0.08)":"#f5f5f5",border:`1px solid ${c==="Red"?"rgba(198,40,40,0.2)":c==="Amber"?"rgba(232,168,56,0.2)":c==="Green"?"rgba(46,125,50,0.2)":"#e0e0e0"}` }}>
+                  <div style={{ fontSize:16 }}>{c==="Red"?"🔴":c==="Amber"?"🟡":c==="Green"?"🟢":"⚪"}</div>
+                  <div style={{ fontSize:10,fontWeight:600,color:C.navy }}>{m.name.split(" ")[0]}</div>
+                </div>;
+              })}
+            </div>
+          </div>
+        </div>
+        {PF}
+      </div>}
+
+      {/* ── ADMIN ── */}
+      {pg==="admin"&&<div style={{ background:"#e8ecf1" }}>{PH("ADMINISTRACIÓN")}
+        <div style={{ padding:"18px 24px",maxWidth:720 }}>
+          <div style={{ background:C.w,borderRadius:6,padding:16,marginBottom:14,borderLeft:`4px solid ${C.teal}` }}>
+            <div style={{ fontSize:12,fontWeight:600,color:C.navy,marginBottom:6 }}>Almacenamiento</div>
+            <div style={{ display:"flex",gap:16,alignItems:"center" }}>
+              <span style={{ fontSize:11,color:"#546e7a" }}>💾 Guardado en <strong>localStorage</strong> de este navegador</span>
+              {svt&&<span style={{ fontSize:10,color:C.gl }}>✓ Último guardado: {svt}</span>}
+            </div>
+          </div>
+          <div style={{ background:C.w,borderRadius:6,padding:16,marginBottom:14 }}>
+            <div style={{ fontSize:12,fontWeight:600,color:C.navy,marginBottom:10 }}>Por semana</div>
+            {WEEKS.map(w=>{
+              const d2=dt[w.n],f=d2?Object.keys(d2).filter(k=>k!=='_global').length:0;
+              return <div key={w.n} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 10px",borderRadius:5,background:f>0?"rgba(0,188,212,0.04)":"#fafafa",border:`1px solid ${f>0?C.bd:"#eee"}`,marginBottom:4 }}>
+                <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                  <div style={{ width:6,height:6,borderRadius:99,background:f>3?C.gl:f>0?C.gold:"#ddd" }}/>
+                  <span style={{ fontSize:11,color:C.navy }}>Sem {w.n}</span>
+                  <span style={{ fontSize:10,color:C.g }}>{w.s}–{w.e}</span>
+                </div>
+                <span style={{ fontSize:10,color:f>0?C.teal:"#bbb" }}>{f}/{TEAM.length}</span>
+              </div>;
+            })}
+          </div>
+          <div style={{ background:C.w,borderRadius:6,padding:16,border:"1px solid rgba(198,40,40,0.2)" }}>
+            <div style={{ fontSize:12,fontWeight:600,color:C.red,marginBottom:4 }}>Zona de riesgo</div>
+            <div style={{ fontSize:10,color:"#546e7a",marginBottom:12 }}>Acción irreversible.</div>
+            <button onClick={async()=>{ if(!confirm("¿Resetear todos los datos?"))return; setDt(INIT); storage.set(SK,JSON.stringify(INIT)); }}
+              style={{ padding:"7px 16px",borderRadius:5,border:`1px solid ${C.red}`,background:"rgba(198,40,40,0.08)",color:C.red,fontSize:11,fontWeight:600,cursor:"pointer" }}>Resetear</button>
+          </div>
+        </div>
+        {PF}
+      </div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
