@@ -445,7 +445,16 @@ function App() {
     const p = normalizarProgreso(campos.progreso);
     if (p<0||p>100) return alert("El progreso debe ser entre 0 y 100.");
     if (campos.fin&&campos.inicio&&campos.fin<campos.inicio) return alert("La fecha de fin no puede ser menor a la de inicio.");
-    const payload = { ...campos, progreso:p, estado:estadoTarea(p), updated_by:"Usuario" };
+    const payload = {
+      nombre:      tarea.nombre,
+      progreso:    p,
+      estado:      estadoTarea(p),
+      responsable: campos.responsable || "",
+      inicio:      campos.inicio || null,
+      fin:         campos.fin    || null,
+      comentario:  campos.comentario || "",
+      updated_by:  "Usuario"
+    };
     setSvTarea("saving");
     try {
       await dbUpsertTarea(tarea.id, payload);
