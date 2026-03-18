@@ -1,1 +1,1 @@
-# otic-dashboard
+# rtic-dashboard
