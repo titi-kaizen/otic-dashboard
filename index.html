@@ -16,211 +16,22 @@
 <script type="text/babel">
 const { useState, useMemo, useEffect, useCallback } = React;
 
-/* ─── DATOS DE PANTALLAS / CRONOGRAMA ─────────────────────────────────────
-   Estructura: Etapa > Pantalla > Tareas
-   Reemplazá con los datos reales del Excel cuando esté disponible.
-   El progreso puede venir en 0-1 o 0-100, se normaliza automáticamente.
-   ─────────────────────────────────────────────────────────────────────── */
-const CRONOGRAMA = [
-  // ── ETAPA 1 ──────────────────────────────────────────────────────────────
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento contractual", tareas:[
-    { id:"e1t01", nombre:"Adaptación de tablero desarrollado (Plan abast. compras)",     progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-05", fin:"2026-04-30", comentario:"" },
-    { id:"e1t02", nombre:"Tarea 2 — Plan de abastecimiento compras",                     progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-05", fin:"2026-04-30", comentario:"" },
-    { id:"e1t03", nombre:"Tarea 1 — Plan Abastecimiento de compras vs Ejecución",        progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-05", fin:"2026-04-30", comentario:"" },
-    { id:"e1t04", nombre:"Tarea 2 — Plan Abastecimiento de compras vs Ejecución",        progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-05", fin:"2026-04-30", comentario:"" },
-  ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Planificación (E1)", tareas:[
-    { id:"e1t05", nombre:"Reunión relevamiento dashboards — Nivel actividad YPF",        progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-06", fin:"2026-03-06", comentario:"" },
-    { id:"e1t06", nombre:"Reunión interna diseño visual — Nivel actividad YPF",          progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-03-10", comentario:"" },
-    { id:"e1t07", nombre:"Reunión cerrar formato visual y Q pantallas — Nivel actividad",progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-11", fin:"2026-03-11", comentario:"Enviar template final cuando esté aprobado" },
-    { id:"e1t08", nombre:"Adaptación tableros a formato RTIC — Nivel actividad",         progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-12", fin:"2026-03-18", comentario:"" },
-    { id:"e1t09", nombre:"Reunión relevamiento dashboards — Dimensionamiento",           progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-06", fin:"2026-03-06", comentario:"" },
-    { id:"e1t10", nombre:"Reunión interna diseño visual — Dimensionamiento",             progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-03-10", comentario:"" },
-    { id:"e1t11", nombre:"Reunión cerrar formato visual — Dimensionamiento",             progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-11", fin:"2026-03-11", comentario:"Enviar template final cuando esté aprobado" },
-    { id:"e1t12", nombre:"Adaptación tableros a formato RTIC — Dimensionamiento",        progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-09", fin:"2026-03-18", comentario:"" },
-  ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento (E1)", tareas:[
-    { id:"e1t13", nombre:"Reunión relevamiento de datos disponibles",                    progreso:90,  responsable:"Flor Chavez", inicio:"2026-03-09", fin:"2026-03-16", comentario:"" },
-    { id:"e1t14", nombre:"Compartir template Power BI y mail",                           progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-11", fin:"2026-03-15", comentario:"A la espera de validación final del template" },
-    { id:"e1t15", nombre:"Reuniones de seguimiento semanales para relevar avances",      progreso:10,  responsable:"Flor Chavez", inicio:"2026-03-16", fin:"2026-03-31", comentario:"" },
-    { id:"e1t16", nombre:"Armado de mockup con template y visualizaciones preliminares", progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-16", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Contextual (E1)", tareas:[
-    { id:"e1t17", nombre:"Análisis de extracción del dato por API (Precio barril)",      progreso:0,   responsable:"Ari Mariño / Sebas Caviglia", inicio:"2026-03-05", fin:"2026-03-31", comentario:"" },
-    { id:"e1t18", nombre:"Reunión con Claus para determinar datos necesitados",          progreso:0,   responsable:"Pedro/Costa", inicio:"2026-03-05", fin:"2026-03-13", comentario:"" },
-    { id:"e1t19", nombre:"Obtención de orígenes y armado de pantalla",                  progreso:0,   responsable:"Pedro/Costa", inicio:"2026-03-13", fin:"2026-03-27", comentario:"" },
-  ]},
-
-  // ── ETAPA 2 ──────────────────────────────────────────────────────────────
-  { etapa:"Etapa 2 — Analizar Mercado/oferta", pantalla:"Planificación (E2)", tareas:[
-    { id:"e2t01", nombre:"Reunión relevamiento dashboards — Benchmarks precios",         progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-06", fin:"2026-03-06", comentario:"" },
-    { id:"e2t02", nombre:"Adaptación tableros a formato RTIC — Benchmarks precios",      progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-09", fin:"2026-03-18", comentario:"" },
-    { id:"e2t03", nombre:"Reunión relevamiento dashboards — Análisis oferta/demanda",    progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-06", fin:"2026-03-06", comentario:"" },
-    { id:"e2t04", nombre:"Adaptación tableros a formato RTIC — Análisis oferta/demanda", progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-09", fin:"2026-03-18", comentario:"" },
-  ]},
-  { etapa:"Etapa 2 — Analizar Mercado/oferta", pantalla:"Compre Neuquino", tareas:[
-    { id:"e2t05", nombre:"Creación de base de datos",                                    progreso:100, responsable:"Juli Sanda", inicio:"2026-02-02", fin:"2026-02-28", comentario:"" },
-    { id:"e2t06", nombre:"Análisis de datos históricos y conexión con bases actuales",   progreso:100, responsable:"Juli Sanda", inicio:"2026-03-02", fin:"2026-03-06", comentario:"" },
-    { id:"e2t07", nombre:"Construcción de pantallas (Montos contratados + Certificación)",progreso:0,  responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e2t08", nombre:"Warning Proveedores monopólicos en cartera",                   progreso:0,   responsable:"Pedro/Costa", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-  ]},
-
-  // ── ETAPA 4 ──────────────────────────────────────────────────────────────
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Tiempos Intermedios", tareas:[
-    { id:"e4t01", nombre:"Análisis de viabilidad de hitos y cálculos de calidad por etapa", progreso:50, responsable:"Juli Sanda", inicio:"2026-02-15", fin:"2026-04-30", comentario:"Pendiente de inicio por cálculos viabilidad de Tecno y Digitalización" },
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Licitaciones", tareas:[
-    { id:"e4t02", nombre:"Evaluación fuente manual Sourcing para cálculo de KPIs",       progreso:100, responsable:"Zahi Sosa", inicio:"2026-03-05", fin:"2026-03-09", comentario:"" },
-    { id:"e4t03", nombre:"Reunión con referente Tecnología con avances",                 progreso:50,  responsable:"Zahi Sosa", inicio:"2026-03-09", fin:"2026-03-09", comentario:"A la espera de validación e incorporación de columnas faltantes en la base" },
-    { id:"e4t04", nombre:"Inicio de construcción de KPIs particulares",                  progreso:0,   responsable:"Zahi Sosa", inicio:"2026-03-09", fin:"2026-04-30", comentario:"" },
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Ahorros", tareas:[
-    { id:"e4t05", nombre:"Tarea 1 — Proyectos de captura de valor por estado",           progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-09", fin:"2026-04-30", comentario:"" },
-    { id:"e4t06", nombre:"Adaptación tablero a visuales y estética RTIC (Ahorros TCO)",  progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e4t07", nombre:"Tarea 1 — Ahorro y Captura de Valor",                         progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-09", fin:"2026-04-30", comentario:"" },
-    { id:"e4t08", nombre:"Tarea 1 — Casos de captura de valor Des. Proveedores",        progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-09", fin:"2026-04-30", comentario:"" },
-    { id:"e4t09", nombre:"Tarea 1 — Ahorros gestados por casos de captura de valor",    progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-09", fin:"2026-04-30", comentario:"" },
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Gestiones de Compras", tareas:[
-    { id:"e4t10", nombre:"Detectar datos de niveles aut. actuales en BTP",               progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e4t11", nombre:"Validar códigos y funcionamiento",                             progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e4t12", nombre:"Corrección/Adaptación pirámide",                               progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-13", fin:"2026-03-20", comentario:"" },
-    { id:"e4t13", nombre:"Tarea — Tasa promedio aprobación de Actas (idem pirámide)",    progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-20", comentario:"" },
-    { id:"e4t14", nombre:"Tarea — Tasa aprobación Actas por nivel (idem pirámide)",      progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-20", comentario:"" },
-    { id:"e4t15", nombre:"Revisión fórmulas actuales — Promedio ciclos revisión",        progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e4t16", nombre:"Adaptación tablero visual RTIC — Promedio ciclos revisión",    progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e4t17", nombre:"Revisión fórmulas + clasificación VP — Compra Lic vs Directa", progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e4t18", nombre:"Adaptación tablero visual RTIC — Compra Lic vs Directa",       progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e4t19", nombre:"Adaptación tablero visual RTIC — Share de licitaciones",       progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Salud Contractual (E4)", tareas:[
-    { id:"e4t20", nombre:"Reunión interna análisis KPIs y diseño preliminar pantallas",  progreso:0,   responsable:"Zahi Sosa", inicio:"2026-03-11", fin:"2026-03-11", comentario:"" },
-    { id:"e4t21", nombre:"Construcción pantalla Salud Contractual",                      progreso:0,   responsable:"Zahi Sosa", inicio:"2026-03-11", fin:"2026-04-15", comentario:"" },
-    { id:"e4t22", nombre:"Reunión con Fernando Gout (avance CIC Costo/Plazo)",           progreso:80,  responsable:"Flor Chavez", inicio:"2026-03-06", fin:"2026-03-16", comentario:"Pendiente: recibir accesos al tablero y Excel" },
-    { id:"e4t23", nombre:"Reunión con Victor Magnarelli para definir visualizaciones",   progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-16", fin:"2026-03-20", comentario:"" },
-    { id:"e4t24", nombre:"Armado de mockup con visualizaciones preliminares",            progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-20", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Pedidos", tareas:[
-    { id:"e4t25", nombre:"Análisis de KPIs y diseño preliminar — Pedidos puntuales",     progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-05", fin:"2026-03-31", comentario:"" },
-    { id:"e4t26", nombre:"Análisis de KPIs y diseño preliminar — Prov. estratégicos",    progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-05", fin:"2026-03-31", comentario:"" },
-    { id:"e4t27", nombre:"Comunicado enviado a referentes SC averiguando criterios",     progreso:100, responsable:"Juli Sanda", inicio:"2026-03-04", fin:"2026-03-18", comentario:"" },
-    { id:"e4t28", nombre:"Compilación de criterios de medición",                         progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-12", fin:"2026-03-12", comentario:"" },
-    { id:"e4t29", nombre:"Análisis y construcción de indicador",                         progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-18", fin:"2026-03-31", comentario:"" },
-  ]},
-
-  // ── ETAPA 5 ──────────────────────────────────────────────────────────────
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Almacenes", tareas:[
-    { id:"e5t01", nombre:"Análisis de tableros disponibles",                             progreso:0,   responsable:"Luciano Negri", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e5t02", nombre:"Reunión con referentes para planificar construcción",          progreso:0,   responsable:"Luciano Negri", inicio:"2026-03-12", fin:"2026-03-18", comentario:"" },
-    { id:"e5t03", nombre:"Construcción de pantalla consolidada de KPIs",                 progreso:0,   responsable:"Luciano Negri", inicio:"2026-03-16", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"COMEX", tareas:[
-    { id:"e5t04", nombre:"Análisis de tableros disponibles",                             progreso:100, responsable:"Luciano Negri", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e5t05", nombre:"Reunión con referentes para planificar construcción",          progreso:100, responsable:"Luciano Negri", inicio:"2026-03-12", fin:"2026-03-18", comentario:"" },
-    { id:"e5t06", nombre:"Construcción de pantalla consolidada de KPIs",                 progreso:0,   responsable:"Luciano Negri", inicio:"2026-03-09", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Transporte", tareas:[
-    { id:"e5t07", nombre:"Análisis de tableros disponibles",                             progreso:100, responsable:"Flor Chavez", inicio:"2026-03-10", fin:"2026-03-13", comentario:"" },
-    { id:"e5t08", nombre:"Enviar mail con template y próximos pasos",                    progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-10", fin:"2026-03-20", comentario:"" },
-    { id:"e5t09", nombre:"Reunión con referentes para planificar construcción",          progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-10", fin:"2026-03-31", comentario:"" },
-    { id:"e5t10", nombre:"Construcción de pantalla consolidada de KPIs",                 progreso:0,   responsable:"Flor Chavez", inicio:"2026-03-10", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Stock", tareas:[
-    { id:"e5t11", nombre:"Análisis de tableros disponibles",                             progreso:100, responsable:"Luciano Negri", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e5t12", nombre:"Reunión con referentes para planificar construcción",          progreso:100, responsable:"Luciano Negri", inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"e5t13", nombre:"Construcción de pantalla consolidada de KPIs",                 progreso:0,   responsable:"Luciano Negri", inicio:"2026-03-12", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Spend", tareas:[
-    { id:"e5t14", nombre:"Adaptación tablero a visuales RTIC — Total Spend",             progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-13", fin:"2026-03-20", comentario:"" },
-    { id:"e5t15", nombre:"Análisis de desarrollo + ideas diseño — Warning certificación",progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-13", fin:"2026-03-20", comentario:"" },
-    { id:"e5t16", nombre:"Reunión con referente — Días mora en certificaciones",         progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-03-10", comentario:"" },
-    { id:"e5t17", nombre:"Construcción KPIs principales y adaptación visual",            progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-03-31", comentario:"" },
-    { id:"e5t18", nombre:"Revisión y adaptación visual final",                           progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-31", fin:"2026-04-04", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"CAPEX", tareas:[
-    { id:"e5t19", nombre:"Adaptación/Desarrollo de tablero CAPEX",                       progreso:15,  responsable:"Luciano Negri", inicio:"2026-03-22", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Inspección y Activación", tareas:[
-    { id:"e5t20", nombre:"Reunión con referente para análisis de tableros disponibles",  progreso:100, responsable:"Juli Sanda", inicio:"2026-03-10", fin:"2026-03-10", comentario:"" },
-    { id:"e5t21", nombre:"Diseño de indicadores de parte del Referente",                 progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-10", fin:"2026-03-31", comentario:"" },
-    { id:"e5t22", nombre:"Reunión de avances",                                           progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-20", fin:"2026-03-20", comentario:"" },
-    { id:"e5t23", nombre:"Adaptación gráfica de KPIs con diseño RTIC",                   progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-31", fin:"2026-04-15", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Salud Contractual (E5)", tareas:[
-    { id:"e5t24", nombre:"Análisis y adaptación de tablero desarrollado — Alertas Monto/Plazo", progreso:0, responsable:"Juli Sanda", inicio:"2026-03-31", fin:"2026-04-15", comentario:"" },
-    { id:"e5t25", nombre:"Reunión con referente — Toyota Well",                          progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-09", fin:"2026-03-09", comentario:"" },
-    { id:"e5t26", nombre:"Conexión de bases y construcción indicador — Toyota Well",     progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-03-18", comentario:"Revisar ubicación de la información" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Accidentes IFA/IFAT", tareas:[
-    { id:"e5t27", nombre:"Reunión con Dayana Mendez",                                    progreso:100, responsable:"Flor Chavez", inicio:"2026-03-06", fin:"2026-03-06", comentario:"" },
-    { id:"e5t28", nombre:"Construcción de mockup",                                       progreso:100, responsable:"Flor Chavez", inicio:"2026-03-09", fin:"2026-03-31", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Vehicular", tareas:[
-    { id:"e5t29", nombre:"Reunión con referente — tableros construidos + KPIs relevados", progreso:0,  responsable:"Hernan Ambrosio", inicio:"2026-03-09", fin:"2026-04-30", comentario:"" },
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Patrimonial", tareas:[
-    { id:"e5t30", nombre:"Reunión con referente — tableros construidos + KPIs relevados", progreso:0,  responsable:"Pedro/Costa", inicio:"2026-03-13", fin:"2026-03-20", comentario:"" },
-  ]},
-
-  // ── ETAPA 6 ──────────────────────────────────────────────────────────────
-  { etapa:"Etapa 6 — Evaluar rendimiento proveedores", pantalla:"Costo Pozo", tareas:[
-    { id:"e6t01", nombre:"Tarea 1 — Costo pozo (pendiente definir)",                     progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-05", fin:"2026-04-30", comentario:"" },
-  ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento proveedores", pantalla:"Salud Contractual (E6)", tareas:[
-    { id:"e6t02", nombre:"Reunión con referente — ver tablero desarrollado",             progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-03-10", comentario:"" },
-    { id:"e6t03", nombre:"Reunión con GIP — entender base y dato a vincular",            progreso:0,   responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-04-04", comentario:"" },
-    { id:"e6t04", nombre:"Agregar base a construcción final como KPI salud contractual", progreso:0,   responsable:"Zahi Sosa", inicio:"2026-03-10", fin:"2026-04-04", comentario:"" },
-  ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento proveedores", pantalla:"GIP (Proveedores)", tareas:[
-    { id:"e6t05", nombre:"Armado de idea de diseño",                                     progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-20", fin:"2026-03-25", comentario:"" },
-    { id:"e6t06", nombre:"Reunión con referentes para análisis de construcción",         progreso:0,   responsable:"Juli Sanda", inicio:"2026-03-25", fin:"2026-04-15", comentario:"" },
-  ]},
-
-  // ── ETAPA 7 ──────────────────────────────────────────────────────────────
-  { etapa:"Etapa 7 — Desarrollar nuevos proveedores", pantalla:"Desarrollo Proveedores", tareas:[
-    { id:"e7t01", nombre:"Reunión con referentes — pasos a seguir en desarrollo",        progreso:100, responsable:"Juli Sanda / Zahi Sosa", inicio:"2026-03-10", fin:"2026-03-10", comentario:"" },
-    { id:"e7t02", nombre:"Reunión con referentes — análisis de las bases",               progreso:0,   responsable:"Zahi Sosa", inicio:"2026-03-10", fin:"2026-04-30", comentario:"" },
-  ]},
-
-  // ── DATACENTER ───────────────────────────────────────────────────────────
-  { etapa:"DATACENTER (mock up visual)", pantalla:"Datacenter", tareas:[
-    { id:"dct01", nombre:"Pantalla Seguimiento Objetivos VP",                            progreso:90,  responsable:"Zahi Sosa",       inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"dct02", nombre:"Pantalla % calidad medición por Etapa",                        progreso:0,   responsable:"Juli Sanda",      inicio:"2026-03-09", fin:"2026-03-16", comentario:"" },
-    { id:"dct03", nombre:"Pantalla Tiempos intermedios + gestión",                       progreso:0,   responsable:"Juli Sanda",      inicio:"2026-03-09", fin:"2026-03-16", comentario:"" },
-    { id:"dct04", nombre:"Pantalla Captura de Valor",                                    progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-09", fin:"2026-03-16", comentario:"" },
-    { id:"dct05", nombre:"Pantalla Seguimiento tarifas UP + Costo Pozo",                 progreso:0,   responsable:"Hernan Ambrosio", inicio:"2026-03-09", fin:"2026-03-16", comentario:"" },
-    { id:"dct06", nombre:"Pantalla Accidentes IFA/IFAT",                                 progreso:90,  responsable:"Flor Chavez",     inicio:"2026-03-09", fin:"2026-03-16", comentario:"" },
-    { id:"dct07", nombre:"Pantalla Portfolio Iniciativas de competitividad",              progreso:0,   responsable:"Zahi Sosa",       inicio:"2026-03-09", fin:"2026-03-13", comentario:"" },
-    { id:"dct08", nombre:"Pantalla Stock (Datacenter)",                                  progreso:0,   responsable:"Luciano Negri",   inicio:"2026-03-09", fin:"2026-03-16", comentario:"" },
-  ]},
-
-  // ── TEMPLATE ─────────────────────────────────────────────────────────────
-  { etapa:"TEMPLATE (mock up visual)", pantalla:"Template / Diseño Visual", tareas:[
-    { id:"tpt01", nombre:"Armado de diseño visual",                                      progreso:100, responsable:"Zahi Sosa", inicio:"2026-02-20", fin:"2026-03-06", comentario:"" },
-    { id:"tpt02", nombre:"Reunión con referente diseño/imagen/marca — mostrar mock up",  progreso:100, responsable:"Zahi Sosa", inicio:"2026-03-06", fin:"2026-03-06", comentario:"Nos compartieron la paleta de colores oficiales por mail" },
-    { id:"tpt03", nombre:"Adaptación de recomendaciones del referente al diseño actual", progreso:100, responsable:"Zahi Sosa", inicio:"2026-03-09", fin:"2026-03-09", comentario:"" },
-    { id:"tpt04", nombre:"Reunión/Envío de validación de template de Imagen",            progreso:0,   responsable:"Zahi Sosa", inicio:"2026-03-09", fin:"2026-04-30", comentario:"Falta validación" },
-  ]},
-];
-
-/* ─────────────────────────────────────────────
-   👇 REEMPLAZÁ ESTOS DOS VALORES CON LOS TUYOS
-   ───────────────────────────────────────────── */
+/* ─── CREDENCIALES SUPABASE ─── */
 const SUPABASE_URL      = "https://tuqladhxuegvqqwyriqi.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Xf2BijTju7QqbI2iQAnYOg_6ERMSr9n";
-/* ─────────────────────────────────────────────── */
-
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* ─── EQUIPO ─── */
 const TEAM = [
-  { id: "zsosa",     name: "Zahi Sosa",       role: "Analista RTIC" },
-  { id: "jsanda",    name: "Juli Sanda",       role: "Analista RTIC" },
-  { id: "fchavez",   name: "Flor Chavez",      role: "Analista RTIC" },
-  { id: "lnegri",    name: "Luciano Negri",    role: "Analista RTIC" },
-  { id: "hambrosio", name: "Hernan Ambrosio",  role: "Analista RTIC" },
-  { id: "pcosta",    name: "Pedro/Costa",      role: "Analista RTIC" },
+  { id:"zsosa",     name:"Zahi Sosa",       role:"Analista RTIC" },
+  { id:"jsanda",    name:"Juli Sanda",       role:"Analista RTIC" },
+  { id:"fchavez",   name:"Flor Chavez",      role:"Analista RTIC" },
+  { id:"lnegri",    name:"Luciano Negri",    role:"Analista RTIC" },
+  { id:"hambrosio", name:"Hernan Ambrosio",  role:"Analista RTIC" },
+  { id:"pcosta",    name:"Pedro/Costa",      role:"Analista RTIC" },
 ];
 
+/* ─── ÁREAS ─── */
 const AREAS = [
   "Datacenter","Template / Diseño Visual","Planificación","Abastecimiento","Contextual",
   "Compre Neuquino","Tiempos Intermedios","Licitaciones","Ahorros","Gestiones de Compras",
@@ -229,69 +40,238 @@ const AREAS = [
   "Costo Pozo","GIP (Proveedores)","Desarrollo Proveedores","Datos & Digitalización","Otro",
 ];
 
+/* ─── DATOS CARGA SEMANAL ─── */
 const SEED = {
-  zsosa: { items: [
-    { area: "Datacenter", text: "Determinación de KPIs de salud", type: "completed", _id: "s1" },
-    { area: "Datacenter", text: "Asignación de la construcción por analista", type: "completed", _id: "s2" },
-    { area: "Template / Diseño Visual", text: "Diseño visual del tablero — Finalizado", type: "completed", _id: "s3" },
-    { area: "Template / Diseño Visual", text: "Reunión con referente de diseño/imagen/marca", type: "completed", _id: "s4" },
-    { area: "Template / Diseño Visual", text: "Adaptación de recomendaciones al diseño actual", type: "completed", _id: "s5" },
-    { area: "Licitaciones", text: "Evaluación de fuente manual Sourcing para cálculo de KPIs", type: "completed", _id: "s6" },
-    { area: "Datacenter", text: "Diseño visual de las pantallas 16/03 + Validación de Template", type: "activity", _id: "s7" },
-    { area: "Salud Contractual", text: "Diseño de información a incluir + construcción", type: "activity", _id: "s8" },
-    { area: "Licitaciones", text: "Construcción de KPIs particulares", type: "activity", _id: "s9" },
-  ], blocked: "Espera validación e incorporación de columnas faltantes en la base de datos de Tecnología.", decision: "Sí — Necesitamos validación final del template de Imagen/Marca corporativa.", confidence: "Amber" },
-  jsanda: { items: [
-    { area: "Planificación", text: "Reunión de relevamiento de dashboards desarrollados", type: "completed", _id: "s10" },
-    { area: "Planificación", text: "Reunión interna para diseño visual", type: "completed", _id: "s11" },
-    { area: "Planificación", text: "Definición de formato visual y cantidad de pantallas", type: "completed", _id: "s12" },
-    { area: "Compre Neuquino", text: "Creación de base de datos y análisis de datos históricos", type: "completed", _id: "s13" },
-    { area: "Accidentes IFA/IFAT", text: "KPIs Accidentes IFA y IFAT relevados", type: "completed", _id: "s14" },
-    { area: "Planificación", text: "Desarrollo y adaptación visual de tableros", type: "activity", _id: "s15" },
-    { area: "Gestiones de Compras", text: "Inicio de adaptación y revisión de KPIs", type: "activity", _id: "s16" },
-    { area: "Ahorros", text: "A la espera de disponibilización de tablero para adaptación", type: "activity", _id: "s17" },
-  ], blocked: "Template final pendiente de aprobación para avanzar con adaptación visual.", decision: "No esta semana.", confidence: "Green" },
-  fchavez: { items: [
-    { area: "Accidentes IFA/IFAT", text: "Reunión con Dayana Mendez + Construcción de mockup — Finalizado", type: "completed", _id: "s18" },
-    { area: "Abastecimiento", text: "Reunión relevamiento de datos disponibles (90% avance)", type: "completed", _id: "s19" },
-    { area: "Transporte", text: "Análisis de tableros disponibles completado", type: "completed", _id: "s20" },
-    { area: "Abastecimiento", text: "Desarrollo y adaptación visual", type: "activity", _id: "s21" },
-    { area: "Transporte", text: "Desarrollo y adaptación visual", type: "activity", _id: "s22" },
-  ], blocked: "Pendiente recibir accesos al tablero y Excel de Fernando Gout.", decision: "Sí — Aprobación del template Power BI para distribución a referentes.", confidence: "Amber" },
-  lnegri: { items: [
-    { area: "COMEX", text: "Análisis de tableros + Reunión con referentes para planificar", type: "completed", _id: "s23" },
-    { area: "Stock", text: "Análisis de tableros disponibles con Santiago Curutchet", type: "completed", _id: "s24" },
-    { area: "COMEX", text: "Desarrollo y adaptación visual", type: "activity", _id: "s25" },
-    { area: "Almacenes", text: "Construcción de pantalla consolidada de KPIs", type: "activity", _id: "s26" },
-    { area: "CAPEX", text: "Adaptación/Desarrollo de tablero", type: "activity", _id: "s27" },
-  ], blocked: "Sin bloqueos esta semana.", decision: "No esta semana.", confidence: "Green" },
-  hambrosio: { items: [
-    { area: "Abastecimiento", text: "Identificación de pantallas a cargo y plan de trabajo", type: "completed", _id: "s28" },
-    { area: "Ahorros", text: "Adaptación del tablero a visuales y estética RTIC", type: "activity", _id: "s29" },
-    { area: "Costo Pozo", text: "Inicio de relevamiento y construcción", type: "activity", _id: "s30" },
-  ], blocked: "Sin bloqueos esta semana.", decision: "No esta semana.", confidence: "Amber" },
-  pcosta: { items: [
-    { area: "Contextual", text: "Reunión con Claus Drescher para determinar datos necesarios", type: "completed", _id: "s31" },
-    { area: "Contextual", text: "Obtención de orígenes y armado de pantalla", type: "activity", _id: "s32" },
-    { area: "Gestión Patrimonial", text: "Reunión con referentes 13/3", type: "activity", _id: "s33" },
-  ], blocked: "Sin bloqueos esta semana.", decision: "No esta semana.", confidence: "Green" },
-  _global: { items: [
-    { area: "Datos & Digitalización", text: "Identificación de 49 datos a disponibilizar", type: "completed", _id: "s34" },
-    { area: "Datos & Digitalización", text: "Avance del 40% en 7 KPIs de primera fase y 7% en 42 KPIs de segunda fase", type: "completed", _id: "s35" },
-    { area: "Datacenter", text: "Diseño Físico de la disposición de las pantallas por sección", type: "activity", _id: "s36" },
-  ], blocked: "", decision: "", confidence: "" },
+  zsosa: { items:[
+    {area:"Datacenter",text:"Determinación de KPIs de salud",type:"completed",_id:"s1"},
+    {area:"Datacenter",text:"Asignación de la construcción por analista",type:"completed",_id:"s2"},
+    {area:"Template / Diseño Visual",text:"Diseño visual del tablero — Finalizado",type:"completed",_id:"s3"},
+    {area:"Template / Diseño Visual",text:"Reunión con referente de diseño/imagen/marca",type:"completed",_id:"s4"},
+    {area:"Template / Diseño Visual",text:"Adaptación de recomendaciones al diseño actual",type:"completed",_id:"s5"},
+    {area:"Licitaciones",text:"Evaluación de fuente manual Sourcing para cálculo de KPIs",type:"completed",_id:"s6"},
+    {area:"Datacenter",text:"Diseño visual de las pantallas 16/03 + Validación de Template",type:"activity",_id:"s7"},
+    {area:"Salud Contractual",text:"Diseño de información a incluir + construcción",type:"activity",_id:"s8"},
+    {area:"Licitaciones",text:"Construcción de KPIs particulares",type:"activity",_id:"s9"},
+  ], blocked:"Espera validación e incorporación de columnas faltantes en la base de datos de Tecnología.", decision:"Sí — Necesitamos validación final del template de Imagen/Marca corporativa.", confidence:"Amber" },
+  jsanda: { items:[
+    {area:"Planificación",text:"Reunión de relevamiento de dashboards desarrollados",type:"completed",_id:"s10"},
+    {area:"Planificación",text:"Reunión interna para diseño visual",type:"completed",_id:"s11"},
+    {area:"Planificación",text:"Definición de formato visual y cantidad de pantallas",type:"completed",_id:"s12"},
+    {area:"Compre Neuquino",text:"Creación de base de datos y análisis de datos históricos",type:"completed",_id:"s13"},
+    {area:"Accidentes IFA/IFAT",text:"KPIs Accidentes IFA y IFAT relevados",type:"completed",_id:"s14"},
+    {area:"Planificación",text:"Desarrollo y adaptación visual de tableros",type:"activity",_id:"s15"},
+    {area:"Gestiones de Compras",text:"Inicio de adaptación y revisión de KPIs",type:"activity",_id:"s16"},
+    {area:"Ahorros",text:"A la espera de disponibilización de tablero para adaptación",type:"activity",_id:"s17"},
+  ], blocked:"Template final pendiente de aprobación para avanzar con adaptación visual.", decision:"No esta semana.", confidence:"Green" },
+  fchavez: { items:[
+    {area:"Accidentes IFA/IFAT",text:"Reunión con Dayana Mendez + Construcción de mockup — Finalizado",type:"completed",_id:"s18"},
+    {area:"Abastecimiento",text:"Reunión relevamiento de datos disponibles (90% avance)",type:"completed",_id:"s19"},
+    {area:"Transporte",text:"Análisis de tableros disponibles completado",type:"completed",_id:"s20"},
+    {area:"Abastecimiento",text:"Desarrollo y adaptación visual",type:"activity",_id:"s21"},
+    {area:"Transporte",text:"Desarrollo y adaptación visual",type:"activity",_id:"s22"},
+  ], blocked:"Pendiente recibir accesos al tablero y Excel de Fernando Gout.", decision:"Sí — Aprobación del template Power BI para distribución a referentes.", confidence:"Amber" },
+  lnegri: { items:[
+    {area:"COMEX",text:"Análisis de tableros + Reunión con referentes para planificar",type:"completed",_id:"s23"},
+    {area:"Stock",text:"Análisis de tableros disponibles con Santiago Curutchet",type:"completed",_id:"s24"},
+    {area:"COMEX",text:"Desarrollo y adaptación visual",type:"activity",_id:"s25"},
+    {area:"Almacenes",text:"Construcción de pantalla consolidada de KPIs",type:"activity",_id:"s26"},
+    {area:"CAPEX",text:"Adaptación/Desarrollo de tablero",type:"activity",_id:"s27"},
+  ], blocked:"Sin bloqueos esta semana.", decision:"No esta semana.", confidence:"Green" },
+  hambrosio: { items:[
+    {area:"Abastecimiento",text:"Identificación de pantallas a cargo y plan de trabajo",type:"completed",_id:"s28"},
+    {area:"Ahorros",text:"Adaptación del tablero a visuales y estética RTIC",type:"activity",_id:"s29"},
+    {area:"Costo Pozo",text:"Inicio de relevamiento y construcción",type:"activity",_id:"s30"},
+  ], blocked:"Sin bloqueos esta semana.", decision:"No esta semana.", confidence:"Amber" },
+  pcosta: { items:[
+    {area:"Contextual",text:"Reunión con Claus Drescher para determinar datos necesarios",type:"completed",_id:"s31"},
+    {area:"Contextual",text:"Obtención de orígenes y armado de pantalla",type:"activity",_id:"s32"},
+    {area:"Gestión Patrimonial",text:"Reunión con referentes 13/3",type:"activity",_id:"s33"},
+  ], blocked:"Sin bloqueos esta semana.", decision:"No esta semana.", confidence:"Green" },
+  _global: { items:[
+    {area:"Datos & Digitalización",text:"Identificación de 49 datos a disponibilizar",type:"completed",_id:"s34"},
+    {area:"Datos & Digitalización",text:"Avance del 40% en 7 KPIs de primera fase y 7% en 42 KPIs de segunda fase",type:"completed",_id:"s35"},
+    {area:"Datacenter",text:"Diseño Físico de la disposición de las pantallas por sección",type:"activity",_id:"s36"},
+  ], blocked:"", decision:"", confidence:"" },
 };
 
+/* ─── CRONOGRAMA REAL DEL EXCEL ─── */
+const CRONOGRAMA = [
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento contractual", tareas:[
+    {id:"e1t01",nombre:"Adaptación de tablero desarrollado (Plan abast. compras)",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
+    {id:"e1t02",nombre:"Tarea 2 — Plan de abastecimiento compras",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
+    {id:"e1t03",nombre:"Tarea 1 — Plan Abastecimiento de compras vs Ejecución",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
+    {id:"e1t04",nombre:"Tarea 2 — Plan Abastecimiento de compras vs Ejecución",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
+  ]},
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Planificación (E1)", tareas:[
+    {id:"e1t05",nombre:"Reunión relevamiento dashboards — Nivel actividad YPF",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
+    {id:"e1t06",nombre:"Reunión interna diseño visual — Nivel actividad YPF",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
+    {id:"e1t07",nombre:"Reunión cerrar formato visual y Q pantallas — Nivel actividad",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:"Enviar template final cuando esté aprobado"},
+    {id:"e1t08",nombre:"Adaptación tableros a formato RTIC — Nivel actividad",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
+    {id:"e1t09",nombre:"Reunión relevamiento dashboards — Dimensionamiento",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
+    {id:"e1t10",nombre:"Reunión interna diseño visual — Dimensionamiento",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
+    {id:"e1t11",nombre:"Reunión cerrar formato visual — Dimensionamiento",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:"Enviar template final cuando esté aprobado"},
+    {id:"e1t12",nombre:"Adaptación tableros a formato RTIC — Dimensionamiento",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
+  ]},
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento (E1)", tareas:[
+    {id:"e1t13",nombre:"Reunión relevamiento de datos disponibles",progreso:90,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
+    {id:"e1t14",nombre:"Compartir template Power BI y mail",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-11",fin:"2026-03-15",comentario:"A la espera de validación final del template"},
+    {id:"e1t15",nombre:"Reuniones de seguimiento semanales para relevar avances",progreso:10,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
+    {id:"e1t16",nombre:"Armado de mockup con template y visualizaciones preliminares",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Contextual (E1)", tareas:[
+    {id:"e1t17",nombre:"Análisis de extracción del dato por API (Precio barril)",progreso:0,responsable:"Ari Mariño / Sebas Caviglia",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
+    {id:"e1t18",nombre:"Reunión con Claus para determinar datos necesitados",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-05",fin:"2026-03-13",comentario:""},
+    {id:"e1t19",nombre:"Obtención de orígenes y armado de pantalla",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-13",fin:"2026-03-27",comentario:""},
+  ]},
+  { etapa:"Etapa 2 — Analizar Mercado/oferta", pantalla:"Planificación (E2)", tareas:[
+    {id:"e2t01",nombre:"Reunión relevamiento dashboards — Benchmarks precios",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
+    {id:"e2t02",nombre:"Adaptación tableros a formato RTIC — Benchmarks precios",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
+    {id:"e2t03",nombre:"Reunión relevamiento dashboards — Análisis oferta/demanda",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
+    {id:"e2t04",nombre:"Adaptación tableros a formato RTIC — Análisis oferta/demanda",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
+  ]},
+  { etapa:"Etapa 2 — Analizar Mercado/oferta", pantalla:"Compre Neuquino", tareas:[
+    {id:"e2t05",nombre:"Creación de base de datos",progreso:100,responsable:"Juli Sanda",inicio:"2026-02-02",fin:"2026-02-28",comentario:""},
+    {id:"e2t06",nombre:"Análisis de datos históricos y conexión con bases actuales",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-02",fin:"2026-03-06",comentario:""},
+    {id:"e2t07",nombre:"Construcción de pantallas (Montos contratados + Certificación)",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e2t08",nombre:"Warning Proveedores monopólicos en cartera",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+  ]},
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Tiempos Intermedios", tareas:[
+    {id:"e4t01",nombre:"Análisis de viabilidad de hitos y cálculos de calidad por etapa",progreso:50,responsable:"Juli Sanda",inicio:"2026-02-15",fin:"2026-04-30",comentario:"Pendiente de inicio por cálculos viabilidad de Tecno y Digitalización"},
+  ]},
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Licitaciones", tareas:[
+    {id:"e4t02",nombre:"Evaluación fuente manual Sourcing para cálculo de KPIs",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-05",fin:"2026-03-09",comentario:""},
+    {id:"e4t03",nombre:"Reunión con referente Tecnología con avances",progreso:50,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:"A la espera de validación e incorporación de columnas faltantes en la base"},
+    {id:"e4t04",nombre:"Inicio de construcción de KPIs particulares",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
+  ]},
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Ahorros", tareas:[
+    {id:"e4t05",nombre:"Tarea 1 — Proyectos de captura de valor por estado",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
+    {id:"e4t06",nombre:"Adaptación tablero a visuales y estética RTIC (Ahorros TCO)",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e4t07",nombre:"Tarea 1 — Ahorro y Captura de Valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
+    {id:"e4t08",nombre:"Tarea 1 — Casos de captura de valor Des. Proveedores",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
+    {id:"e4t09",nombre:"Tarea 1 — Ahorros gestados por casos de captura de valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
+  ]},
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Gestiones de Compras", tareas:[
+    {id:"e4t10",nombre:"Detectar datos de niveles aut. actuales en BTP",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e4t11",nombre:"Validar códigos y funcionamiento",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e4t12",nombre:"Corrección/Adaptación pirámide",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
+    {id:"e4t13",nombre:"Tasa promedio aprobación de Actas (idem pirámide)",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-20",comentario:""},
+    {id:"e4t14",nombre:"Tasa aprobación Actas por nivel (idem pirámide)",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-20",comentario:""},
+    {id:"e4t15",nombre:"Revisión fórmulas actuales — Promedio ciclos revisión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e4t16",nombre:"Adaptación tablero visual RTIC — Promedio ciclos revisión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e4t17",nombre:"Revisión fórmulas + clasificación VP — Compra Lic vs Directa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e4t18",nombre:"Adaptación tablero visual RTIC — Compra Lic vs Directa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e4t19",nombre:"Adaptación tablero visual RTIC — Share de licitaciones",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+  ]},
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Salud Contractual (E4)", tareas:[
+    {id:"e4t20",nombre:"Reunión interna análisis KPIs y diseño preliminar pantallas",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:""},
+    {id:"e4t21",nombre:"Construcción pantalla Salud Contractual",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-11",fin:"2026-04-15",comentario:""},
+    {id:"e4t22",nombre:"Reunión con Fernando Gout (avance CIC Costo/Plazo)",progreso:80,responsable:"Flor Chavez",inicio:"2026-03-06",fin:"2026-03-16",comentario:"Pendiente: recibir accesos al tablero y Excel"},
+    {id:"e4t23",nombre:"Reunión con Victor Magnarelli para definir visualizaciones",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-20",comentario:""},
+    {id:"e4t24",nombre:"Armado de mockup con visualizaciones preliminares",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-20",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Pedidos", tareas:[
+    {id:"e4t25",nombre:"Análisis de KPIs y diseño preliminar — Pedidos puntuales",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
+    {id:"e4t26",nombre:"Análisis de KPIs y diseño preliminar — Prov. estratégicos",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
+    {id:"e4t27",nombre:"Comunicado enviado a referentes SC averiguando criterios",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-04",fin:"2026-03-18",comentario:""},
+    {id:"e4t28",nombre:"Compilación de criterios de medición",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-12",fin:"2026-03-12",comentario:""},
+    {id:"e4t29",nombre:"Análisis y construcción de indicador",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-18",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Almacenes", tareas:[
+    {id:"e5t01",nombre:"Análisis de tableros disponibles",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e5t02",nombre:"Reunión con referentes para planificar construcción",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
+    {id:"e5t03",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"COMEX", tareas:[
+    {id:"e5t04",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e5t05",nombre:"Reunión con referentes para planificar construcción",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
+    {id:"e5t06",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Transporte", tareas:[
+    {id:"e5t07",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-13",comentario:""},
+    {id:"e5t08",nombre:"Enviar mail con template y próximos pasos",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-20",comentario:""},
+    {id:"e5t09",nombre:"Reunión con referentes para planificar construcción",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
+    {id:"e5t10",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Stock", tareas:[
+    {id:"e5t11",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e5t12",nombre:"Reunión con referentes para planificar construcción",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"e5t13",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Spend", tareas:[
+    {id:"e5t14",nombre:"Adaptación tablero a visuales RTIC — Total Spend",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
+    {id:"e5t15",nombre:"Análisis de desarrollo + ideas diseño — Warning certificación",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
+    {id:"e5t16",nombre:"Reunión con referente — Días mora en certificaciones",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
+    {id:"e5t17",nombre:"Construcción KPIs principales y adaptación visual",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
+    {id:"e5t18",nombre:"Revisión y adaptación visual final",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-31",fin:"2026-04-04",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"CAPEX", tareas:[
+    {id:"e5t19",nombre:"Adaptación/Desarrollo de tablero CAPEX",progreso:15,responsable:"Luciano Negri",inicio:"2026-03-22",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Inspección y Activación", tareas:[
+    {id:"e5t20",nombre:"Reunión con referente para análisis de tableros disponibles",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
+    {id:"e5t21",nombre:"Diseño de indicadores de parte del Referente",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
+    {id:"e5t22",nombre:"Reunión de avances",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-20",fin:"2026-03-20",comentario:""},
+    {id:"e5t23",nombre:"Adaptación gráfica de KPIs con diseño RTIC",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-31",fin:"2026-04-15",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Salud Contractual (E5)", tareas:[
+    {id:"e5t24",nombre:"Análisis y adaptación tablero — Alertas Monto/Plazo",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-31",fin:"2026-04-15",comentario:""},
+    {id:"e5t25",nombre:"Reunión con referente — Toyota Well",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
+    {id:"e5t26",nombre:"Conexión de bases y construcción indicador — Toyota Well",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-18",comentario:"Revisar ubicación de la información"},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Accidentes IFA/IFAT", tareas:[
+    {id:"e5t27",nombre:"Reunión con Dayana Mendez",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
+    {id:"e5t28",nombre:"Construcción de mockup",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-31",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Vehicular", tareas:[
+    {id:"e5t29",nombre:"Reunión con referente — tableros construidos + KPIs relevados",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
+  ]},
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Patrimonial", tareas:[
+    {id:"e5t30",nombre:"Reunión con referente — tableros construidos + KPIs relevados",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
+  ]},
+  { etapa:"Etapa 6 — Evaluar rendimiento proveedores", pantalla:"Costo Pozo", tareas:[
+    {id:"e6t01",nombre:"Tarea 1 — Costo pozo (pendiente definir)",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
+  ]},
+  { etapa:"Etapa 6 — Evaluar rendimiento proveedores", pantalla:"Salud Contractual (E6)", tareas:[
+    {id:"e6t02",nombre:"Reunión con referente — ver tablero desarrollado",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
+    {id:"e6t03",nombre:"Reunión con GIP — entender base y dato a vincular",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-04-04",comentario:""},
+    {id:"e6t04",nombre:"Agregar base a construcción final como KPI salud contractual",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-10",fin:"2026-04-04",comentario:""},
+  ]},
+  { etapa:"Etapa 6 — Evaluar rendimiento proveedores", pantalla:"GIP (Proveedores)", tareas:[
+    {id:"e6t05",nombre:"Armado de idea de diseño",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-20",fin:"2026-03-25",comentario:""},
+    {id:"e6t06",nombre:"Reunión con referentes para análisis de construcción",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-25",fin:"2026-04-15",comentario:""},
+  ]},
+  { etapa:"Etapa 7 — Desarrollar nuevos proveedores", pantalla:"Desarrollo Proveedores", tareas:[
+    {id:"e7t01",nombre:"Reunión con referentes — pasos a seguir en desarrollo",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
+    {id:"e7t02",nombre:"Reunión con referentes — análisis de las bases",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-10",fin:"2026-04-30",comentario:""},
+  ]},
+  { etapa:"DATACENTER (mock up visual)", pantalla:"Datacenter", tareas:[
+    {id:"dct01",nombre:"Pantalla Seguimiento Objetivos VP",progreso:90,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"dct02",nombre:"Pantalla % calidad medición por Etapa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
+    {id:"dct03",nombre:"Pantalla Tiempos intermedios + gestión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
+    {id:"dct04",nombre:"Pantalla Captura de Valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
+    {id:"dct05",nombre:"Pantalla Seguimiento tarifas UP + Costo Pozo",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
+    {id:"dct06",nombre:"Pantalla Accidentes IFA/IFAT",progreso:90,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
+    {id:"dct07",nombre:"Pantalla Portfolio Iniciativas de competitividad",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
+    {id:"dct08",nombre:"Pantalla Stock (Datacenter)",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
+  ]},
+  { etapa:"TEMPLATE (mock up visual)", pantalla:"Template / Diseño Visual", tareas:[
+    {id:"tpt01",nombre:"Armado de diseño visual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-02-20",fin:"2026-03-06",comentario:""},
+    {id:"tpt02",nombre:"Reunión con referente diseño/imagen/marca",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:"Nos compartieron la paleta de colores oficiales por mail"},
+    {id:"tpt03",nombre:"Adaptación de recomendaciones al diseño actual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
+    {id:"tpt04",nombre:"Validación de template de Imagen",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:"Falta validación"},
+  ]},
+];
+
+/* ─── CONSTANTES ─── */
+const SK    = "rtic-dash-v3";
 const INIT  = { 1: SEED };
 const uid   = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-const WEEKS = Array.from({ length: 12 }, (_, i) => {
-  const s = new Date(2026, 2, 5 + i * 7), e = new Date(s);
-  e.setDate(e.getDate() + 6);
-  const f  = d => d.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit" });
-  const ff = d => d.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" });
-  return { n: i+1, s: f(s), e: f(e), sf: ff(s), ef: ff(e) };
+const WEEKS = Array.from({ length:12 }, (_,i) => {
+  const s = new Date(2026,2,5+i*7), e = new Date(s); e.setDate(e.getDate()+6);
+  const f  = d => d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"});
+  const ff = d => d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"});
+  return { n:i+1, s:f(s), e:f(e), sf:ff(s), ef:ff(e) };
 });
-
 const C = {
   navy:"#0c1525", nl:"#131d30", teal:"#00bcd4", td:"#0097a7",
   gold:"#e8a838", grn:"#2e7d32", gl:"#4caf50",
@@ -299,70 +279,73 @@ const C = {
   g:"#8a9bb5",    gl2:"#b0bec5", bd:"rgba(0,188,212,0.15)"
 };
 
-/* ── helpers Supabase (weekly data) ── */
-/* ── helpers Supabase (tareas / avance) ── */
-async function dbLoadTareas() {
-  const { data, error } = await sb.from("task_progress").select("*");
+/* ─── SUPABASE: CARGA SEMANAL ─── */
+async function dbLoad() {
+  const { data, error } = await sb.from("weekly_data").select("*");
   if (error) throw error;
-  // devuelve mapa { task_id: { progreso, responsable, inicio, fin, comentario, updated_at, updated_by } }
-  const map = {};
-  (data || []).forEach(r => { map[r.task_id] = r; });
-  return map;
+  const result = { 1:{ ...SEED } };
+  (data||[]).forEach(row => {
+    if (!result[row.week_number]) result[row.week_number] = {};
+    result[row.week_number][row.member_id] = row.data;
+  });
+  Object.keys(SEED).forEach(k => { if (!result[1][k]) result[1][k] = SEED[k]; });
+  return result;
 }
-async function dbUpsertTarea(taskId, fields) {
-  const { error } = await sb.from("task_progress").upsert(
-    { task_id: taskId, ...fields, updated_at: new Date().toISOString() },
-    { onConflict: "task_id" }
+async function dbUpsert(weekNumber, memberId, memberData) {
+  const { error } = await sb.from("weekly_data").upsert(
+    { week_number:weekNumber, member_id:memberId, data:memberData, updated_at:new Date().toISOString() },
+    { onConflict:"week_number,member_id" }
   );
   if (error) throw error;
 }
 
-/* ── lógica de negocio ── */
+/* ─── SUPABASE: TAREAS ─── */
+async function dbLoadTareas() {
+  const { data, error } = await sb.from("task_progress").select("*");
+  if (error) throw error;
+  const map = {};
+  (data||[]).forEach(r => { map[r.task_id] = r; });
+  return map;
+}
+async function dbUpsertTarea(taskId, fields) {
+  const { error } = await sb.from("task_progress").upsert(
+    { task_id:taskId, ...fields, updated_at:new Date().toISOString() },
+    { onConflict:"task_id" }
+  );
+  if (error) throw error;
+}
+
+/* ─── LÓGICA DE NEGOCIO ─── */
 function normalizarProgreso(v) {
-  if (v === null || v === undefined || v === "") return 0;
+  if (v===null||v===undefined||v==="") return 0;
   const n = parseFloat(v);
   if (isNaN(n)) return 0;
-  return n <= 1 ? Math.round(n * 100) : Math.min(100, Math.max(0, Math.round(n)));
+  return n<=1 ? Math.round(n*100) : Math.min(100, Math.max(0, Math.round(n)));
 }
 function estadoTarea(p) {
-  if (p >= 100) return "Completada";
-  if (p > 0)   return "En curso";
+  if (p>=100) return "Completada";
+  if (p>0)   return "En curso";
   return "Pendiente";
 }
 function calcularAvancePantalla(tareas, overrides) {
   if (!tareas.length) return 0;
-  const total = tareas.reduce((s, t) => {
+  const total = tareas.reduce((s,t) => {
     const ov = overrides[t.id];
     const p  = ov ? normalizarProgreso(ov.progreso) : normalizarProgreso(t.progreso);
     return s + p;
   }, 0);
   return Math.round(total / tareas.length);
 }
-
-async function dbLoad() {
-  const { data, error } = await sb.from("weekly_data").select("*");
-  if (error) throw error;
-  const result = { 1: { ...SEED } };
-  (data || []).forEach(row => {
-    if (!result[row.week_number]) result[row.week_number] = {};
-    result[row.week_number][row.member_id] = row.data;
-  });
-  // seed week 1 only fills missing members
-  Object.keys(SEED).forEach(k => {
-    if (!result[1][k]) result[1][k] = SEED[k];
-  });
-  return result;
+function getDaysRemaining(isoTarget, fromDate = new Date()) {
+  const target = new Date(isoTarget + "T00:00:00Z");
+  const from   = Date.UTC(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+  const diff   = target.getTime() - from;
+  if (isNaN(diff)) return null;
+  if (diff < 0)    return -1;
+  return Math.ceil(diff / 86_400_000);
 }
 
-async function dbUpsert(weekNumber, memberId, memberData) {
-  const { error } = await sb.from("weekly_data").upsert(
-    { week_number: weekNumber, member_id: memberId, data: memberData, updated_at: new Date().toISOString() },
-    { onConflict: "week_number,member_id" }
-  );
-  if (error) throw error;
-}
-
-/* ── ItemRow ── */
+/* ─── COMPONENTE ITEM ROW ─── */
 function ItemRow({ item, idx, onUp, onRm }) {
   return (
     <div style={{ display:"flex", gap:8, marginBottom:8, alignItems:"flex-start" }}>
@@ -372,14 +355,14 @@ function ItemRow({ item, idx, onUp, onRm }) {
       </select>
       <input value={item.text} onChange={e=>onUp(idx,"text",e.target.value)}
         placeholder="Descripción del entregable o actividad..."
-        style={{ flex:1, padding:"7px 8px", border:"1px solid #dde", borderRadius:4, fontSize:12, fontFamily:"inherit" }} />
+        style={{ flex:1, padding:"7px 8px", border:"1px solid #dde", borderRadius:4, fontSize:12, fontFamily:"inherit" }}/>
       <button onClick={()=>onRm(idx)}
         style={{ padding:"6px 10px", border:"none", background:"rgba(198,40,40,0.08)", color:C.red, borderRadius:4, cursor:"pointer", fontSize:12, flexShrink:0 }}>✕</button>
     </div>
   );
 }
 
-/* ── App principal ── */
+/* ─── APP PRINCIPAL ─── */
 function App() {
   const [pg,  setPg]  = useState("cover");
   const [wk,  setWk]  = useState(1);
@@ -391,108 +374,120 @@ function App() {
   const [sv,  setSv]  = useState(false);
   const [svt, setSvt] = useState(null);
   const [err, setErr] = useState(null);
-  const [today, setToday]       = useState(() => new Date());
-  const [tareaOv, setTareaOv]   = useState({});   // overrides desde Supabase { task_id: fields }
-  const [expandedP, setExpandedP] = useState(null); // pantalla expandida
-  const [editTarea, setEditTarea] = useState(null); // tarea en edición { ...tarea }
-  const [busqueda, setBusqueda]  = useState("");
-  const [filtroEtapa, setFiltroEtapa] = useState("Todas");
+  const [today, setToday]         = useState(() => new Date());
+  const [tareaOv, setTareaOv]     = useState({});
+  const [expandedP, setExpandedP] = useState(null);
+  const [editTarea, setEditTarea] = useState(null);
+  const [newTarea, setNewTarea]   = useState(null);
+  const [newForm, setNewForm]     = useState({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
+  const [busqueda, setBusqueda]   = useState("");
+  const [filtroEtapa, setFiltroEtapa]   = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("Todos");
-  const [svTarea, setSvTarea]    = useState(null);  // null | "saving" | "ok" | "error"
+  const [svTarea, setSvTarea]     = useState(null);
 
-  /* ── reloj diario: actualiza "today" cada 60 segundos ── */
+  /* reloj diario */
   useEffect(() => {
     const t = setInterval(() => setToday(new Date()), 60_000);
-    return () => clearInterval(t); // limpia al desmontar
+    return () => clearInterval(t);
   }, []);
 
+  /* cargar weekly_data */
+  useEffect(() => {
+    dbLoad()
+      .then(d => { setDt(d); setLd(false); })
+      .catch(e => { setErr("No se pudo conectar con Supabase."); setLd(false); console.error(e); });
+  }, []);
+
+  /* cargar tareas */
   useEffect(() => {
     dbLoadTareas()
       .then(m => setTareaOv(m))
       .catch(e => console.error("Error cargando tareas:", e));
   }, []);
 
-  const guardarTarea = async (tarea, campos) => {
-    // Validaciones
-    const p = normalizarProgreso(campos.progreso);
-    if (p < 0 || p > 100) return alert("El progreso debe ser entre 0 y 100.");
-    if (campos.fin && campos.inicio && campos.fin < campos.inicio)
-      return alert("La fecha de fin no puede ser menor a la de inicio.");
-    const payload = { ...campos, progreso: p, estado: estadoTarea(p), updated_by: "Usuario" };
-    setSvTarea("saving");
-    try {
-      await dbUpsertTarea(tarea.id, payload);
-      setTareaOv(prev => ({ ...prev, [tarea.id]: payload }));
-      setSvTarea("ok");
-      setTimeout(() => setSvTarea(null), 2000);
-      setEditTarea(null);
-    } catch { setSvTarea("error"); setTimeout(() => setSvTarea(null), 3000); }
-  };
-
-  /* ── datos derivados para avance ── */
-  const etapas = [...new Set(CRONOGRAMA.map(p => p.etapa))];
-  const pantallasVisibles = CRONOGRAMA.filter(p => {
-    const matchBusq = p.pantalla.toLowerCase().includes(busqueda.toLowerCase());
-    const matchEtapa = filtroEtapa === "Todas" || p.etapa === filtroEtapa;
-    const avance = calcularAvancePantalla(p.tareas, tareaOv);
-    const estado = avance >= 100 ? "Completada" : avance > 0 ? "En curso" : "Pendiente";
-    const matchEstado = filtroEstado === "Todos" || estado === filtroEstado;
-    return matchBusq && matchEtapa && matchEstado;
-  });
-  const avanceGlobal = CRONOGRAMA.length
-    ? Math.round(CRONOGRAMA.reduce((s, p) => s + calcularAvancePantalla(p.tareas, tareaOv), 0) / CRONOGRAMA.length)
-    : 0;
-
-  /* ── cargar desde Supabase al iniciar ── */
-  useEffect(() => {
-    dbLoad()
-      .then(d => { setDt(d); setLd(false); })
-      .catch(e => { setErr("No se pudo conectar con Supabase. Revisá las credenciales."); setLd(false); console.error(e); });
-  }, []);
-
-  const persist = useCallback(async (weekNumber, memberId, memberData) => {
+  /* persist carga semanal */
+  const persist = useCallback(async (d) => {
     setSv(true); setErr(null);
     try {
-      await dbUpsert(weekNumber, memberId, memberData);
-      setSvt(new Date().toLocaleTimeString("es-AR", { hour:"2-digit", minute:"2-digit" }));
-    } catch(e) {
-      setErr("Error al guardar. Revisá la conexión."); console.error(e);
-    }
+      await dbUpsert(wk, ed, d[wk]?.[ed]);
+      setSvt(new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));
+    } catch(e) { setErr("Error al guardar."); console.error(e); }
     setSv(false);
-  }, []);
+  }, [wk, ed]);
 
   const wd = dt[wk] || {};
   const wc = WEEKS[wk - 1];
 
+  /* carga semanal */
   const startEd = id => {
     const d = wd[id];
     setEd(id);
-    setFi(d?.items ? d.items.map(x=>({...x, _id:x._id||uid()})) : []);
+    setFi(d?.items ? d.items.map(x=>({...x,_id:x._id||uid()})) : []);
     setFm({ blocked:d?.blocked||"", decision:d?.decision||"", confidence:d?.confidence||"Green" });
   };
-
   const saveEd = async () => {
-    const memberData = { items: fi, ...fm };
-    const u = { ...dt, [wk]: { ...(dt[wk]||{}), [ed]: memberData } };
+    const memberData = { items:fi, ...fm };
+    const u = { ...dt, [wk]:{ ...(dt[wk]||{}), [ed]:memberData } };
     setDt(u); setEd(null);
-    await persist(wk, ed, memberData);
+    setSv(true);
+    try {
+      await dbUpsert(wk, ed, memberData);
+      setSvt(new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));
+    } catch(e) { setErr("Error al guardar."); console.error(e); }
+    setSv(false);
   };
-
-  const addI = t  => setFi(p=>[...p, { area:AREAS[0], text:"", type:t, _id:uid() }]);
+  const addI = t  => setFi(p=>[...p,{area:AREAS[0],text:"",type:t,_id:uid()}]);
   const rmI  = i  => setFi(p=>p.filter((_,j)=>j!==i));
   const upI  = (i,f,v) => setFi(p=>p.map((x,j)=>j===i?{...x,[f]:v}:x));
 
-  /* ── función pura y reutilizable ── */
-  function getDaysRemaining(isoTarget, fromDate = new Date()) {
-    // Trabajamos en UTC para evitar desfases de timezone
-    const target = new Date(isoTarget + "T00:00:00Z");
-    const from   = Date.UTC(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
-    const diff   = target.getTime() - from;
-    if (isNaN(diff)) return null;          // fecha inválida
-    if (diff < 0)    return -1;            // ya pasó
-    return Math.ceil(diff / 86_400_000);   // milisegundos → días
-  }
+  /* guardar tarea existente */
+  const guardarTarea = async (tarea, campos) => {
+    const p = normalizarProgreso(campos.progreso);
+    if (p<0||p>100) return alert("El progreso debe ser entre 0 y 100.");
+    if (campos.fin&&campos.inicio&&campos.fin<campos.inicio) return alert("La fecha de fin no puede ser menor a la de inicio.");
+    const payload = { ...campos, progreso:p, estado:estadoTarea(p), updated_by:"Usuario" };
+    setSvTarea("saving");
+    try {
+      await dbUpsertTarea(tarea.id, payload);
+      setTareaOv(prev=>({...prev,[tarea.id]:payload}));
+      setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
+      setEditTarea(null);
+    } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
+  };
 
+  /* agregar tarea nueva */
+  const agregarTarea = async (pantalla) => {
+    if (!newForm.nombre.trim()) return alert("El nombre de la tarea es obligatorio.");
+    const p = normalizarProgreso(newForm.progreso);
+    if (newForm.fin&&newForm.inicio&&newForm.fin<newForm.inicio) return alert("La fecha de fin no puede ser menor a la de inicio.");
+    const nuevoId = "usr_" + uid();
+    const payload = { ...newForm, progreso:p, estado:estadoTarea(p), updated_by:"Usuario" };
+    setSvTarea("saving");
+    try {
+      await dbUpsertTarea(nuevoId, payload);
+      const idx = CRONOGRAMA.findIndex(p2=>p2.pantalla===pantalla);
+      if (idx!==-1) CRONOGRAMA[idx].tareas.push({ id:nuevoId, nombre:newForm.nombre, progreso:p, responsable:newForm.responsable||"", inicio:newForm.inicio||"", fin:newForm.fin||"", comentario:newForm.comentario||"" });
+      setTareaOv(prev=>({...prev,[nuevoId]:payload}));
+      setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
+      setNewTarea(null);
+      setNewForm({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
+    } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
+  };
+
+  /* datos avance */
+  const etapas = [...new Set(CRONOGRAMA.map(p=>p.etapa))];
+  const pantallasVisibles = CRONOGRAMA.filter(p => {
+    const matchBusq  = p.pantalla.toLowerCase().includes(busqueda.toLowerCase());
+    const matchEtapa = filtroEtapa==="Todas" || p.etapa===filtroEtapa;
+    const avance     = calcularAvancePantalla(p.tareas, tareaOv);
+    const estado     = avance>=100?"Completada":avance>0?"En curso":"Pendiente";
+    const matchEstado = filtroEstado==="Todos" || estado===filtroEstado;
+    return matchBusq && matchEtapa && matchEstado;
+  });
+  const avanceGlobal = CRONOGRAMA.length
+    ? Math.round(CRONOGRAMA.reduce((s,p)=>s+calcularAvancePantalla(p.tareas,tareaOv),0)/CRONOGRAMA.length) : 0;
+
+  /* resumen semanal */
   const sum = useMemo(() => {
     const all=[];
     Object.entries(wd).forEach(([mid,d])=>{
@@ -506,18 +501,17 @@ function App() {
     const ov=cs.length===0?"NONE":cs.some(c=>c==="Red")?"RED":cs.filter(c=>c==="Amber").length>1?"AMBER":"GREEN";
     const bl=Object.entries(wd).filter(([k,d])=>k!=='_global'&&d.blocked&&!d.blocked.toLowerCase().includes("sin bloqueo")).map(([k,d])=>({name:TEAM.find(t=>t.id===k)?.name,text:d.blocked}));
     const dc=Object.entries(wd).filter(([k,d])=>k!=='_global'&&d.decision&&d.decision.toLowerCase().startsWith("sí")).map(([k,d])=>({name:TEAM.find(t=>t.id===k)?.name,text:d.decision.replace(/^sí\s*[-—–]\s*/i,"")}));
-    // Días restantes desde HOY hasta el 15 de mayo (fecha de cierre del proyecto)
     const dr = getDaysRemaining("2026-05-15", today);
     return { hm, am, ov, bl, dc, dr };
-  }, [wd, wk, today]); // today como dependencia → recalcula cuando cambia la fecha
+  }, [wd, wk, today]);
 
-  /* ── layout helpers ── */
+  /* layout helpers */
   const PH = t => (
     <div style={{ background:C.navy, borderBottom:`3px solid ${C.teal}`, padding:"16px 28px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
       <h1 style={{ fontSize:20, fontWeight:300, letterSpacing:1, color:C.w, margin:0 }}>{t}</h1>
       <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-        {sv  && <span style={{ fontSize:10, color:C.gold }}>Guardando en Supabase…</span>}
-        {svt && !sv && <span style={{ fontSize:10, color:C.gl }}>✓ Guardado {svt}</span>}
+        {sv && <span style={{ fontSize:10, color:C.gold }}>Guardando…</span>}
+        {svt && !sv && <span style={{ fontSize:10, color:C.gl }}>✓ {svt}</span>}
         {err && <span style={{ fontSize:10, color:C.rl }}>⚠ {err}</span>}
         <span style={{ fontSize:12, color:C.g }}>RTIC | YPF S.A.</span>
       </div>
@@ -530,7 +524,6 @@ function App() {
   );
   const SH = (t,col) => <div style={{ background:col, color:C.w, padding:"7px 14px", fontSize:12, fontWeight:700, letterSpacing:0.4, borderRadius:"4px 4px 0 0" }}>{t}</div>;
 
-  /* ── loading / error screen ── */
   if (ld) return (
     <div style={{ fontFamily:"'Segoe UI',sans-serif", background:C.navy, minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:14 }}>
       <div style={{ width:36, height:36, border:`3px solid ${C.bd}`, borderTop:`3px solid ${C.teal}`, borderRadius:"50%", animation:"sp 1s linear infinite" }}/>
@@ -539,19 +532,10 @@ function App() {
     </div>
   );
 
-  if (err && !dt) return (
-    <div style={{ fontFamily:"'Segoe UI',sans-serif", background:C.navy, minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:14, padding:40 }}>
-      <div style={{ fontSize:32 }}>⚠️</div>
-      <div style={{ color:C.rl, fontSize:16, fontWeight:600 }}>Error de conexión</div>
-      <div style={{ color:C.g, fontSize:13, textAlign:"center", maxWidth:400 }}>{err}</div>
-      <div style={{ color:C.g, fontSize:11, textAlign:"center", maxWidth:400 }}>Revisá que SUPABASE_URL y SUPABASE_ANON_KEY estén correctos en el código.</div>
-    </div>
-  );
-
   return (
     <div style={{ fontFamily:"'Segoe UI','Helvetica Neue',sans-serif", background:"#e8ecf1", minHeight:"100vh" }}>
 
-      {/* ── NAV ── */}
+      {/* NAV */}
       <div style={{ background:C.navy, display:"flex", alignItems:"center", padding:"0 10px", borderBottom:`2px solid ${C.teal}`, position:"sticky", top:0, zIndex:100, flexWrap:"wrap" }}>
         {[["cover","Portada"],["input","Carga Semanal"],["avance","Avance"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
           <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px", border:"none", background:pg===k?C.nl:"transparent", color:pg===k?C.teal:C.gl2, fontSize:12, fontWeight:pg===k?600:400, cursor:"pointer", borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
@@ -564,12 +548,33 @@ function App() {
         </div>
       </div>
 
+      {/* ── PORTADA ── */}
+      {pg==="cover" && (
+        <div style={{ background:C.navy, minHeight:"calc(100vh - 46px)", display:"flex", flexDirection:"column", justifyContent:"center", padding:"50px 70px", position:"relative" }}>
+          <div style={{ maxWidth:750 }}>
+            <h1 style={{ fontSize:48, fontWeight:300, color:C.w, lineHeight:1.1, margin:0 }}>REAL TIME INTELIGENCE CENTER</h1>
+            <div style={{ width:350, height:4, background:C.teal, margin:"28px 0" }}/>
+            <h2 style={{ fontSize:24, fontWeight:300, color:C.teal, margin:"0 0 40px" }}>Resumen Ejecutivo Semanal</h2>
+            <div style={{ background:C.nl, border:`1px solid ${C.bd}`, borderRadius:4, padding:"22px 26px", maxWidth:460 }}>
+              {[["SEMANA",`N°${wk} — ${wc.sf} al ${wc.ef}`],["RESPONSABLE","Claus Drescher"],["ÁREA","Supply Chain — Performance"],["VERSIÓN","v1.0"]].map(([l,v])=>(
+                <div key={l} style={{ marginBottom:11 }}>
+                  <span style={{ fontSize:11, fontWeight:700, color:C.teal, letterSpacing:1.5, marginRight:10 }}>{l}</span>
+                  <span style={{ fontSize:13, color:C.w }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ position:"absolute", bottom:24, left:0, right:0, textAlign:"center", fontSize:11, color:C.g }}>PRIVADO — USO INTERNO</div>
+        </div>
+      )}
+
       {/* ── AVANCE DE PANTALLAS ── */}
       {pg==="avance" && (() => {
         const colAvance = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?C.grn:a>0?C.gold:C.g; };
         const estadoPantalla = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?"Completada":a>0?"En curso":"Pendiente"; };
         return (
-          <div style={{ background:"#e8ecf1" }}>{PH("AVANCE DE PANTALLAS")}
+          <div style={{ background:"#e8ecf1" }}>
+            {PH("AVANCE DE PANTALLAS")}
             {/* indicador global */}
             <div style={{ background:C.navy, padding:"10px 28px", display:"flex", alignItems:"center", gap:20, borderBottom:`1px solid ${C.bd}` }}>
               <span style={{ fontSize:11, color:C.g }}>AVANCE GLOBAL DEL PROYECTO</span>
@@ -597,18 +602,18 @@ function App() {
             {/* cards */}
             <div style={{ padding:"18px 24px" }}>
               {pantallasVisibles.map(p => {
-                const avance   = calcularAvancePantalla(p.tareas, tareaOv);
-                const estado   = estadoPantalla(p);
-                const col      = colAvance(p);
-                const isExp    = expandedP === p.pantalla;
-                const completadas = p.tareas.filter(t => normalizarProgreso((tareaOv[t.id]||t).progreso) >= 100).length;
-                const enCurso  = p.tareas.filter(t => { const v=normalizarProgreso((tareaOv[t.id]||t).progreso); return v>0&&v<100; }).length;
-                const pendientes = p.tareas.filter(t => normalizarProgreso((tareaOv[t.id]||t).progreso) === 0).length;
+                const avance    = calcularAvancePantalla(p.tareas, tareaOv);
+                const estado    = estadoPantalla(p);
+                const col       = colAvance(p);
+                const isExp     = expandedP === p.pantalla;
+                const completadas = p.tareas.filter(t=>normalizarProgreso((tareaOv[t.id]||t).progreso)>=100).length;
+                const enCurso   = p.tareas.filter(t=>{const v=normalizarProgreso((tareaOv[t.id]||t).progreso);return v>0&&v<100;}).length;
+                const pendientes = p.tareas.filter(t=>normalizarProgreso((tareaOv[t.id]||t).progreso)===0).length;
+                const isAddingHere = newTarea === p.pantalla;
                 return (
                   <div key={p.pantalla} style={{ background:C.w, borderRadius:6, marginBottom:10, border:`1px solid ${isExp?C.teal:"#e0e0e0"}`, overflow:"hidden", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
-                    {/* cabecera card */}
-                    <div onClick={()=>setExpandedP(isExp?null:p.pantalla)}
-                      style={{ padding:"14px 18px", cursor:"pointer", display:"flex", alignItems:"center", gap:14 }}>
+                    {/* cabecera */}
+                    <div onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }} style={{ padding:"14px 18px", cursor:"pointer", display:"flex", alignItems:"center", gap:14 }}>
                       <div style={{ flex:1 }}>
                         <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
                           <span style={{ fontSize:14, fontWeight:700, color:C.navy }}>{p.pantalla}</span>
@@ -630,94 +635,136 @@ function App() {
                       </div>
                       <span style={{ fontSize:16, color:C.g, userSelect:"none" }}>{isExp?"▲":"▼"}</span>
                     </div>
-                    {/* detalle expandible */}
+
+                    {/* detalle */}
                     {isExp && (
-                      <div style={{ borderTop:`1px solid #f0f0f0`, padding:"12px 18px" }}>
-                        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
-                          <thead>
-                            <tr style={{ background:"#f7f9fb" }}>
-                              {["Tarea","Progreso","Estado","Responsable","Inicio","Fin","Comentario",""].map(h=>(
-                                <th key={h} style={{ padding:"7px 8px", textAlign:"left", color:C.g, fontWeight:600, fontSize:10, borderBottom:"1px solid #eee" }}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {p.tareas.map(t => {
-                              const ov     = tareaOv[t.id] || {};
-                              const prog   = normalizarProgreso(ov.progreso !== undefined ? ov.progreso : t.progreso);
-                              const resp   = ov.responsable || t.responsable;
-                              const ini    = ov.inicio || t.inicio;
-                              const fin2   = ov.fin || t.fin;
-                              const coment = ov.comentario !== undefined ? ov.comentario : t.comentario;
-                              const est    = estadoTarea(prog);
-                              const isEditing = editTarea?.id === t.id;
-                              return (
-                                <tr key={t.id} style={{ borderBottom:"1px solid #f5f5f5", background:isEditing?"#fffdf0":"transparent" }}>
-                                  <td style={{ padding:"8px 8px", color:C.navy, maxWidth:200 }}>{t.nombre}</td>
-                                  <td style={{ padding:"8px 8px", minWidth:100 }}>
-                                    {isEditing
-                                      ? <input type="number" min={0} max={100} value={editTarea.progreso}
-                                          onChange={e=>setEditTarea(p=>({...p,progreso:e.target.value}))}
-                                          style={{ width:60, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                      : <div style={{ display:"flex", alignItems:"center", gap:5 }}>
-                                          <div style={{ width:60, height:5, background:"#f0f0f0", borderRadius:99 }}>
-                                            <div style={{ width:`${prog}%`, height:"100%", background:prog>=100?C.grn:prog>0?C.gold:C.g, borderRadius:99 }}/>
+                      <div style={{ borderTop:`1px solid #f0f0f0` }}>
+                        <div style={{ overflowX:"auto" }}>
+                          <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                            <thead>
+                              <tr style={{ background:"#f7f9fb" }}>
+                                {["Tarea","Progreso","Estado","Responsable","Inicio","Fin","Comentario",""].map(h=>(
+                                  <th key={h} style={{ padding:"7px 8px", textAlign:"left", color:C.g, fontWeight:600, fontSize:10, borderBottom:"1px solid #eee" }}>{h}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {p.tareas.map(t => {
+                                const ov     = tareaOv[t.id] || {};
+                                const prog   = normalizarProgreso(ov.progreso!==undefined ? ov.progreso : t.progreso);
+                                const resp   = ov.responsable || t.responsable;
+                                const ini    = ov.inicio || t.inicio;
+                                const fin2   = ov.fin || t.fin;
+                                const coment = ov.comentario!==undefined ? ov.comentario : t.comentario;
+                                const est    = estadoTarea(prog);
+                                const isEditing = editTarea?.id === t.id;
+                                return (
+                                  <tr key={t.id} style={{ borderBottom:"1px solid #f5f5f5", background:isEditing?"#fffdf0":"transparent" }}>
+                                    <td style={{ padding:"8px 8px", color:C.navy, maxWidth:200 }}>{t.nombre}</td>
+                                    <td style={{ padding:"8px 8px", minWidth:100 }}>
+                                      {isEditing
+                                        ? <input type="number" min={0} max={100} value={editTarea.progreso}
+                                            onChange={e=>setEditTarea(p=>({...p,progreso:e.target.value}))}
+                                            style={{ width:60, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                        : <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                                            <div style={{ width:60, height:5, background:"#f0f0f0", borderRadius:99 }}>
+                                              <div style={{ width:`${prog}%`, height:"100%", background:prog>=100?C.grn:prog>0?C.gold:C.g, borderRadius:99 }}/>
+                                            </div>
+                                            <span style={{ fontWeight:700, color:prog>=100?C.grn:prog>0?"#b8860b":C.g }}>{prog}%</span>
                                           </div>
-                                          <span style={{ fontWeight:700, color:prog>=100?C.grn:prog>0?"#b8860b":C.g }}>{prog}%</span>
-                                        </div>
-                                    }
-                                  </td>
-                                  <td style={{ padding:"8px 8px" }}>
-                                    <span style={{ padding:"2px 6px", borderRadius:3, fontSize:9, fontWeight:700, background:est==="Completada"?"rgba(46,125,50,0.1)":est==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.1)", color:est==="Completada"?C.grn:est==="En curso"?"#b8860b":C.g }}>{est}</span>
-                                  </td>
-                                  <td style={{ padding:"8px 8px" }}>
-                                    {isEditing
-                                      ? <input value={editTarea.responsable} onChange={e=>setEditTarea(p=>({...p,responsable:e.target.value}))}
-                                          style={{ width:110, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                      : <span style={{ color:"#546e7a" }}>{resp}</span>}
-                                  </td>
-                                  <td style={{ padding:"8px 8px" }}>
-                                    {isEditing
-                                      ? <input type="date" value={editTarea.inicio} onChange={e=>setEditTarea(p=>({...p,inicio:e.target.value}))}
-                                          style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                      : <span style={{ color:"#90a4ae" }}>{ini}</span>}
-                                  </td>
-                                  <td style={{ padding:"8px 8px" }}>
-                                    {isEditing
-                                      ? <input type="date" value={editTarea.fin} onChange={e=>setEditTarea(p=>({...p,fin:e.target.value}))}
-                                          style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                      : <span style={{ color:"#90a4ae" }}>{fin2}</span>}
-                                  </td>
-                                  <td style={{ padding:"8px 8px", maxWidth:160 }}>
-                                    {isEditing
-                                      ? <input value={editTarea.comentario} onChange={e=>setEditTarea(p=>({...p,comentario:e.target.value}))}
-                                          style={{ width:"100%", padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                      : <span style={{ color:"#90a4ae", fontStyle:"italic" }}>{coment||"—"}</span>}
-                                  </td>
-                                  <td style={{ padding:"8px 8px", whiteSpace:"nowrap" }}>
-                                    {isEditing
-                                      ? <div style={{ display:"flex", gap:4 }}>
-                                          <button onClick={()=>guardarTarea(t, editTarea)}
-                                            style={{ padding:"3px 8px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
-                                          <button onClick={()=>setEditTarea(null)}
-                                            style={{ padding:"3px 7px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
-                                        </div>
-                                      : <button onClick={()=>setEditTarea({ id:t.id, progreso:prog, responsable:resp, inicio:ini, fin:fin2, comentario:coment })}
-                                          style={{ padding:"3px 8px", background:C.nl, color:C.gl2, border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✏️ Editar</button>
-                                    }
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                        {p.tareas.length === 0 && <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin tareas cargadas</div>}
+                                      }
+                                    </td>
+                                    <td style={{ padding:"8px 8px" }}>
+                                      <span style={{ padding:"2px 6px", borderRadius:3, fontSize:9, fontWeight:700, background:est==="Completada"?"rgba(46,125,50,0.1)":est==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.1)", color:est==="Completada"?C.grn:est==="En curso"?"#b8860b":C.g }}>{est}</span>
+                                    </td>
+                                    <td style={{ padding:"8px 8px" }}>
+                                      {isEditing
+                                        ? <input value={editTarea.responsable} onChange={e=>setEditTarea(p=>({...p,responsable:e.target.value}))}
+                                            style={{ width:110, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                        : <span style={{ color:"#546e7a" }}>{resp}</span>}
+                                    </td>
+                                    <td style={{ padding:"8px 8px" }}>
+                                      {isEditing
+                                        ? <input type="date" value={editTarea.inicio} onChange={e=>setEditTarea(p=>({...p,inicio:e.target.value}))}
+                                            style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                        : <span style={{ color:"#90a4ae" }}>{ini}</span>}
+                                    </td>
+                                    <td style={{ padding:"8px 8px" }}>
+                                      {isEditing
+                                        ? <input type="date" value={editTarea.fin} onChange={e=>setEditTarea(p=>({...p,fin:e.target.value}))}
+                                            style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                        : <span style={{ color:"#90a4ae" }}>{fin2}</span>}
+                                    </td>
+                                    <td style={{ padding:"8px 8px", maxWidth:160 }}>
+                                      {isEditing
+                                        ? <input value={editTarea.comentario} onChange={e=>setEditTarea(p=>({...p,comentario:e.target.value}))}
+                                            style={{ width:"100%", padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                        : <span style={{ color:"#90a4ae", fontStyle:"italic" }}>{coment||"—"}</span>}
+                                    </td>
+                                    <td style={{ padding:"8px 8px", whiteSpace:"nowrap" }}>
+                                      {isEditing
+                                        ? <div style={{ display:"flex", gap:4 }}>
+                                            <button onClick={()=>guardarTarea(t, editTarea)}
+                                              style={{ padding:"3px 8px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
+                                            <button onClick={()=>setEditTarea(null)}
+                                              style={{ padding:"3px 7px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
+                                          </div>
+                                        : <button onClick={()=>setEditTarea({id:t.id,progreso:prog,responsable:resp,inicio:ini,fin:fin2,comentario:coment})}
+                                            style={{ padding:"3px 8px", background:C.nl, color:C.gl2, border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✏️</button>
+                                      }
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* formulario nueva tarea */}
+                        {isAddingHere
+                          ? <div style={{ padding:"12px 16px", background:"rgba(0,188,212,0.04)", borderTop:"1px solid #e0f7fa" }}>
+                              <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ Nueva tarea en {p.pantalla}</div>
+                              <div style={{ display:"grid", gridTemplateColumns:"2fr 80px 1fr 1fr 1fr 2fr auto", gap:6, alignItems:"center" }}>
+                                <input value={newForm.nombre} onChange={e=>setNewForm(f=>({...f,nombre:e.target.value}))}
+                                  placeholder="Nombre de la tarea *"
+                                  style={{ padding:"5px 7px", border:`1px solid ${newForm.nombre?"#dde":C.rl}`, borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
+                                <input type="number" min={0} max={100} value={newForm.progreso}
+                                  onChange={e=>setNewForm(f=>({...f,progreso:e.target.value}))}
+                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
+                                <input value={newForm.responsable} onChange={e=>setNewForm(f=>({...f,responsable:e.target.value}))}
+                                  placeholder="Responsable"
+                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
+                                <input type="date" value={newForm.inicio} onChange={e=>setNewForm(f=>({...f,inicio:e.target.value}))}
+                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
+                                <input type="date" value={newForm.fin} onChange={e=>setNewForm(f=>({...f,fin:e.target.value}))}
+                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
+                                <input value={newForm.comentario} onChange={e=>setNewForm(f=>({...f,comentario:e.target.value}))}
+                                  placeholder="Comentario"
+                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
+                                <div style={{ display:"flex", gap:4 }}>
+                                  <button onClick={()=>agregarTarea(p.pantalla)}
+                                    style={{ padding:"5px 10px", background:C.teal, color:C.w, border:"none", borderRadius:4, fontSize:11, fontWeight:700, cursor:"pointer" }}>Guardar</button>
+                                  <button onClick={()=>{ setNewTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }}
+                                    style={{ padding:"5px 8px", background:"#eee", border:"none", borderRadius:4, fontSize:11, cursor:"pointer" }}>✕</button>
+                                </div>
+                              </div>
+                            </div>
+                          : <div style={{ padding:"8px 16px", borderTop:"1px solid #f0f0f0" }}>
+                              <button onClick={()=>{ setNewTarea(p.pantalla); setEditTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }}
+                                style={{ padding:"5px 12px", border:`1px dashed ${C.teal}`, borderRadius:4, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:11, fontWeight:600, cursor:"pointer" }}>
+                                + Agregar tarea
+                              </button>
+                            </div>
+                        }
+                        {p.tareas.length===0 && !isAddingHere && (
+                          <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin tareas cargadas</div>
+                        )}
                       </div>
                     )}
                   </div>
                 );
               })}
-              {pantallasVisibles.length === 0 && (
+              {pantallasVisibles.length===0 && (
                 <div style={{ textAlign:"center", padding:40, color:"#90a4ae", fontSize:13 }}>No se encontraron pantallas con esos filtros.</div>
               )}
             </div>
@@ -725,26 +772,6 @@ function App() {
           </div>
         );
       })()}
-
-      {/* ── PORTADA ── */}
-      {pg==="cover" && (
-        <div style={{ background:C.navy, minHeight:"calc(100vh - 46px)", display:"flex", flexDirection:"column", justifyContent:"center", padding:"50px 70px", position:"relative" }}>
-          <div style={{ maxWidth:750 }}>
-            <h1 style={{ fontSize:48, fontWeight:300, color:C.w, lineHeight:1.1, margin:0 }}>REAL TIME INTELIGENCE CENTER</h1>
-            <div style={{ width:350, height:4, background:C.teal, margin:"28px 0" }}/>
-            <h2 style={{ fontSize:24, fontWeight:300, color:C.teal, margin:"0 0 40px" }}>Resumen Ejecutivo Semanal</h2>
-            <div style={{ background:C.nl, border:`1px solid ${C.bd}`, borderRadius:4, padding:"22px 26px", maxWidth:460 }}>
-              {[["SEMANA",`N°${wk} — ${wc.sf} al ${wc.ef}`],["RESPONSABLE","Claus Drescher"],["ÁREA","Supply Chain — Performance"],["VERSIÓN","v1.0"]].map(([l,v])=>(
-                <div key={l} style={{ marginBottom:11 }}>
-                  <span style={{ fontSize:11, fontWeight:700, color:C.teal, letterSpacing:1.5, marginRight:10 }}>{l}</span>
-                  <span style={{ fontSize:13, color:C.w }}>{v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{ position:"absolute", bottom:24, left:0, right:0, textAlign:"center", fontSize:11, color:C.g }}>PRIVADO — USO INTERNO</div>
-        </div>
-      )}
 
       {/* ── CARGA SEMANAL ── */}
       {pg==="input" && (
@@ -923,8 +950,8 @@ function App() {
           <div style={{ padding:"18px 24px" }}>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:18 }}>
               {[
-                { v: sum.dr === -1 ? "✓" : sum.dr === null ? "—" : sum.dr, l: sum.dr === -1 ? "Proyecto Finalizado" : "Días Restantes", bc: sum.dr === -1 ? C.grn : C.navy },
-                { v: sum.bl.length, l: "Issues Abiertos", bc: C.red }
+                { v:sum.dr===-1?"✓":sum.dr===null?"—":sum.dr, l:sum.dr===-1?"Proyecto Finalizado":"Días Restantes", bc:sum.dr===-1?C.grn:C.navy },
+                { v:sum.bl.length, l:"Issues Abiertos", bc:C.red }
               ].map((c,i)=>(
                 <div key={i} style={{ background:C.w, borderRadius:6, overflow:"hidden", textAlign:"center" }}>
                   <div style={{ height:5, background:c.bc }}/>
