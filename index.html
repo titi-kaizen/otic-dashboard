@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { background: #e8ecf1; }</style>
 </head>
 <body>
@@ -362,6 +363,19 @@ function getDaysRemaining(isoTarget, fromDate = new Date()) {
   return Math.ceil(diff / 86_400_000);
 }
 
+/* ─── COMPONENTE GRÁFICO REUTILIZABLE ─── */
+function TemplateChart({ config, height=200 }) {
+  const ref  = React.useRef(null);
+  const inst = React.useRef(null);
+  useEffect(() => {
+    if (!ref.current || !window.Chart) return;
+    if (inst.current) inst.current.destroy();
+    inst.current = new window.Chart(ref.current, config);
+    return () => { if (inst.current) { inst.current.destroy(); inst.current = null; } };
+  }, []);
+  return <canvas ref={ref} style={{ maxHeight: height }} />;
+}
+
 /* ─── COMPONENTE ITEM ROW ─── */
 function ItemRow({ item, idx, onUp, onRm }) {
   return (
@@ -586,7 +600,7 @@ function App() {
 
       {/* NAV */}
       <div style={{ background:C.navy, display:"flex", alignItems:"center", padding:"0 10px", borderBottom:`2px solid ${C.teal}`, position:"sticky", top:0, zIndex:100, flexWrap:"wrap" }}>
-        {[["cover","Portada"],["input","Carga Semanal"],["avance","Avance"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
+        {[["cover","Portada"],["input","Carga Semanal"],["avance","Avance"],["template","Template"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
           <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px", border:"none", background:pg===k?C.nl:"transparent", color:pg===k?C.teal:C.gl2, fontSize:12, fontWeight:pg===k?600:400, cursor:"pointer", borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
         ))}
         <div style={{ marginLeft:"auto", padding:"6px 0" }}>
@@ -596,6 +610,124 @@ function App() {
           </select>
         </div>
       </div>
+
+      {/* ── TEMPLATE POWER BI ── */}
+      {pg==="template" && (() => {
+        const GERS = [
+          {n:"C. Corporativas",v:6390},{n:"C. DW y Midstream",v:3953},
+          {n:"C. Logística y Transp.",v:2340},{n:"C. de Equipos y Mat.",v:2300},
+          {n:"C. Upstream",v:1883},{n:"C. Well Construction",v:770},{n:"C. Infraestructura",v:479},
+        ];
+        const lbls  = GERS.map(g=>g.n);
+        const vals  = GERS.map(g=>g.v);
+        const cyans = ['#00e5ff','#00bcd4','#0097a7','#00838f','#006064','#4dd0e1','#80deea'];
+        const darkOpts = (indexAxis='x') => ({
+          indexAxis, responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false} },
+          scales:{
+            x:{ grid:{color:'rgba(255,255,255,0.07)'}, ticks:{color:'#7ab0c8',font:{size:9}}, ...(indexAxis==='y'?{}:{}) },
+            y:{ grid:{color: indexAxis==='y'?'transparent':'rgba(255,255,255,0.07)'}, ticks:{color:'#7ab0c8',font:{size:9}} }
+          }
+        });
+        const TB = { background:"#0a1628", border:"1px solid rgba(0,188,212,0.18)", borderRadius:6, padding:12 };
+        return (
+          <div style={{ background:"#050d1a", minHeight:"calc(100vh - 46px)", fontFamily:"'Segoe UI',sans-serif" }}>
+            {/* header */}
+            <div style={{ background:"#0c1a2e", padding:"10px 24px", display:"flex", justifyContent:"space-between", alignItems:"center", borderBottom:"1px solid rgba(0,188,212,0.2)" }}>
+              <div style={{ display:"flex", gap:8 }}>
+                {["⌂","ℹ"].map(ic=><div key={ic} style={{ width:28,height:28,background:"rgba(0,188,212,0.12)",borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",color:"#00bcd4",fontSize:14,cursor:"pointer" }}>{ic}</div>)}
+              </div>
+              <div style={{ fontSize:15, fontWeight:600, color:"#fff", letterSpacing:1.5 }}>DETALLE DEL TITULO GENERAL DE LA SOLAPA</div>
+              <div style={{ textAlign:"right" }}>
+                <div style={{ fontSize:9, color:"#7ab0c8" }}>18/02/2026 — Última actualización</div>
+                <div style={{ fontSize:16, fontWeight:900, color:"#ef3340", letterSpacing:2, marginTop:2 }}>YPF</div>
+              </div>
+            </div>
+
+            {/* KPIs */}
+            <div style={{ padding:"10px 18px", display:"flex", gap:8 }}>
+              {[["📋","18.116","Legajos"],["📝","18.116","Solped"],["📄","18.116","Contratos"]].map(([ic,v,l])=>(
+                <div key={l} style={{ ...TB, display:"flex", alignItems:"center", gap:10, flex:1 }}>
+                  <span style={{ fontSize:22 }}>{ic}</span>
+                  <div><div style={{ fontSize:20,fontWeight:700,color:"#00e5ff" }}>{v}</div><div style={{ fontSize:10,color:"#7ab0c8" }}>{l}</div></div>
+                </div>
+              ))}
+              <div style={{ ...TB, flex:1 }}>
+                {[["$","18.116","ind. 1"],["⚙️","18.116 mil","ind. 2"]].map(([ic,v,l])=>(
+                  <div key={l} style={{ display:"flex",alignItems:"center",gap:6,marginBottom:4 }}>
+                    <span style={{ fontSize:14 }}>{ic}</span>
+                    <div><div style={{ fontSize:15,fontWeight:700,color:"#00e5ff" }}>{v}</div><div style={{ fontSize:9,color:"#7ab0c8" }}>{l}</div></div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ ...TB, flex:1.4, textAlign:"center" }}>
+                <div style={{ fontSize:9,color:"#7ab0c8",marginBottom:2 }}>KPI TACOMETRO</div>
+                <div style={{ height:65, position:"relative" }}>
+                  <TemplateChart height={65} config={{ type:'doughnut', data:{ datasets:[{ data:[18116,11884], backgroundColor:['#00bcd4','rgba(255,255,255,0.05)'], borderWidth:0 }] }, options:{ rotation:-90, circumference:180, cutout:'72%', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{enabled:false}} } }}/>
+                  <div style={{ position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)",fontSize:13,fontWeight:700,color:"#00e5ff",whiteSpace:"nowrap" }}>18116</div>
+                </div>
+                <div style={{ fontSize:9,color:"#7ab0c8" }}>30 mil</div>
+              </div>
+              <div style={{ ...TB, flex:1.2, textAlign:"center" }}>
+                <div style={{ fontSize:9,color:"#7ab0c8",marginBottom:4 }}>TOTAL CONTRATOS 2026</div>
+                <div style={{ fontSize:22,fontWeight:700,color:"#00e5ff" }}>18.116</div>
+                <div style={{ fontSize:9,color:"#7ab0c8" }}>Cantidad de contratos</div>
+              </div>
+              <div style={{ ...TB, flex:1, textAlign:"center" }}>
+                <div style={{ fontSize:9,color:"#7ab0c8",marginBottom:4 }}>KPI INDICADOR</div>
+                <div style={{ fontSize:36,fontWeight:700,color:"#ef5350",lineHeight:1 }}>9</div>
+                <div style={{ fontSize:9,color:"#7ab0c8",marginTop:2 }}>Objetivo: 10 (-10%)</div>
+              </div>
+            </div>
+
+            {/* gráficos */}
+            <div style={{ padding:"0 18px 18px", display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
+              <div style={TB}>
+                <div style={{ fontSize:11,fontWeight:600,color:"#c0d4e0",marginBottom:6,textAlign:"center" }}>Grafico barras</div>
+                <div style={{ height:200 }}><TemplateChart height={200} config={{ type:'bar', data:{ labels:lbls, datasets:[{ data:vals, backgroundColor:'#00bcd4', borderWidth:0, borderRadius:2 }] }, options:{ ...darkOpts('y'), scales:{ x:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{color:'#7ab0c8',font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(1)+"k":v}}, y:{grid:{display:false},ticks:{color:'#c0d4e0',font:{size:8}}} } } }}/></div>
+              </div>
+              <div style={TB}>
+                <div style={{ fontSize:11,fontWeight:600,color:"#c0d4e0",marginBottom:6,textAlign:"center" }}>Grafico embudo</div>
+                <div style={{ height:200 }}><TemplateChart height={200} config={{ type:'bar', data:{ labels:lbls, datasets:[{ data:vals, backgroundColor:cyans, borderWidth:0, borderRadius:2 }] }, options:{ ...darkOpts('y'), scales:{ x:{display:false}, y:{grid:{display:false},ticks:{color:'#c0d4e0',font:{size:8}}} } } }}/></div>
+              </div>
+              <div style={TB}>
+                <div style={{ fontSize:11,fontWeight:600,color:"#c0d4e0",marginBottom:6,textAlign:"center" }}>Grafico barras 2</div>
+                <div style={{ height:200 }}><TemplateChart height={200} config={{ type:'bar', data:{ labels:lbls, datasets:[{ data:vals, backgroundColor:cyans, borderWidth:0, borderRadius:2 }] }, options:{ ...darkOpts('x'), scales:{ x:{grid:{display:false},ticks:{color:'#7ab0c8',font:{size:7},maxRotation:45}}, y:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{color:'#7ab0c8',font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(1)+"k":v}} } } }}/></div>
+              </div>
+              <div style={TB}>
+                <div style={{ fontSize:11,fontWeight:600,color:"#c0d4e0",marginBottom:6,textAlign:"center" }}>Grafico torta</div>
+                <div style={{ height:200 }}><TemplateChart height={200} config={{ type:'doughnut', data:{ labels:['false','true'], datasets:[{ data:[30.81,69.19], backgroundColor:['#006080','#00bcd4'], borderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{ position:'left', labels:{ color:'#c0d4e0',font:{size:10},padding:10 } }, tooltip:{ callbacks:{ label: ctx => ctx.label+': '+ctx.parsed.toFixed(2)+'%' } } } } }}/></div>
+              </div>
+              <div style={TB}>
+                <div style={{ fontSize:11,fontWeight:600,color:"#c0d4e0",marginBottom:6,textAlign:"center" }}>Grafico lineal</div>
+                <div style={{ height:200 }}><TemplateChart height={200} config={{ type:'line', data:{ labels:lbls, datasets:[{ data:vals, borderColor:'#00bcd4', backgroundColor:'rgba(0,188,212,0.08)', fill:true, tension:0.4, pointBackgroundColor:'#00e5ff', pointRadius:4, pointBorderWidth:0 }] }, options:{ ...darkOpts('x'), scales:{ x:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{color:'#7ab0c8',font:{size:7},maxRotation:45}}, y:{grid:{color:'rgba(255,255,255,0.07)'},ticks:{color:'#7ab0c8',font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(1)+"k":v}} } } }}/></div>
+              </div>
+              <div style={{ ...TB, overflow:"auto" }}>
+                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                  <thead>
+                    <tr style={{ background:"rgba(0,188,212,0.25)" }}>
+                      <th style={{ padding:"6px 8px",textAlign:"left",color:"#fff",fontWeight:600 }}>Gerencia</th>
+                      <th style={{ padding:"6px 8px",textAlign:"right",color:"#fff",fontWeight:600 }}>Doc. Compras</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[["—",5],["C. Corporativas",6389],["C. de Equipos y Materiales",2300],["C. DW y Midstream",3953],["C. Infraestructura",479],["C. Logística y Transporte",2340],["C. Upstream",1883],["C. Well Construction",767]].map(([g,v],i)=>(
+                      <tr key={i} style={{ borderBottom:"1px solid rgba(255,255,255,0.05)", background:i%2===0?"transparent":"rgba(0,188,212,0.04)" }}>
+                        <td style={{ padding:"5px 8px",color:"#c0d4e0" }}>{g}</td>
+                        <td style={{ padding:"5px 8px",textAlign:"right",color:"#00e5ff" }}>{v.toLocaleString("es-AR")}</td>
+                      </tr>
+                    ))}
+                    <tr style={{ background:"rgba(0,188,212,0.2)", borderTop:"1px solid rgba(0,188,212,0.4)" }}>
+                      <td style={{ padding:"6px 8px",fontWeight:700,color:"#fff" }}>Total</td>
+                      <td style={{ padding:"6px 8px",textAlign:"right",fontWeight:700,color:"#00e5ff" }}>18.116</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── PORTADA ── */}
       {pg==="cover" && (
