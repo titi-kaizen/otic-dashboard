@@ -525,8 +525,19 @@ function App() {
     const tareasAcumDone = tareasAcum.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100);
     const pctTareas      = tareasAcum.length > 0 ? Math.round((tareasAcumDone.length / tareasAcum.length) * 100) : 0;
 
-    // PANTALLAS: fecha_fin de pantallaConfig <= hoy (acumuladas)
-    const pantallasAcum     = CRONOGRAMA.filter(p => { const ms = toEndOfDayMs(pantallaConfig[p.pantalla]?.fecha_fin); return ms !== null && ms <= hoyMs; });
+    // PANTALLAS: usa fecha_fin manual si existe, sino el máximo fin de sus tareas
+    // Mismo criterio que tareas: fechaFin <= hoy
+    const getFechaFinPantalla = (p) => {
+      // Primero: fecha fin manual cargada por el usuario
+      if (pantallaConfig[p.pantalla]?.fecha_fin) return pantallaConfig[p.pantalla].fecha_fin;
+      // Fallback: max(fin) de todas sus tareas
+      const fechas = p.tareas
+        .map(t => (tareaOv[t.id]?.fin || t.fin || "").slice(0, 10))
+        .filter(Boolean);
+      if (!fechas.length) return null;
+      return fechas.sort().at(-1);
+    };
+    const pantallasAcum     = CRONOGRAMA.filter(p => { const ms = toEndOfDayMs(getFechaFinPantalla(p)); return ms !== null && ms <= hoyMs; });
     const pantallasAcumDone = pantallasAcum.filter(p => calcularAvancePantalla(p.tareas, tareaOv) >= 100);
     const pctPantallas      = pantallasAcum.length > 0 ? Math.round((pantallasAcumDone.length / pantallasAcum.length) * 100) : 0;
 
