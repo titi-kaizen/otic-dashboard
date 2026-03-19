@@ -8,7 +8,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { background: #e8ecf1; }</style>
 </head>
 <body>
@@ -363,19 +362,6 @@ function getDaysRemaining(isoTarget, fromDate = new Date()) {
   return Math.ceil(diff / 86_400_000);
 }
 
-/* ─── COMPONENTE GRÁFICO REUTILIZABLE ─── */
-function TemplateChart({ config, height=200 }) {
-  const ref  = React.useRef(null);
-  const inst = React.useRef(null);
-  useEffect(() => {
-    if (!ref.current || !window.Chart) return;
-    if (inst.current) inst.current.destroy();
-    inst.current = new window.Chart(ref.current, config);
-    return () => { if (inst.current) { inst.current.destroy(); inst.current = null; } };
-  }, []);
-  return <canvas ref={ref} style={{ maxHeight: height }} />;
-}
-
 /* ─── COMPONENTE ITEM ROW ─── */
 function ItemRow({ item, idx, onUp, onRm }) {
   return (
@@ -600,7 +586,7 @@ function App() {
 
       {/* NAV */}
       <div style={{ background:C.navy, display:"flex", alignItems:"center", padding:"0 10px", borderBottom:`2px solid ${C.teal}`, position:"sticky", top:0, zIndex:100, flexWrap:"wrap" }}>
-        {[["cover","Portada"],["input","Carga Semanal"],["avance","Avance"],["template","Template"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
+        {[["cover","Portada"],["input","Carga Semanal"],["avance","Avance"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
           <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px", border:"none", background:pg===k?C.nl:"transparent", color:pg===k?C.teal:C.gl2, fontSize:12, fontWeight:pg===k?600:400, cursor:"pointer", borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
         ))}
         <div style={{ marginLeft:"auto", padding:"6px 0" }}>
@@ -611,22 +597,7 @@ function App() {
         </div>
       </div>
 
-      {/* ── TEMPLATE POWER BI ── */}
-      {pg==="template" && (() => {
-        return (
-          <div style={{ background:"#0d0d2b", minHeight:"calc(100vh - 46px)", display:"flex", flexDirection:"column" }}>
-            {PH("TEMPLATE POWER BI")}
-            <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:0 }}>
-              <img
-                src="image001.jpg"
-                alt="Template Power BI"
-                style={{ width:"100%", height:"auto", display:"block" }}
-              />
-            </div>
-            {PF}
-          </div>
-        );
-      })() || (() => {
+      {/* ── PORTADA ── */}
         const GERS = [
           {n:"C. Corporativas",v:6390},{n:"C. DW y Midstream",v:3953},
           {n:"C. Logística y Transp.",v:2340},{n:"C. de Equipos y Mat.",v:2300},
