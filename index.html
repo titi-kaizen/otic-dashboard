@@ -113,8 +113,8 @@ const CRONOGRAMA = [
     {id:"e1t16",nombre:"Armado de mockup con visualizaciones preliminares",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
   ]},
   { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Contextual (E1)", tareas:[
-    {id:"e1t17",nombre:"Análisis extracción del dato por API (Precio barril)",progreso:0,responsable:"Ari Mariño / Sebas Caviglia",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
-    {id:"e1t18",nombre:"Reunión con Claus para determinar datos necesitados",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-05",fin:"2026-03-13",comentario:""},
+    {id:"e1t17",nombre:"Análisis extracción del dato por API",progreso:0,responsable:"Ari Mariño / Sebas Caviglia",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
+    {id:"e1t18",nombre:"Reunión con Claus para determinar datos",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-05",fin:"2026-03-13",comentario:""},
     {id:"e1t19",nombre:"Obtención de orígenes y armado de pantalla",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-13",fin:"2026-03-27",comentario:""},
   ]},
   { etapa:"Etapa 2 — Analizar Mercado/oferta", pantalla:"Planificación (E2)", tareas:[
@@ -130,7 +130,7 @@ const CRONOGRAMA = [
     {id:"e2t08",nombre:"Warning Proveedores monopólicos en cartera",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
   ]},
   { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Tiempos Intermedios", tareas:[
-    {id:"e4t01",nombre:"Análisis de viabilidad de hitos y cálculos de calidad",progreso:50,responsable:"Juli Sanda",inicio:"2026-02-15",fin:"2026-04-30",comentario:"Pendiente por cálculos viabilidad de Tecno y Digitalización"},
+    {id:"e4t01",nombre:"Análisis de viabilidad de hitos y cálculos de calidad",progreso:50,responsable:"Juli Sanda",inicio:"2026-02-15",fin:"2026-04-30",comentario:"Pendiente por cálculos viabilidad"},
   ]},
   { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Licitaciones", tareas:[
     {id:"e4t02",nombre:"Evaluación fuente manual Sourcing para KPIs",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-05",fin:"2026-03-09",comentario:""},
@@ -210,7 +210,7 @@ const CRONOGRAMA = [
   { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Salud Contractual (E5)", tareas:[
     {id:"e5t24",nombre:"Análisis y adaptación — Alertas Monto/Plazo",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-31",fin:"2026-04-15",comentario:""},
     {id:"e5t25",nombre:"Reunión con referente — Toyota Well",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
-    {id:"e5t26",nombre:"Conexión de bases — Toyota Well",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-18",comentario:"Revisar ubicación de la información"},
+    {id:"e5t26",nombre:"Conexión de bases — Toyota Well",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-18",comentario:""},
   ]},
   { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Accidentes IFA/IFAT", tareas:[
     {id:"e5t27",nombre:"Reunión con Dayana Mendez",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
@@ -272,6 +272,7 @@ const C = {
   g:"#8a9bb5",    gl2:"#b0bec5", bd:"rgba(0,188,212,0.15)"
 };
 
+/* ─── Supabase helpers ─── */
 async function dbLoad() {
   const { data, error } = await sb.from("weekly_data").select("*");
   if (error) throw error;
@@ -290,21 +291,6 @@ async function dbUpsert(weekNumber, memberId, memberData) {
   );
   if (error) throw error;
 }
-async function dbLoadPantallaConfig() {
-  const { data, error } = await sb.from("pantalla_config").select("*");
-  if (error) throw error;
-  const map = {};
-  (data||[]).forEach(r => { map[r.pantalla] = r; });
-  return map;
-}
-async function dbUpsertPantallaConfig(pantalla, fields) {
-  const { error } = await sb.from("pantalla_config").upsert(
-    { pantalla, ...fields, updated_at: new Date().toISOString() },
-    { onConflict: "pantalla" }
-  );
-  if (error) throw error;
-}
-
 async function dbLoadTareas() {
   const { data, error } = await sb.from("task_progress").select("*");
   if (error) throw error;
@@ -330,7 +316,22 @@ async function dbUpsertTarea(taskId, fields) {
   );
   if (error) throw error;
 }
+async function dbLoadPantallaConfig() {
+  const { data, error } = await sb.from("pantalla_config").select("*");
+  if (error) throw error;
+  const map = {};
+  (data||[]).forEach(r => { map[r.pantalla] = r; });
+  return map;
+}
+async function dbUpsertPantallaConfig(pantalla, fields) {
+  const { error } = await sb.from("pantalla_config").upsert(
+    { pantalla, ...fields, updated_at:new Date().toISOString() },
+    { onConflict:"pantalla" }
+  );
+  if (error) throw error;
+}
 
+/* ─── Lógica de negocio ─── */
 function normalizarProgreso(v) {
   if (v===null||v===undefined||v==="") return 0;
   const n = parseFloat(v);
@@ -354,7 +355,14 @@ function getDaysRemaining(isoTarget, fromDate = new Date()) {
   if (diff < 0)    return -1;
   return Math.ceil(diff / 86_400_000);
 }
+/* Convierte "YYYY-MM-DD" a timestamp fin de día para comparación acumulada */
+function toEndOfDayMs(str) {
+  if (!str) return null;
+  const d = new Date(str.slice(0,10) + "T23:59:59");
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
 
+/* ─── Componentes ─── */
 function ItemRow({ item, idx, onUp, onRm }) {
   return (
     <div style={{ display:"flex", gap:8, marginBottom:8, alignItems:"flex-start" }}>
@@ -371,6 +379,24 @@ function ItemRow({ item, idx, onUp, onRm }) {
   );
 }
 
+/* Barra de progreso acumulada */
+function BarAcum({ label, pct, done, total }) {
+  const col = pct >= 100 ? C.gl : pct >= 60 ? C.gold : pct > 0 ? C.rl : C.g;
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+      <span style={{ fontSize:11, color:C.g, minWidth:250 }}>{label}</span>
+      <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
+        <div style={{ width:`${pct}%`, height:"100%", background:col, borderRadius:99, transition:"width .5s" }}/>
+      </div>
+      <span style={{ fontSize:15, fontWeight:700, color:col, minWidth:44 }}>{pct}%</span>
+      <span style={{ fontSize:10, color:C.g }}>
+        {total === 0 ? "Sin vencimientos registrados" : `${done}/${total} completadas`}
+      </span>
+    </div>
+  );
+}
+
+/* ─── App principal ─── */
 function App() {
   const [pg,  setPg]  = useState("cover");
   const [wk,  setWk]  = useState(1);
@@ -382,18 +408,18 @@ function App() {
   const [sv,  setSv]  = useState(false);
   const [svt, setSvt] = useState(null);
   const [err, setErr] = useState(null);
-  const [today, setToday]           = useState(() => new Date());
-  const [tareaOv, setTareaOv]       = useState({});
-  const [expandedP, setExpandedP]   = useState(null);
-  const [editTarea, setEditTarea]   = useState(null);
-  const [newTarea, setNewTarea]     = useState(null);
-  const [newForm, setNewForm]       = useState({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
-  const [busqueda, setBusqueda]     = useState("");
+  const [today, setToday]               = useState(() => new Date());
+  const [tareaOv, setTareaOv]           = useState({});
+  const [pantallaConfig, setPantallaConfig] = useState({});
+  const [expandedP, setExpandedP]       = useState(null);
+  const [editTarea, setEditTarea]       = useState(null);
+  const [newTarea, setNewTarea]         = useState(null);
+  const [newForm, setNewForm]           = useState({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
+  const [busqueda, setBusqueda]         = useState("");
   const [filtroEtapa, setFiltroEtapa]   = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("Todos");
-  const [pantallaConfig, setPantallaConfig] = useState({});
-  const [editFechaFin, setEditFechaFin]     = useState(null); // pantalla que está editando fecha fin
-  const [svTarea, setSvTarea]               = useState(null);
+  const [svTarea, setSvTarea]           = useState(null);
+  const [editFechaFin, setEditFechaFin] = useState(null);
 
   useEffect(() => {
     const t = setInterval(() => setToday(new Date()), 60_000);
@@ -405,20 +431,16 @@ function App() {
       .catch(e => { setErr("No se pudo conectar con Supabase."); setLd(false); console.error(e); });
   }, []);
   useEffect(() => {
-    dbLoadPantallaConfig()
-      .then(m => setPantallaConfig(m))
-      .catch(e => console.error("Error cargando config pantallas:", e));
+    dbLoadTareas().then(m => setTareaOv(m)).catch(console.error);
   }, []);
-
   useEffect(() => {
-    dbLoadTareas()
-      .then(m => setTareaOv(m))
-      .catch(e => console.error("Error cargando tareas:", e));
+    dbLoadPantallaConfig().then(m => setPantallaConfig(m)).catch(console.error);
   }, []);
 
   const wd = dt[wk] || {};
   const wc = WEEKS[wk - 1];
 
+  /* Carga semanal */
   const startEd = id => {
     const d = wd[id];
     setEd(id);
@@ -428,18 +450,16 @@ function App() {
   const saveEd = async () => {
     const memberData = { items:fi, ...fm };
     const u = { ...dt, [wk]:{ ...(dt[wk]||{}), [ed]:memberData } };
-    setDt(u); setEd(null);
-    setSv(true);
-    try {
-      await dbUpsert(wk, ed, memberData);
-      setSvt(new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));
-    } catch(e) { setErr("Error al guardar."); console.error(e); }
+    setDt(u); setEd(null); setSv(true);
+    try { await dbUpsert(wk, ed, memberData); setSvt(new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})); }
+    catch(e) { setErr("Error al guardar."); console.error(e); }
     setSv(false);
   };
   const addI = t  => setFi(p=>[...p,{area:AREAS[0],text:"",type:t,_id:uid()}]);
   const rmI  = i  => setFi(p=>p.filter((_,j)=>j!==i));
   const upI  = (i,f,v) => setFi(p=>p.map((x,j)=>j===i?{...x,[f]:v}:x));
 
+  /* Tareas */
   const borrarTarea = async (tarea, pantalla) => {
     if (!confirm(`¿Borrar la tarea "${tarea.nombre}"?`)) return;
     setSvTarea("saving");
@@ -451,25 +471,22 @@ function App() {
       setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
     } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
   };
-
   const guardarTarea = async (tarea, campos) => {
     const p = normalizarProgreso(campos.progreso);
     if (p<0||p>100) return alert("El progreso debe ser entre 0 y 100.");
-    if (campos.fin&&campos.inicio&&campos.fin<campos.inicio) return alert("La fecha de fin no puede ser menor a la de inicio.");
+    if (campos.fin&&campos.inicio&&campos.fin<campos.inicio) return alert("La fecha fin no puede ser menor a la de inicio.");
     const payload = { nombre:tarea.nombre, progreso:p, estado:estadoTarea(p), responsable:campos.responsable||"", inicio:campos.inicio||null, fin:campos.fin||null, comentario:campos.comentario||"", updated_by:"Usuario" };
     setSvTarea("saving");
     try {
       await dbUpsertTarea(tarea.id, payload);
       setTareaOv(prev=>({...prev,[tarea.id]:payload}));
-      setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
-      setEditTarea(null);
+      setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000); setEditTarea(null);
     } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
   };
-
   const agregarTarea = async (pantalla) => {
     if (!newForm.nombre.trim()) return alert("El nombre de la tarea es obligatorio.");
     const p = normalizarProgreso(newForm.progreso);
-    if (newForm.fin&&newForm.inicio&&newForm.fin<newForm.inicio) return alert("La fecha de fin no puede ser menor a la de inicio.");
+    if (newForm.fin&&newForm.inicio&&newForm.fin<newForm.inicio) return alert("La fecha fin no puede ser menor a la de inicio.");
     const nuevoId = "usr_" + uid();
     const payload = { nombre:newForm.nombre, pantalla, progreso:p, estado:estadoTarea(p), responsable:newForm.responsable||"", inicio:newForm.inicio||null, fin:newForm.fin||null, comentario:newForm.comentario||"", updated_by:"Usuario" };
     setSvTarea("saving");
@@ -479,11 +496,11 @@ function App() {
       if (idx!==-1) CRONOGRAMA[idx].tareas.push({ id:nuevoId, nombre:newForm.nombre, progreso:p, responsable:newForm.responsable||"", inicio:newForm.inicio||"", fin:newForm.fin||"", comentario:newForm.comentario||"" });
       setTareaOv(prev=>({...prev,[nuevoId]:payload}));
       setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
-      setNewTarea(null);
-      setNewForm({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
+      setNewTarea(null); setNewForm({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
     } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
   };
 
+  /* Datos avance */
   const etapas = [...new Set(CRONOGRAMA.map(p=>p.etapa))];
   const pantallasVisibles = CRONOGRAMA.filter(p => {
     const matchBusq   = p.pantalla.toLowerCase().includes(busqueda.toLowerCase());
@@ -496,6 +513,30 @@ function App() {
   const avanceGlobal = CRONOGRAMA.length
     ? Math.round(CRONOGRAMA.reduce((s,p)=>s+calcularAvancePantalla(p.tareas,tareaOv),0)/CRONOGRAMA.length) : 0;
 
+  /* Indicadores acumulados al día de hoy */
+  const indicadoresHoy = useMemo(() => {
+    // "hoy" = fin del día actual para incluir cualquier tarea que vence durante el día
+    const ahora = new Date(today); ahora.setHours(23,59,59,999);
+    const hoyMs = ahora.getTime();
+
+    // TAREAS: fechaFin <= hoy (acumuladas)
+    const todasTareas    = CRONOGRAMA.flatMap(p => p.tareas);
+    const tareasAcum     = todasTareas.filter(t => { const ms = toEndOfDayMs(tareaOv[t.id]?.fin || t.fin); return ms !== null && ms <= hoyMs; });
+    const tareasAcumDone = tareasAcum.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100);
+    const pctTareas      = tareasAcum.length > 0 ? Math.round((tareasAcumDone.length / tareasAcum.length) * 100) : 0;
+
+    // PANTALLAS: fecha_fin de pantallaConfig <= hoy (acumuladas)
+    const pantallasAcum     = CRONOGRAMA.filter(p => { const ms = toEndOfDayMs(pantallaConfig[p.pantalla]?.fecha_fin); return ms !== null && ms <= hoyMs; });
+    const pantallasAcumDone = pantallasAcum.filter(p => calcularAvancePantalla(p.tareas, tareaOv) >= 100);
+    const pctPantallas      = pantallasAcum.length > 0 ? Math.round((pantallasAcumDone.length / pantallasAcum.length) * 100) : 0;
+
+    return {
+      pctTareas, tareasTotal:tareasAcum.length, tareasDone:tareasAcumDone.length,
+      pctPantallas, pantallasTotal:pantallasAcum.length, pantallasDone:pantallasAcumDone.length,
+    };
+  }, [tareaOv, pantallaConfig, today]);
+
+  /* Resumen semanal */
   const sum = useMemo(() => {
     const all=[];
     Object.entries(wd).forEach(([mid,d])=>{
@@ -513,6 +554,7 @@ function App() {
     return { hm, am, ov, bl, dc, dr };
   }, [wd, wk, today]);
 
+  /* Layout helpers */
   const PH = t => (
     <div style={{ background:C.navy, borderBottom:`3px solid ${C.teal}`, padding:"16px 28px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
       <h1 style={{ fontSize:20, fontWeight:300, letterSpacing:1, color:C.w, margin:0 }}>{t}</h1>
@@ -555,7 +597,7 @@ function App() {
         </div>
       </div>
 
-      {/* PORTADA */}
+      {/* ── PORTADA ── */}
       {pg==="cover" && (
         <div style={{ background:C.navy, minHeight:"calc(100vh - 46px)", display:"flex", flexDirection:"column", justifyContent:"center", padding:"50px 70px", position:"relative" }}>
           <div style={{ maxWidth:750 }}>
@@ -575,53 +617,42 @@ function App() {
         </div>
       )}
 
-      {/* AVANCE */}
+      {/* ── AVANCE ── */}
       {pg==="avance" && (() => {
         const colAvance = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?C.grn:a>0?C.gold:C.g; };
         const estadoPantalla = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?"Completada":a>0?"En curso":"Pendiente"; };
         return (
           <div style={{ background:"#e8ecf1" }}>
             {PH("AVANCE DE PANTALLAS")}
-            {/* indicador global + cumplimiento diario */}
-            <div style={{ background:C.navy, padding:"10px 28px", display:"flex", flexDirection:"column", gap:8, borderBottom:`1px solid ${C.bd}` }}>
-              {/* barra global */}
-              <div style={{ display:"flex", alignItems:"center", gap:20 }}>
-                <span style={{ fontSize:11, color:C.g, minWidth:220 }}>AVANCE GLOBAL DEL PROYECTO</span>
-                <div style={{ flex:1, maxWidth:300, height:8, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
-                  <div style={{ width:`${avanceGlobal}%`, height:"100%", background:avanceGlobal>=100?C.grn:avanceGlobal>30?C.teal:C.gold, borderRadius:99, transition:"width .4s" }}/>
+
+            {/* ── Barras de progreso ── */}
+            <div style={{ background:C.navy, padding:"12px 28px", display:"flex", flexDirection:"column", gap:10, borderBottom:`1px solid ${C.bd}` }}>
+              {/* Global */}
+              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>AVANCE GLOBAL DEL PROYECTO</span>
+                <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
+                  <div style={{ width:`${avanceGlobal}%`, height:"100%", background:avanceGlobal>=100?C.gl:avanceGlobal>30?C.teal:C.gold, borderRadius:99, transition:"width .4s" }}/>
                 </div>
-                <span style={{ fontSize:18, fontWeight:700, color:C.teal, minWidth:50 }}>{avanceGlobal}%</span>
+                <span style={{ fontSize:15, fontWeight:700, color:C.teal, minWidth:44 }}>{avanceGlobal}%</span>
                 {svTarea && <span style={{ fontSize:10, color:svTarea==="ok"?C.gl:svTarea==="error"?C.rl:C.gold, marginLeft:"auto" }}>{svTarea==="saving"?"Guardando…":svTarea==="ok"?"✓ Guardado":"⚠ Error al guardar"}</span>}
               </div>
-              {/* barra cumplimiento diario */}
-              {(() => {
-                const hoy = today.toISOString().slice(0,10);
-                const tareasHoy = CRONOGRAMA.flatMap(p => p.tareas).filter(t => {
-                  const fin = (tareaOv[t.id]?.fin || t.fin || "").slice(0,10);
-                  return fin === hoy;
-                });
-                const completadasHoy = tareasHoy.filter(t => {
-                  const ov = tareaOv[t.id];
-                  return normalizarProgreso(ov?.progreso !== undefined ? ov.progreso : t.progreso) >= 100;
-                });
-                const total = tareasHoy.length;
-                const comp  = completadasHoy.length;
-                const pct   = total > 0 ? Math.round((comp / total) * 100) : 0;
-                const col   = pct >= 100 ? C.grn : pct >= 60 ? C.gold : C.rl;
-                return (
-                  <div style={{ display:"flex", alignItems:"center", gap:20 }}>
-                    <span style={{ fontSize:11, color:C.g, minWidth:220 }}>CUMPLIMIENTO HOY ({hoy})</span>
-                    <div style={{ flex:1, maxWidth:300, height:8, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
-                      <div style={{ width:`${pct}%`, height:"100%", background:col, borderRadius:99, transition:"width .4s" }}/>
-                    </div>
-                    <span style={{ fontSize:18, fontWeight:700, color:col, minWidth:50 }}>{pct}%</span>
-                    <span style={{ fontSize:10, color:C.g }}>
-                      {total === 0 ? "Sin tareas para hoy" : `${comp}/${total} tareas completadas hoy`}
-                    </span>
-                  </div>
-                );
-              })()}
+              {/* Tareas acumuladas */}
+              <BarAcum
+                label="TAREAS COMPLETADAS AL DÍA DE HOY"
+                pct={indicadoresHoy.pctTareas}
+                done={indicadoresHoy.tareasDone}
+                total={indicadoresHoy.tareasTotal}
+              />
+              {/* Pantallas acumuladas */}
+              <BarAcum
+                label="PANTALLAS COMPLETADAS AL DÍA DE HOY"
+                pct={indicadoresHoy.pctPantallas}
+                done={indicadoresHoy.pantallasDone}
+                total={indicadoresHoy.pantallasTotal}
+              />
             </div>
+
+            {/* Filtros */}
             <div style={{ padding:"12px 24px", background:C.w, borderBottom:"1px solid #e8ecf1", display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
               <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="🔍 Buscar pantalla..."
                 style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12, width:220 }}/>
@@ -636,6 +667,8 @@ function App() {
               </select>
               <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
             </div>
+
+            {/* Cards */}
             <div style={{ padding:"18px 24px" }}>
               {pantallasVisibles.map(p => {
                 const avance     = calcularAvancePantalla(p.tareas, tareaOv);
@@ -646,6 +679,7 @@ function App() {
                 const enCurso    = p.tareas.filter(t=>{const v=normalizarProgreso((tareaOv[t.id]||t).progreso);return v>0&&v<100;}).length;
                 const pendientes = p.tareas.filter(t=>normalizarProgreso((tareaOv[t.id]||t).progreso)===0).length;
                 const isAddingHere = newTarea === p.pantalla;
+                const ffVal = pantallaConfig[p.pantalla]?.fecha_fin || "";
                 return (
                   <div key={p.pantalla} style={{ background:C.w, borderRadius:6, marginBottom:10, border:`1px solid ${isExp?C.teal:"#e0e0e0"}`, overflow:"hidden", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
                     <div onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }}
@@ -662,32 +696,32 @@ function App() {
                           </div>
                           <span style={{ fontSize:13, fontWeight:700, color:col, minWidth:38, textAlign:"right" }}>{avance}%</span>
                         </div>
-                        <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10, color:C.g, alignItems:"center" }}>
+                        <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10, color:C.g, alignItems:"center", flexWrap:"wrap" }}>
                           <span>📋 {p.tareas.length} tareas</span>
                           <span style={{ color:C.grn }}>✓ {completadas}</span>
                           <span style={{ color:"#b8860b" }}>◑ {enCurso}</span>
                           <span>○ {pendientes}</span>
+                          {/* Fecha fin de pantalla */}
                           <span style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:4 }}>
                             🗓 Fecha fin:
                             {editFechaFin === p.pantalla
                               ? <span onClick={e=>e.stopPropagation()} style={{ display:"flex", gap:4, alignItems:"center" }}>
-                                  <input type="date"
-                                    defaultValue={pantallaConfig[p.pantalla]?.fecha_fin || ""}
-                                    id={`ff-${p.pantalla.replace(/\s/g,"_")}`}
+                                  <input type="date" defaultValue={ffVal} id={`ff-${p.pantalla.replace(/[^a-zA-Z0-9]/g,"_")}`}
                                     style={{ padding:"2px 5px", border:"1px solid #dde", borderRadius:3, fontSize:10 }}/>
                                   <button onClick={async e => {
                                     e.stopPropagation();
-                                    const val = document.getElementById(`ff-${p.pantalla.replace(/\s/g,"_")}`).value;
+                                    const val = document.getElementById(`ff-${p.pantalla.replace(/[^a-zA-Z0-9]/g,"_")}`).value;
                                     try {
-                                      await dbUpsertPantallaConfig(p.pantalla, { fecha_fin: val || null });
-                                      setPantallaConfig(prev => ({ ...prev, [p.pantalla]: { ...prev[p.pantalla], fecha_fin: val } }));
-                                    } catch {}
+                                      await dbUpsertPantallaConfig(p.pantalla, { fecha_fin: val||null });
+                                      setPantallaConfig(prev=>({...prev,[p.pantalla]:{...prev[p.pantalla],fecha_fin:val}}));
+                                    } catch(e){console.error(e);}
                                     setEditFechaFin(null);
                                   }} style={{ padding:"2px 7px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
                                   <button onClick={e=>{e.stopPropagation();setEditFechaFin(null);}} style={{ padding:"2px 6px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
                                 </span>
-                              : <span onClick={e=>{e.stopPropagation();setEditFechaFin(p.pantalla);}} style={{ cursor:"pointer", color:pantallaConfig[p.pantalla]?.fecha_fin?C.navy:"#bbb", textDecoration:"underline dotted" }}>
-                                  {pantallaConfig[p.pantalla]?.fecha_fin || "Sin definir"}
+                              : <span onClick={e=>{e.stopPropagation();setEditFechaFin(p.pantalla);}}
+                                  style={{ cursor:"pointer", color:ffVal?C.navy:"#bbb", textDecoration:"underline dotted" }}>
+                                  {ffVal || "Sin definir"}
                                 </span>
                             }
                           </span>
@@ -695,6 +729,7 @@ function App() {
                       </div>
                       <span style={{ fontSize:16, color:C.g, userSelect:"none" }}>{isExp?"▲":"▼"}</span>
                     </div>
+
                     {isExp && (
                       <div style={{ borderTop:`1px solid #f0f0f0` }}>
                         <div style={{ overflowX:"auto" }}>
@@ -822,7 +857,7 @@ function App() {
         );
       })()}
 
-      {/* CARGA SEMANAL */}
+      {/* ── CARGA SEMANAL ── */}
       {pg==="input" && (
         <div style={{ background:"#e8ecf1" }}>{PH("CARGA SEMANAL — 5 Preguntas Clave")}
           <div style={{ padding:"18px 24px" }}>
@@ -919,7 +954,7 @@ function App() {
         </div>
       )}
 
-      {/* CALENDARIO */}
+      {/* ── CALENDARIO ── */}
       {pg==="calendar" && (
         <div style={{ background:"#e8ecf1" }}>{PH("Calendario")}
           <div style={{ padding:"18px 24px" }}>
@@ -946,7 +981,7 @@ function App() {
         </div>
       )}
 
-      {/* RESUMEN */}
+      {/* ── RESUMEN ── */}
       {pg==="resumen" && (
         <div style={{ background:"#e8ecf1" }}>{PH("RESUMEN EJECUTIVO")}
           <div style={{ padding:"18px 24px" }}>
@@ -991,7 +1026,7 @@ function App() {
         </div>
       )}
 
-      {/* MÉTRICAS */}
+      {/* ── MÉTRICAS ── */}
       {pg==="metricas" && (
         <div style={{ background:"#e8ecf1" }}>{PH("MÉTRICAS DE AVANCE Y KPIs")}
           <div style={{ padding:"18px 24px" }}>
@@ -1057,7 +1092,7 @@ function App() {
         </div>
       )}
 
-      {/* ADMIN */}
+      {/* ── ADMIN ── */}
       {pg==="admin" && (
         <div style={{ background:"#e8ecf1" }}>{PH("ADMINISTRACIÓN")}
           <div style={{ padding:"18px 24px", maxWidth:720 }}>
