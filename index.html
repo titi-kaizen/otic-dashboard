@@ -254,6 +254,7 @@ const CRONOGRAMA = [
     {id:"tpt03",nombre:"Adaptación de recomendaciones al diseño",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
     {id:"tpt04",nombre:"Validación de template de Imagen",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:"Falta validación"},
   ]},
+  { etapa:"Seguimiento SOLPED", pantalla:"Seguimiento SOLPED", tareas:[] },
 ];
 
 const SK    = "rtic-dash-v3";
@@ -647,15 +648,43 @@ function App() {
             {PH("AVANCE DE PANTALLAS")}
             <div style={{ background:C.navy, padding:"12px 28px", display:"flex", flexDirection:"column", gap:10, borderBottom:`1px solid ${C.bd}` }}>
               <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>AVANCE GLOBAL DEL PROYECTO</span>
+                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>AVANCE DESARROLLO INDICADORES</span>
                 <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
                   <div style={{ width:`${avanceGlobal}%`, height:"100%", background:avanceGlobal>=100?C.gl:avanceGlobal>30?C.teal:C.gold, borderRadius:99, transition:"width .4s" }}/>
                 </div>
                 <span style={{ fontSize:15, fontWeight:700, color:C.teal, minWidth:44 }}>{avanceGlobal}%</span>
                 {svTarea && <span style={{ fontSize:10, color:svTarea==="ok"?C.gl:svTarea==="error"?C.rl:C.gold, marginLeft:"auto" }}>{svTarea==="saving"?"Guardando…":svTarea==="ok"?"✓ Guardado":"⚠ Error al guardar"}</span>}
               </div>
-              <BarAcum label="TAREAS COMPLETADAS AL DÍA DE HOY" pct={indicadoresHoy.pctTareas} done={indicadoresHoy.tareasDone} total={indicadoresHoy.tareasTotal}/>
-              <BarAcum label="PANTALLAS COMPLETADAS AL DÍA DE HOY" pct={indicadoresHoy.pctPantallas} done={indicadoresHoy.pantallasDone} total={indicadoresHoy.pantallasTotal}/>
+              <BarAcum label="AVANCE ACUMULADO A LA FECHA" pct={indicadoresHoy.pctTareas} done={indicadoresHoy.tareasDone} total={indicadoresHoy.tareasTotal}/>
+              {/* Contador total de indicadores */}
+              {(() => {
+                const total = CRONOGRAMA.reduce((s,p) => s + p.tareas.length, 0);
+                const completados = CRONOGRAMA.reduce((s,p) => s + p.tareas.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100).length, 0);
+                const enCurso = CRONOGRAMA.reduce((s,p) => s + p.tareas.filter(t => { const v=normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso); return v>0&&v<100; }).length, 0);
+                return (
+                  <div style={{ display:"flex", alignItems:"center", gap:20 }}>
+                    <span style={{ fontSize:11, color:C.g, minWidth:250 }}>TOTAL INDICADORES</span>
+                    <div style={{ display:"flex", gap:16 }}>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ fontSize:20, fontWeight:700, color:C.teal }}>{total}</div>
+                        <div style={{ fontSize:9, color:C.g }}>Total</div>
+                      </div>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ fontSize:20, fontWeight:700, color:C.gl }}>{completados}</div>
+                        <div style={{ fontSize:9, color:C.g }}>Completados</div>
+                      </div>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ fontSize:20, fontWeight:700, color:C.gold }}>{enCurso}</div>
+                        <div style={{ fontSize:9, color:C.g }}>En curso</div>
+                      </div>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ fontSize:20, fontWeight:700, color:C.g }}>{total - completados - enCurso}</div>
+                        <div style={{ fontSize:9, color:C.g }}>Pendientes</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             <div style={{ padding:"12px 24px", background:C.w, borderBottom:"1px solid #e8ecf1", display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
               <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="🔍 Buscar pantalla..."
@@ -699,7 +728,7 @@ function App() {
                           <span style={{ fontSize:13, fontWeight:700, color:col, minWidth:38, textAlign:"right" }}>{avance}%</span>
                         </div>
                         <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10, color:C.g, alignItems:"center", flexWrap:"wrap" }}>
-                          <span>📋 {p.tareas.length} tareas</span>
+                          <span>📋 {p.tareas.length} indicadores</span>
                           <span style={{ color:C.grn }}>✓ {completadas}</span>
                           <span style={{ color:"#b8860b" }}>◑ {enCurso}</span>
                           <span>○ {pendientes}</span>
@@ -736,7 +765,7 @@ function App() {
                           <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
                             <thead>
                               <tr style={{ background:"#f7f9fb" }}>
-                                {["Tarea","Progreso","Estado","Responsable","Inicio","Fin","Comentario",""].map(h=>(
+                                {["Indicador","Progreso","Estado","Responsable","Inicio","Fin","Comentario",""].map(h=>(
                                   <th key={h} style={{ padding:"7px 8px", textAlign:"left", color:C.g, fontWeight:600, fontSize:10, borderBottom:"1px solid #eee" }}>{h}</th>
                                 ))}
                               </tr>
@@ -813,9 +842,9 @@ function App() {
                         </div>
                         {isAddingHere
                           ? <div style={{ padding:"12px 16px", background:"rgba(0,188,212,0.04)", borderTop:"1px solid #e0f7fa" }}>
-                              <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ Nueva tarea en {p.pantalla}</div>
+                              <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ Nuevo indicador en {p.pantalla}</div>
                               <div style={{ display:"grid", gridTemplateColumns:"2fr 80px 1fr 1fr 1fr 2fr auto", gap:6, alignItems:"center" }}>
-                                <input value={newForm.nombre} onChange={e=>setNewForm(f=>({...f,nombre:e.target.value}))} placeholder="Nombre de la tarea *"
+                                <input value={newForm.nombre} onChange={e=>setNewForm(f=>({...f,nombre:e.target.value}))} placeholder="Nombre del indicador *"
                                   style={{ padding:"5px 7px", border:`1px solid ${newForm.nombre?"#dde":C.rl}`, borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
                                 <input type="number" min={0} max={100} value={newForm.progreso} onChange={e=>setNewForm(f=>({...f,progreso:e.target.value}))}
                                   style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
@@ -836,7 +865,7 @@ function App() {
                           : <div style={{ padding:"8px 16px", borderTop:"1px solid #f0f0f0" }}>
                               <button onClick={()=>{ setNewTarea(p.pantalla); setEditTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }}
                                 style={{ padding:"5px 12px", border:`1px dashed ${C.teal}`, borderRadius:4, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:11, fontWeight:600, cursor:"pointer" }}>
-                                + Agregar tarea
+                                + Agregar indicador
                               </button>
                             </div>
                         }
