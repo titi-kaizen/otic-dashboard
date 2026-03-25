@@ -294,8 +294,17 @@ async function dbLoadTareas() {
   const { data, error } = await sb.from("task_progress").select("*");
   if (error) throw error;
   const map = {};
-  (data||[]).forEach(r => {
+
+  // 1. Marcar tareas eliminadas para quitarlas del CRONOGRAMA
+  (data||[]).filter(r => r.deleted).forEach(r => {
+    const idx = CRONOGRAMA.findIndex(p => p.tareas.some(t => t.id === r.task_id));
+    if (idx !== -1) CRONOGRAMA[idx].tareas = CRONOGRAMA[idx].tareas.filter(t => t.id !== r.task_id);
+  });
+
+  // 2. Cargar overrides de tareas activas
+  (data||[]).filter(r => !r.deleted).forEach(r => {
     map[r.task_id] = r;
+    // Re-inyectar tareas usr_ que fueron creadas por el usuario
     if (r.task_id.startsWith("usr_") && r.pantalla) {
       const idx = CRONOGRAMA.findIndex(p => p.pantalla === r.pantalla);
       if (idx !== -1 && !CRONOGRAMA[idx].tareas.find(t => t.id === r.task_id)) {
@@ -456,9 +465,24 @@ function App() {
     if (!confirm(`¿Borrar la tarea "${tarea.nombre}"?`)) return;
     setSvTarea("saving");
     try {
-      await sb.from("task_progress").delete().eq("task_id", tarea.id);
+      // Marcamos deleted:true en vez de borrar la fila
+      // Así persiste en Supabase y no reaparece al recargar
+      await dbUpsertTarea(tarea.id, {
+        nombre:      tarea.nombre,
+        pantalla,
+        progreso:    0,
+        estado:      "Pendiente",
+        responsable: "",
+        inicio:      null,
+        fin:         null,
+        comentario:  "",
+        deleted:     true,
+        updated_by:  "Usuario"
+      });
+      // Quitar de CRONOGRAMA en memoria
       const idx = CRONOGRAMA.findIndex(p => p.pantalla === pantalla);
       if (idx !== -1) CRONOGRAMA[idx].tareas = CRONOGRAMA[idx].tareas.filter(t => t.id !== tarea.id);
+      // Quitar del override map
       setTareaOv(prev => { const n={...prev}; delete n[tarea.id]; return n; });
       setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
     } catch(e) { console.error("Error borrando tarea:",e); setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
