@@ -272,7 +272,6 @@ const C = {
   g:"#8a9bb5",    gl2:"#b0bec5", bd:"rgba(0,188,212,0.15)"
 };
 
-/* ─── Supabase helpers ─── */
 async function dbLoad() {
   const { data, error } = await sb.from("weekly_data").select("*");
   if (error) throw error;
@@ -331,7 +330,6 @@ async function dbUpsertPantallaConfig(pantalla, fields) {
   if (error) throw error;
 }
 
-/* ─── Lógica de negocio ─── */
 function normalizarProgreso(v) {
   if (v===null||v===undefined||v==="") return 0;
   const n = parseFloat(v);
@@ -355,14 +353,12 @@ function getDaysRemaining(isoTarget, fromDate = new Date()) {
   if (diff < 0)    return -1;
   return Math.ceil(diff / 86_400_000);
 }
-/* Convierte "YYYY-MM-DD" a timestamp fin de día para comparación acumulada */
 function toEndOfDayMs(str) {
   if (!str) return null;
   const d = new Date(str.slice(0,10) + "T23:59:59");
   return isNaN(d.getTime()) ? null : d.getTime();
 }
 
-/* ─── Componentes ─── */
 function ItemRow({ item, idx, onUp, onRm }) {
   return (
     <div style={{ display:"flex", gap:8, marginBottom:8, alignItems:"flex-start" }}>
@@ -379,7 +375,6 @@ function ItemRow({ item, idx, onUp, onRm }) {
   );
 }
 
-/* Barra de progreso acumulada */
 function BarAcum({ label, pct, done, total }) {
   const col = pct >= 100 ? C.gl : pct >= 60 ? C.gold : pct > 0 ? C.rl : C.g;
   return (
@@ -396,7 +391,6 @@ function BarAcum({ label, pct, done, total }) {
   );
 }
 
-/* ─── App principal ─── */
 function App() {
   const [pg,  setPg]  = useState("cover");
   const [wk,  setWk]  = useState(1);
@@ -440,7 +434,6 @@ function App() {
   const wd = dt[wk] || {};
   const wc = WEEKS[wk - 1];
 
-  /* Carga semanal */
   const startEd = id => {
     const d = wd[id];
     setEd(id);
@@ -459,7 +452,6 @@ function App() {
   const rmI  = i  => setFi(p=>p.filter((_,j)=>j!==i));
   const upI  = (i,f,v) => setFi(p=>p.map((x,j)=>j===i?{...x,[f]:v}:x));
 
-  /* Tareas */
   const borrarTarea = async (tarea, pantalla) => {
     if (!confirm(`¿Borrar la tarea "${tarea.nombre}"?`)) return;
     setSvTarea("saving");
@@ -469,20 +461,35 @@ function App() {
       if (idx !== -1) CRONOGRAMA[idx].tareas = CRONOGRAMA[idx].tareas.filter(t => t.id !== tarea.id);
       setTareaOv(prev => { const n={...prev}; delete n[tarea.id]; return n; });
       setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
-    } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
+    } catch(e) { console.error("Error borrando tarea:",e); setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
   };
+
+  /* ── CORRECCIÓN: se agrega pantalla al payload para que el upsert funcione ── */
   const guardarTarea = async (tarea, campos) => {
     const p = normalizarProgreso(campos.progreso);
     if (p<0||p>100) return alert("El progreso debe ser entre 0 y 100.");
     if (campos.fin&&campos.inicio&&campos.fin<campos.inicio) return alert("La fecha fin no puede ser menor a la de inicio.");
-    const payload = { nombre:tarea.nombre, progreso:p, estado:estadoTarea(p), responsable:campos.responsable||"", inicio:campos.inicio||null, fin:campos.fin||null, comentario:campos.comentario||"", updated_by:"Usuario" };
+    const pantallaDeTarea = CRONOGRAMA.find(pt => pt.tareas.some(t2 => t2.id === tarea.id))?.pantalla || null;
+    const payload = {
+      nombre:      tarea.nombre,
+      pantalla:    pantallaDeTarea,
+      progreso:    p,
+      estado:      estadoTarea(p),
+      responsable: campos.responsable || "",
+      inicio:      campos.inicio || null,
+      fin:         campos.fin    || null,
+      comentario:  campos.comentario || "",
+      updated_by:  "Usuario"
+    };
     setSvTarea("saving");
     try {
       await dbUpsertTarea(tarea.id, payload);
       setTareaOv(prev=>({...prev,[tarea.id]:payload}));
-      setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000); setEditTarea(null);
-    } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
+      setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
+      setEditTarea(null);
+    } catch(e) { console.error("Error guardando tarea:",e); setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
   };
+
   const agregarTarea = async (pantalla) => {
     if (!newForm.nombre.trim()) return alert("El nombre de la tarea es obligatorio.");
     const p = normalizarProgreso(newForm.progreso);
@@ -497,10 +504,9 @@ function App() {
       setTareaOv(prev=>({...prev,[nuevoId]:payload}));
       setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
       setNewTarea(null); setNewForm({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
-    } catch { setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
+    } catch(e) { console.error("Error agregando tarea:",e); setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
   };
 
-  /* Datos avance */
   const etapas = [...new Set(CRONOGRAMA.map(p=>p.etapa))];
   const pantallasVisibles = CRONOGRAMA.filter(p => {
     const matchBusq   = p.pantalla.toLowerCase().includes(busqueda.toLowerCase());
@@ -513,30 +519,22 @@ function App() {
   const avanceGlobal = CRONOGRAMA.length
     ? Math.round(CRONOGRAMA.reduce((s,p)=>s+calcularAvancePantalla(p.tareas,tareaOv),0)/CRONOGRAMA.length) : 0;
 
-  /* Indicadores acumulados al día de hoy */
   const indicadoresHoy = useMemo(() => {
-    // "hoy" = fin del día actual para incluir cualquier tarea que vence durante el día
     const ahora = new Date(today); ahora.setHours(23,59,59,999);
     const hoyMs = ahora.getTime();
-
-    // TAREAS: fechaFin <= hoy (acumuladas)
     const todasTareas    = CRONOGRAMA.flatMap(p => p.tareas);
     const tareasAcum     = todasTareas.filter(t => { const ms = toEndOfDayMs(tareaOv[t.id]?.fin || t.fin); return ms !== null && ms <= hoyMs; });
     const tareasAcumDone = tareasAcum.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100);
     const pctTareas      = tareasAcum.length > 0 ? Math.round((tareasAcumDone.length / tareasAcum.length) * 100) : 0;
-
-    // PANTALLAS: fecha_fin de pantallaConfig <= hoy (acumuladas)
     const pantallasAcum     = CRONOGRAMA.filter(p => { const ms = toEndOfDayMs(pantallaConfig[p.pantalla]?.fecha_fin); return ms !== null && ms <= hoyMs; });
     const pantallasAcumDone = pantallasAcum.filter(p => calcularAvancePantalla(p.tareas, tareaOv) >= 100);
     const pctPantallas      = pantallasAcum.length > 0 ? Math.round((pantallasAcumDone.length / pantallasAcum.length) * 100) : 0;
-
     return {
       pctTareas, tareasTotal:tareasAcum.length, tareasDone:tareasAcumDone.length,
       pctPantallas, pantallasTotal:pantallasAcum.length, pantallasDone:pantallasAcumDone.length,
     };
   }, [tareaOv, pantallaConfig, today]);
 
-  /* Resumen semanal */
   const sum = useMemo(() => {
     const all=[];
     Object.entries(wd).forEach(([mid,d])=>{
@@ -554,7 +552,6 @@ function App() {
     return { hm, am, ov, bl, dc, dr };
   }, [wd, wk, today]);
 
-  /* Layout helpers */
   const PH = t => (
     <div style={{ background:C.navy, borderBottom:`3px solid ${C.teal}`, padding:"16px 28px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
       <h1 style={{ fontSize:20, fontWeight:300, letterSpacing:1, color:C.w, margin:0 }}>{t}</h1>
@@ -597,7 +594,7 @@ function App() {
         </div>
       </div>
 
-      {/* ── PORTADA ── */}
+      {/* PORTADA */}
       {pg==="cover" && (
         <div style={{ background:C.navy, minHeight:"calc(100vh - 46px)", display:"flex", flexDirection:"column", justifyContent:"center", padding:"50px 70px", position:"relative" }}>
           <div style={{ maxWidth:750 }}>
@@ -617,17 +614,14 @@ function App() {
         </div>
       )}
 
-      {/* ── AVANCE ── */}
+      {/* AVANCE */}
       {pg==="avance" && (() => {
         const colAvance = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?C.grn:a>0?C.gold:C.g; };
         const estadoPantalla = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?"Completada":a>0?"En curso":"Pendiente"; };
         return (
           <div style={{ background:"#e8ecf1" }}>
             {PH("AVANCE DE PANTALLAS")}
-
-            {/* ── Barras de progreso ── */}
             <div style={{ background:C.navy, padding:"12px 28px", display:"flex", flexDirection:"column", gap:10, borderBottom:`1px solid ${C.bd}` }}>
-              {/* Global */}
               <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                 <span style={{ fontSize:11, color:C.g, minWidth:250 }}>AVANCE GLOBAL DEL PROYECTO</span>
                 <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
@@ -636,23 +630,9 @@ function App() {
                 <span style={{ fontSize:15, fontWeight:700, color:C.teal, minWidth:44 }}>{avanceGlobal}%</span>
                 {svTarea && <span style={{ fontSize:10, color:svTarea==="ok"?C.gl:svTarea==="error"?C.rl:C.gold, marginLeft:"auto" }}>{svTarea==="saving"?"Guardando…":svTarea==="ok"?"✓ Guardado":"⚠ Error al guardar"}</span>}
               </div>
-              {/* Tareas acumuladas */}
-              <BarAcum
-                label="TAREAS COMPLETADAS AL DÍA DE HOY"
-                pct={indicadoresHoy.pctTareas}
-                done={indicadoresHoy.tareasDone}
-                total={indicadoresHoy.tareasTotal}
-              />
-              {/* Pantallas acumuladas */}
-              <BarAcum
-                label="PANTALLAS COMPLETADAS AL DÍA DE HOY"
-                pct={indicadoresHoy.pctPantallas}
-                done={indicadoresHoy.pantallasDone}
-                total={indicadoresHoy.pantallasTotal}
-              />
+              <BarAcum label="TAREAS COMPLETADAS AL DÍA DE HOY" pct={indicadoresHoy.pctTareas} done={indicadoresHoy.tareasDone} total={indicadoresHoy.tareasTotal}/>
+              <BarAcum label="PANTALLAS COMPLETADAS AL DÍA DE HOY" pct={indicadoresHoy.pctPantallas} done={indicadoresHoy.pantallasDone} total={indicadoresHoy.pantallasTotal}/>
             </div>
-
-            {/* Filtros */}
             <div style={{ padding:"12px 24px", background:C.w, borderBottom:"1px solid #e8ecf1", display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
               <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="🔍 Buscar pantalla..."
                 style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12, width:220 }}/>
@@ -667,8 +647,6 @@ function App() {
               </select>
               <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
             </div>
-
-            {/* Cards */}
             <div style={{ padding:"18px 24px" }}>
               {pantallasVisibles.map(p => {
                 const avance     = calcularAvancePantalla(p.tareas, tareaOv);
@@ -701,7 +679,6 @@ function App() {
                           <span style={{ color:C.grn }}>✓ {completadas}</span>
                           <span style={{ color:"#b8860b" }}>◑ {enCurso}</span>
                           <span>○ {pendientes}</span>
-                          {/* Fecha fin de pantalla */}
                           <span style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:4 }}>
                             🗓 Fecha fin:
                             {editFechaFin === p.pantalla
@@ -714,7 +691,7 @@ function App() {
                                     try {
                                       await dbUpsertPantallaConfig(p.pantalla, { fecha_fin: val||null });
                                       setPantallaConfig(prev=>({...prev,[p.pantalla]:{...prev[p.pantalla],fecha_fin:val}}));
-                                    } catch(e){console.error(e);}
+                                    } catch(e){ console.error(e); }
                                     setEditFechaFin(null);
                                   }} style={{ padding:"2px 7px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
                                   <button onClick={e=>{e.stopPropagation();setEditFechaFin(null);}} style={{ padding:"2px 6px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
@@ -729,7 +706,6 @@ function App() {
                       </div>
                       <span style={{ fontSize:16, color:C.g, userSelect:"none" }}>{isExp?"▲":"▼"}</span>
                     </div>
-
                     {isExp && (
                       <div style={{ borderTop:`1px solid #f0f0f0` }}>
                         <div style={{ overflowX:"auto" }}>
@@ -857,7 +833,7 @@ function App() {
         );
       })()}
 
-      {/* ── CARGA SEMANAL ── */}
+      {/* CARGA SEMANAL */}
       {pg==="input" && (
         <div style={{ background:"#e8ecf1" }}>{PH("CARGA SEMANAL — 5 Preguntas Clave")}
           <div style={{ padding:"18px 24px" }}>
@@ -954,7 +930,7 @@ function App() {
         </div>
       )}
 
-      {/* ── CALENDARIO ── */}
+      {/* CALENDARIO */}
       {pg==="calendar" && (
         <div style={{ background:"#e8ecf1" }}>{PH("Calendario")}
           <div style={{ padding:"18px 24px" }}>
@@ -981,7 +957,7 @@ function App() {
         </div>
       )}
 
-      {/* ── RESUMEN ── */}
+      {/* RESUMEN */}
       {pg==="resumen" && (
         <div style={{ background:"#e8ecf1" }}>{PH("RESUMEN EJECUTIVO")}
           <div style={{ padding:"18px 24px" }}>
@@ -1026,7 +1002,7 @@ function App() {
         </div>
       )}
 
-      {/* ── MÉTRICAS ── */}
+      {/* MÉTRICAS */}
       {pg==="metricas" && (
         <div style={{ background:"#e8ecf1" }}>{PH("MÉTRICAS DE AVANCE Y KPIs")}
           <div style={{ padding:"18px 24px" }}>
@@ -1092,7 +1068,7 @@ function App() {
         </div>
       )}
 
-      {/* ── ADMIN ── */}
+      {/* ADMIN */}
       {pg==="admin" && (
         <div style={{ background:"#e8ecf1" }}>{PH("ADMINISTRACIÓN")}
           <div style={{ padding:"18px 24px", maxWidth:720 }}>
