@@ -533,6 +533,12 @@ function App() {
   };
 
   const etapas = [...new Set(CRONOGRAMA.map(p=>p.etapa))];
+  // Lista de responsables: nombres del equipo + responsables únicos ya cargados en indicadores
+  const responsablesBase = TEAM.map(m => m.name);
+  const responsablesExtra = [...new Set(
+    CRONOGRAMA.flatMap(p => p.tareas).map(t => (tareaOv[t.id]?.responsable || t.responsable || "").trim()).filter(r => r && !responsablesBase.includes(r))
+  )];
+  const responsablesLista = [...responsablesBase, ...responsablesExtra];
   const pantallasVisibles = CRONOGRAMA.filter(p => {
     const matchBusq   = p.pantalla.toLowerCase().includes(busqueda.toLowerCase());
     const matchEtapa  = filtroEtapa==="Todas" || p.etapa===filtroEtapa;
@@ -661,26 +667,23 @@ function App() {
                 const total = CRONOGRAMA.reduce((s,p) => s + p.tareas.length, 0);
                 const completados = CRONOGRAMA.reduce((s,p) => s + p.tareas.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100).length, 0);
                 const enCurso = CRONOGRAMA.reduce((s,p) => s + p.tareas.filter(t => { const v=normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso); return v>0&&v<100; }).length, 0);
+                const pendientes = total - completados - enCurso;
+                const stats = [
+                  { v:total,       l:"Total",       col:C.teal,  bg:"rgba(0,188,212,0.12)" },
+                  { v:completados, l:"Completados",  col:C.gl,    bg:"rgba(76,175,80,0.12)" },
+                  { v:enCurso,     l:"En curso",     col:C.gold,  bg:"rgba(232,168,56,0.12)" },
+                  { v:pendientes,  l:"Pendientes",   col:C.g,     bg:"rgba(138,155,181,0.12)" },
+                ];
                 return (
-                  <div style={{ display:"flex", alignItems:"center", gap:20 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                     <span style={{ fontSize:11, color:C.g, minWidth:250 }}>TOTAL INDICADORES</span>
-                    <div style={{ display:"flex", gap:16 }}>
-                      <div style={{ textAlign:"center" }}>
-                        <div style={{ fontSize:20, fontWeight:700, color:C.teal }}>{total}</div>
-                        <div style={{ fontSize:9, color:C.g }}>Total</div>
-                      </div>
-                      <div style={{ textAlign:"center" }}>
-                        <div style={{ fontSize:20, fontWeight:700, color:C.gl }}>{completados}</div>
-                        <div style={{ fontSize:9, color:C.g }}>Completados</div>
-                      </div>
-                      <div style={{ textAlign:"center" }}>
-                        <div style={{ fontSize:20, fontWeight:700, color:C.gold }}>{enCurso}</div>
-                        <div style={{ fontSize:9, color:C.g }}>En curso</div>
-                      </div>
-                      <div style={{ textAlign:"center" }}>
-                        <div style={{ fontSize:20, fontWeight:700, color:C.g }}>{total - completados - enCurso}</div>
-                        <div style={{ fontSize:9, color:C.g }}>Pendientes</div>
-                      </div>
+                    <div style={{ display:"flex", gap:8 }}>
+                      {stats.map(s => (
+                        <div key={s.l} style={{ textAlign:"center", padding:"8px 18px", borderRadius:6, background:s.bg, border:`1px solid ${s.col}33` }}>
+                          <div style={{ fontSize:28, fontWeight:700, color:s.col, lineHeight:1 }}>{s.v}</div>
+                          <div style={{ fontSize:10, color:s.col, marginTop:4, letterSpacing:0.5 }}>{s.l}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );
@@ -800,8 +803,12 @@ function App() {
                                     </td>
                                     <td style={{ padding:"8px" }}>
                                       {isEditing
-                                        ? <input value={editTarea.responsable} onChange={e=>setEditTarea(p=>({...p,responsable:e.target.value}))}
+                                        ? <><input value={editTarea.responsable} onChange={e=>setEditTarea(p=>({...p,responsable:e.target.value}))}
+                                            list="resp-list-edit"
                                             style={{ width:110, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                          <datalist id="resp-list-edit">
+                                            {responsablesLista.map(r=><option key={r} value={r}/>)}
+                                          </datalist></>
                                         : <span style={{ color:"#546e7a" }}>{resp}</span>}
                                     </td>
                                     <td style={{ padding:"8px" }}>
@@ -849,7 +856,11 @@ function App() {
                                 <input type="number" min={0} max={100} value={newForm.progreso} onChange={e=>setNewForm(f=>({...f,progreso:e.target.value}))}
                                   style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
                                 <input value={newForm.responsable} onChange={e=>setNewForm(f=>({...f,responsable:e.target.value}))} placeholder="Responsable"
+                                  list="resp-list"
                                   style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
+                                <datalist id="resp-list">
+                                  {responsablesLista.map(r=><option key={r} value={r}/>)}
+                                </datalist>
                                 <input type="date" value={newForm.inicio} onChange={e=>setNewForm(f=>({...f,inicio:e.target.value}))}
                                   style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
                                 <input type="date" value={newForm.fin} onChange={e=>setNewForm(f=>({...f,fin:e.target.value}))}
