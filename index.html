@@ -132,6 +132,7 @@ const CRONOGRAMA = [
   { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Tiempos Intermedios", tareas:[
     {id:"e4t01",nombre:"Análisis de viabilidad de hitos y cálculos de calidad",progreso:50,responsable:"Juli Sanda",inicio:"2026-02-15",fin:"2026-04-30",comentario:"Pendiente por cálculos viabilidad"},
   ]},
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Seguimiento SOLPED", tareas:[] },
   { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Licitaciones", tareas:[
     {id:"e4t02",nombre:"Evaluación fuente manual Sourcing para KPIs",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-05",fin:"2026-03-09",comentario:""},
     {id:"e4t03",nombre:"Reunión con referente Tecnología con avances",progreso:50,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:"A la espera de validación de columnas faltantes"},
@@ -254,7 +255,6 @@ const CRONOGRAMA = [
     {id:"tpt03",nombre:"Adaptación de recomendaciones al diseño",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
     {id:"tpt04",nombre:"Validación de template de Imagen",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:"Falta validación"},
   ]},
-  { etapa:"Seguimiento SOLPED", pantalla:"Seguimiento SOLPED", tareas:[] },
 ];
 
 const SK    = "rtic-dash-v3";
@@ -672,16 +672,16 @@ function App() {
                   { v:total,       l:"Total",       col:C.teal,  bg:"rgba(0,188,212,0.12)" },
                   { v:completados, l:"Completados",  col:C.gl,    bg:"rgba(76,175,80,0.12)" },
                   { v:enCurso,     l:"En curso",     col:C.gold,  bg:"rgba(232,168,56,0.12)" },
-                  { v:pendientes,  l:"Pendientes",   col:C.g,     bg:"rgba(138,155,181,0.12)" },
+                  { v:pendientes,  l:"Pendientes",   col:C.rl,    bg:"rgba(239,83,80,0.12)" },
                 ];
                 return (
                   <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                     <span style={{ fontSize:11, color:C.g, minWidth:250 }}>TOTAL INDICADORES</span>
                     <div style={{ display:"flex", gap:8 }}>
                       {stats.map(s => (
-                        <div key={s.l} style={{ textAlign:"center", padding:"8px 18px", borderRadius:6, background:s.bg, border:`1px solid ${s.col}33` }}>
-                          <div style={{ fontSize:28, fontWeight:700, color:s.col, lineHeight:1 }}>{s.v}</div>
-                          <div style={{ fontSize:10, color:s.col, marginTop:4, letterSpacing:0.5 }}>{s.l}</div>
+                        <div key={s.l} style={{ textAlign:"center", padding:"12px 24px", borderRadius:8, background:s.bg, border:`1px solid ${s.col}44` }}>
+                          <div style={{ fontSize:36, fontWeight:700, color:s.col, lineHeight:1 }}>{s.v}</div>
+                          <div style={{ fontSize:11, color:s.col, marginTop:6, letterSpacing:0.5, fontWeight:500 }}>{s.l}</div>
                         </div>
                       ))}
                     </div>
