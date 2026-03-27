@@ -267,7 +267,9 @@ const CRONOGRAMA = [
   ]},
 ];
 
-const SK    = "rtic-dash-v3";
+/* Pantallas que usan "Pantallas de Área" en vez de "indicadores"
+   y que se excluyen del contador total de indicadores */
+const PANTALLAS_AREA = ["Datacenter (Mock Up Visual)", "Template / Diseño Visual", "Datacenter (Desarrollo)"];
 const INIT  = { 1: SEED };
 const uid   = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const WEEKS = Array.from({ length:12 }, (_,i) => {
@@ -683,9 +685,10 @@ function App() {
               <BarAcum label="AVANCE ACUMULADO A LA FECHA" pct={indicadoresHoy.pctTareas} done={indicadoresHoy.tareasDone} total={indicadoresHoy.tareasTotal}/>
               {/* Contador total de indicadores */}
               {(() => {
-                const total = CRONOGRAMA.reduce((s,p) => s + p.tareas.length, 0);
-                const completados = CRONOGRAMA.reduce((s,p) => s + p.tareas.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100).length, 0);
-                const enCurso = CRONOGRAMA.reduce((s,p) => s + p.tareas.filter(t => { const v=normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso); return v>0&&v<100; }).length, 0);
+                const tareasParaContar = CRONOGRAMA.filter(p => !PANTALLAS_AREA.includes(p.pantalla));
+                const total = tareasParaContar.reduce((s,p) => s + p.tareas.length, 0);
+                const completados = tareasParaContar.reduce((s,p) => s + p.tareas.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100).length, 0);
+                const enCurso = tareasParaContar.reduce((s,p) => s + p.tareas.filter(t => { const v=normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso); return v>0&&v<100; }).length, 0);
                 const pendientes = total - completados - enCurso;
                 const stats = [
                   { v:total,       l:"Total",       col:C.teal,  bg:"rgba(0,188,212,0.12)" },
@@ -750,7 +753,9 @@ function App() {
                           <span style={{ fontSize:13, fontWeight:700, color:col, minWidth:38, textAlign:"right" }}>{avance}%</span>
                         </div>
                         <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10, color:C.g, alignItems:"center", flexWrap:"wrap" }}>
-                          <span>📋 {p.tareas.length} indicadores</span>
+                        const esPantallaArea = PANTALLAS_AREA.includes(p.pantalla);
+                        const labelItem      = esPantallaArea ? "Pantallas de Área" : "indicadores";
+                          <span>📋 {p.tareas.length} {labelItem}</span>
                           <span style={{ color:C.grn }}>✓ {completadas}</span>
                           <span style={{ color:"#b8860b" }}>◑ {enCurso}</span>
                           <span>○ {pendientes}</span>
@@ -868,9 +873,9 @@ function App() {
                         </div>
                         {isAddingHere
                           ? <div style={{ padding:"12px 16px", background:"rgba(0,188,212,0.04)", borderTop:"1px solid #e0f7fa" }}>
-                              <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ Nuevo indicador en {p.pantalla}</div>
+                              <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ {esPantallaArea?"Nueva Pantalla de Área":"Nuevo indicador"} en {p.pantalla}</div>
                               <div style={{ display:"grid", gridTemplateColumns:"2fr 80px 1fr 1fr 1fr 2fr auto", gap:6, alignItems:"center" }}>
-                                <input value={newForm.nombre} onChange={e=>setNewForm(f=>({...f,nombre:e.target.value}))} placeholder="Nombre del indicador *"
+                                <input value={newForm.nombre} onChange={e=>setNewForm(f=>({...f,nombre:e.target.value}))} placeholder={esPantallaArea?"Nombre de la pantalla *":"Nombre del indicador *"}
                                   style={{ padding:"5px 7px", border:`1px solid ${newForm.nombre?"#dde":C.rl}`, borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
                                 <input type="number" min={0} max={100} value={newForm.progreso} onChange={e=>setNewForm(f=>({...f,progreso:e.target.value}))}
                                   style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
@@ -895,12 +900,14 @@ function App() {
                           : <div style={{ padding:"8px 16px", borderTop:"1px solid #f0f0f0" }}>
                               <button onClick={()=>{ setNewTarea(p.pantalla); setEditTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }}
                                 style={{ padding:"5px 12px", border:`1px dashed ${C.teal}`, borderRadius:4, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:11, fontWeight:600, cursor:"pointer" }}>
-                                + Agregar indicador
+                                + {esPantallaArea ? "Agregar Pantalla de Área" : "Agregar indicador"}
                               </button>
                             </div>
                         }
                         {p.tareas.length===0 && !isAddingHere && (
-                          <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin tareas cargadas</div>
+                          <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>
+                            {esPantallaArea ? "Sin pantallas de área cargadas" : "Sin indicadores cargados"}
+                          </div>
                         )}
                       </div>
                     )}
