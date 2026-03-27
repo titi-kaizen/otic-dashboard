@@ -239,7 +239,7 @@ const CRONOGRAMA = [
     {id:"e7t01",nombre:"Reunión con referentes — pasos a seguir",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
     {id:"e7t02",nombre:"Reunión con referentes — análisis de las bases",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-10",fin:"2026-04-30",comentario:""},
   ]},
-  { etapa:"DATACENTER (mock up visual)", pantalla:"Datacenter", tareas:[
+  { etapa:"DATACENTER (mock up visual)", pantalla:"Datacenter (Mock Up Visual)", tareas:[
     {id:"dct01",nombre:"Pantalla Seguimiento Objetivos VP",progreso:90,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"dct02",nombre:"Pantalla % calidad medición por Etapa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
     {id:"dct03",nombre:"Pantalla Tiempos intermedios + gestión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
@@ -251,9 +251,19 @@ const CRONOGRAMA = [
   ]},
   { etapa:"TEMPLATE (mock up visual)", pantalla:"Template / Diseño Visual", tareas:[
     {id:"tpt01",nombre:"Armado de diseño visual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-02-20",fin:"2026-03-06",comentario:""},
-    {id:"tpt02",nombre:"Reunión con referente diseño/imagen/marca",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:"Paleta de colores compartida por mail"},
-    {id:"tpt03",nombre:"Adaptación de recomendaciones al diseño",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
+    {id:"tpt02",nombre:"Reunión con referente de diseño/imagen/marca",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:"Paleta de colores compartida por mail"},
+    {id:"tpt03",nombre:"Adaptación de recomendaciones al diseño actual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
     {id:"tpt04",nombre:"Validación de template de Imagen",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:"Falta validación"},
+  ]},
+  { etapa:"DATACENTER (desarrollo)", pantalla:"Datacenter (Desarrollo)", tareas:[
+    {id:"dcd01",nombre:"Pantalla Seguimiento Objetivos VP",               progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd02",nombre:"Pantalla % calidad medición por etapa",           progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd03",nombre:"Pantalla Tiempos intermedios + gestión",          progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd04",nombre:"Pantalla Captura de Valor",                       progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd05",nombre:"Pantalla Seguimiento tarifas UP + Costo Pozo",    progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd06",nombre:"Pantalla Accidentes IFA/IFAT",                    progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd07",nombre:"Pantalla Portfolio de iniciativas de competitividad (plazo/costo)", progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd08",nombre:"Pantalla Stock",                                  progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
   ]},
 ];
 
@@ -451,11 +461,20 @@ function App() {
     setFm({ blocked:d?.blocked||"", decision:d?.decision||"", confidence:d?.confidence||"Green" });
   };
   const saveEd = async () => {
+    const memberId   = ed;                              // ← capturar ANTES de setear null
     const memberData = { items:fi, ...fm };
-    const u = { ...dt, [wk]:{ ...(dt[wk]||{}), [ed]:memberData } };
-    setDt(u); setEd(null); setSv(true);
-    try { await dbUpsert(wk, ed, memberData); setSvt(new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})); }
-    catch(e) { setErr("Error al guardar."); console.error(e); }
+    const u = { ...dt, [wk]:{ ...(dt[wk]||{}), [memberId]:memberData } };
+    setDt(u);
+    setEd(null);
+    setSv(true);
+    setErr(null);                                       // ← limpiar error anterior
+    try {
+      await dbUpsert(wk, memberId, memberData);
+      setSvt(new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));
+    } catch(e) {
+      setErr("Error al guardar carga semanal.");
+      console.error("saveEd error:", e);
+    }
     setSv(false);
   };
   const addI = t  => setFi(p=>[...p,{area:AREAS[0],text:"",type:t,_id:uid()}]);
