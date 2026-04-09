@@ -402,13 +402,17 @@ if (error) throw error;
 
 /* ─── pantallas_cronograma helpers ─── */
 async function dbLoadPantallasCronograma() {
+try {
 const { data, error } = await sb.from(“pantallas_cronograma”).select(”*”).eq(“deleted”, false).order(“orden”);
 if (error) {
-/* Si la tabla no existe aún, retornar array vacío sin crashear */
-console.warn(“pantallas_cronograma no disponible:”, error.message);
+console.warn(“pantallas_cronograma no disponible:”, error.message || “sin detalle”);
 return [];
 }
 return data || [];
+} catch(e) {
+console.warn(“pantallas_cronograma excepcion:”, e && e.message ? e.message : String(e));
+return [];
+}
 }
 async function dbUpsertPantallaCronograma(id, fields) {
 const { error } = await sb.from(“pantallas_cronograma”).upsert(
@@ -557,7 +561,7 @@ async function cargarTodo() {
 try {
 const d = await dbLoad();
 setDt(d);
-} catch(e) { console.error(“Error weekly_data:”, e); }
+} catch(e) { console.warn(“Error weekly_data:”, e && e.message ? e.message : String(e)); }
 
 ```
   let tareas = {}, tareasPorPantallaDin = {};
@@ -566,18 +570,18 @@ setDt(d);
     tareas = r.map;
     tareasPorPantallaDin = r.tareasPorPantallaDin;
     setTareaOv(tareas);
-  } catch(e) { console.error("Error task_progress:", e); }
+  } catch(e) { console.warn("Error task_progress:", e && e.message ? e.message : String(e)); }
 
   let pconf = {};
   try {
     pconf = await dbLoadPantallaConfig();
     setPantallaConfig(pconf);
-  } catch(e) { console.error("Error pantalla_config:", e); }
+  } catch(e) { console.warn("Error pantalla_config:", e && e.message ? e.message : String(e)); }
 
   let pantallasDin = [];
   try {
     pantallasDin = await dbLoadPantallasCronograma();
-  } catch(e) { console.error("Error pantallas_cronograma:", e); }
+  } catch(e) { console.warn("Error pantallas_cronograma:", e && e.message ? e.message : String(e)); }
 
   /* Merge: base hardcodeada (no eliminadas) + dinámicas de Supabase */
   const deletedHardcoded = new Set(
@@ -599,7 +603,7 @@ setDt(d);
   setCronograma([...baseViva, ...extras]);
   setLd(false);
 }
-cargarTodo();
+cargarTodo().catch(e => { console.warn("cargarTodo fatal:", e && e.message ? e.message : String(e)); setLd(false); });
 ```
 
 }, []);
