@@ -690,8 +690,7 @@ function App() {
   });
 
   const _tts = cronograma.flatMap(p=>p.tareas);
-  const _ttsFiltradas = CRONOGRAMA.filter(p => !PANTALLAS_AREA.includes(p.pantalla)).flatMap(p=>p.tareas);
-  const avanceGlobal = _ttsFiltradas.length ? Math.round(_ttsFiltradas.reduce((s,t)=>{ const ov=tareaOv[t.id]; return s+(ov?normalizarProgreso(ov.progreso):normalizarProgreso(t.progreso)); },0)/_ttsFiltradas.length) : 0
+  const avanceGlobal = _tts.length ? Math.round(_tts.reduce((s,t)=>{ const ov=tareaOv[t.id]; return s+(ov?normalizarProgreso(ov.progreso):normalizarProgreso(t.progreso)); },0)/_tts.length) : 0;
 
   const indicadoresHoy = useMemo(() => {
     const ahora = new Date(today); ahora.setHours(23,59,59,999);
