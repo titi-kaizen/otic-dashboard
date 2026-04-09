@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -12,33 +13,7 @@
 </head>
 <body>
   <div id="root"></div>
-<script type="text/babel">
-const { useState, useMemo, useEffect, useCallback } = React;
-
-const SUPABASE_URL      = "https://tuqladhxuegvqqwyriqi.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_Xf2BijTju7QqbI2iQAnYOg_6ERMSr9n";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const PANTALLAS_AREA = ["Datacenter (Mock Up Visual)", "Template / Diseño Visual", "Datacenter (Desarrollo)"];
-const PANTALLA_DATACENTER_DEV = "Datacenter (Desarrollo)";
-
-const TEAM = [
-  { id:"zsosa",     name:"Zahi Sosa",       role:"Analista RTIC" },
-  { id:"jsanda",    name:"Juli Sanda",       role:"Analista RTIC" },
-  { id:"fchavez",   name:"Flor Chavez",      role:"Analista RTIC" },
-  { id:"lnegri",    name:"Luciano Negri",    role:"Analista RTIC" },
-  { id:"hambrosio", name:"Hernan Ambrosio",  role:"Analista RTIC" },
-  { id:"pcosta",    name:"Pedro/Costa",      role:"Analista RTIC" },
-];
-
-const AREAS = [
-  "Datacenter","Template / Diseño Visual","Planificación","Abastecimiento","Contextual",
-  "Compre Neuquino","Tiempos Intermedios","Licitaciones","Ahorros","Gestiones de Compras",
-  "Salud Contractual","Pedidos","Almacenes","COMEX","Transporte","Stock","Spend","CAPEX",
-  "Inspección y Activación","Accidentes IFA/IFAT","Gestión Vehicular","Gestión Patrimonial",
-  "Costo Pozo","GIP (Proveedores)","Desarrollo Proveedores","Datos & Digitalización","Otro",
-];
-
+<script>
 const SEED = {
   zsosa: { items:[
     {area:"Datacenter",text:"Determinación de KPIs de salud",type:"completed",_id:"s1"},
@@ -93,216 +68,246 @@ const SEED = {
 };
 
 const CRONOGRAMA_BASE = [
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento contractual", hardcoded:true, tareas:[
-    {id:"e1t01",nombre:"Adaptación de tablero desarrollado",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
-    {id:"e1t02",nombre:"Tarea 2 — Plan de abastecimiento compras",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
-    {id:"e1t03",nombre:"Tarea 1 — Plan abastecimiento vs ejecución",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
-    {id:"e1t04",nombre:"Tarea 2 — Plan abastecimiento vs ejecución",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
-  ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Planificación (E1)", hardcoded:true, tareas:[
-    {id:"e1t05",nombre:"Reunión de relevamiento de dashboards — Nivel actividad YPF",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
-    {id:"e1t06",nombre:"Reunión interna para diseño visual",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
-    {id:"e1t07",nombre:"Reunión para cerrar formato visual",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:"Enviar template final cuando esté aprobado"},
-    {id:"e1t08",nombre:"Adaptación de tableros a formato RTIC",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
-    {id:"e1t09",nombre:"Reunión de relevamiento — Dimensionamiento",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
-    {id:"e1t10",nombre:"Reunión de diseño visual — Dimensionamiento",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
-    {id:"e1t11",nombre:"Reunión para cerrar formato — Dimensionamiento",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:""},
-    {id:"e1t12",nombre:"Adaptación de tableros — Dimensionamiento",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
-  ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento (E1)", hardcoded:true, tareas:[
-    {id:"e1t13",nombre:"Reunión de relevamiento de datos disponibles",progreso:90,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
-    {id:"e1t14",nombre:"Compartir template Power BI y mail",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-11",fin:"2026-03-15",comentario:"A la espera de validación final del template"},
-    {id:"e1t15",nombre:"Reuniones de seguimiento semanales",progreso:10,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
-    {id:"e1t16",nombre:"Armado de mockup con visualizaciones preliminares",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Contextual (E1)", hardcoded:true, tareas:[
-    {id:"e1t17",nombre:"Análisis de extracción del dato por API",progreso:0,responsable:"Ari Mariño / Sebas Caviglia",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
-    {id:"e1t18",nombre:"Reunión con Claus para determinar datos necesitados",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-05",fin:"2026-03-13",comentario:""},
-    {id:"e1t19",nombre:"Obtención de orígenes y armado de pantalla",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-13",fin:"2026-03-27",comentario:""},
-  ]},
-  { etapa:"Etapa 2 — Analizar mercado/oferta", pantalla:"Planificación (E2)", hardcoded:true, tareas:[
-    {id:"e2t01",nombre:"Reunión de relevamiento — Benchmarks de precios",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
-    {id:"e2t02",nombre:"Adaptación de tableros — Benchmarks de precios",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
-    {id:"e2t03",nombre:"Reunión de relevamiento — Análisis oferta/demanda",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
-    {id:"e2t04",nombre:"Adaptación de tableros — Análisis oferta/demanda",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
-  ]},
-  { etapa:"Etapa 2 — Analizar mercado/oferta", pantalla:"Compre Neuquino", hardcoded:true, tareas:[
-    {id:"e2t05",nombre:"Creación de base de datos",progreso:100,responsable:"Juli Sanda",inicio:"2026-02-02",fin:"2026-02-28",comentario:""},
-    {id:"e2t06",nombre:"Análisis de datos históricos y conexión con bases actuales",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-02",fin:"2026-03-06",comentario:""},
-    {id:"e2t07",nombre:"Construcción de pantallas (Montos + Certificación)",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e2t08",nombre:"Warning proveedores monopólicos en cartera",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Tiempos Intermedios", hardcoded:true, tareas:[
-    {id:"e4t01",nombre:"Análisis de viabilidad de hitos y cálculos de calidad",progreso:50,responsable:"Juli Sanda",inicio:"2026-02-15",fin:"2026-04-30",comentario:"Pendiente por cálculos de viabilidad"},
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Seguimiento SOLPED", hardcoded:true, tareas:[] },
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Licitaciones", hardcoded:true, tareas:[
-    {id:"e4t02",nombre:"Evaluación de fuente manual Sourcing para cálculo de KPIs",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-05",fin:"2026-03-09",comentario:""},
-    {id:"e4t03",nombre:"Reunión con referente de Tecnología con avances",progreso:50,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:"A la espera de validación e incorporación de columnas faltantes"},
-    {id:"e4t04",nombre:"Inicio de construcción de KPIs particulares",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Ahorros", hardcoded:true, tareas:[
-    {id:"e4t05",nombre:"Proyectos de captura de valor por estado",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
-    {id:"e4t06",nombre:"Adaptación de tablero a visuales RTIC",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e4t07",nombre:"Ahorro y captura de valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
-    {id:"e4t08",nombre:"Casos de captura de valor — Desarrollo de proveedores",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
-    {id:"e4t09",nombre:"Ahorros gestionados por casos de captura de valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Gestiones de Compras", hardcoded:true, tareas:[
-    {id:"e4t10",nombre:"Detectar datos de niveles de autorización actuales en BTP",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e4t11",nombre:"Validar códigos y funcionamiento",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e4t12",nombre:"Corrección/Adaptación de pirámide",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
-    {id:"e4t13",nombre:"Tasa promedio de aprobación de Actas",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-20",comentario:""},
-    {id:"e4t14",nombre:"Tasa de aprobación de Actas por nivel",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-20",comentario:""},
-    {id:"e4t15",nombre:"Revisión de fórmulas — Promedio de ciclos de revisión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e4t16",nombre:"Adaptación de tablero RTIC — Promedio de ciclos de revisión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e4t17",nombre:"Revisión de fórmulas — Compra licitación vs directa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e4t18",nombre:"Adaptación de tablero RTIC — Compra licitación vs directa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e4t19",nombre:"Adaptación de tablero RTIC — Share de licitaciones",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Salud Contractual (E4)", hardcoded:true, tareas:[
-    {id:"e4t20",nombre:"Reunión interna — Análisis de KPIs y diseño preliminar",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:""},
-    {id:"e4t21",nombre:"Construcción de pantalla Salud Contractual",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-11",fin:"2026-04-15",comentario:""},
-    {id:"e4t22",nombre:"Reunión con Fernando Gout (CIC Costo/Plazo)",progreso:80,responsable:"Flor Chavez",inicio:"2026-03-06",fin:"2026-03-16",comentario:"Pendiente: recibir accesos al tablero y Excel"},
-    {id:"e4t23",nombre:"Reunión con Victor Magnarelli — visualizaciones",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-20",comentario:""},
-    {id:"e4t24",nombre:"Armado de mockup con visualizaciones preliminares",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-20",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Pedidos", hardcoded:true, tareas:[
-    {id:"e4t25",nombre:"Análisis de KPIs y diseño preliminar — Pedidos puntuales",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
-    {id:"e4t26",nombre:"Análisis de KPIs y diseño preliminar — Proveedores estratégicos",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
-    {id:"e4t27",nombre:"Comunicado enviado a referentes SC",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-04",fin:"2026-03-18",comentario:""},
-    {id:"e4t28",nombre:"Compilación de criterios de medición",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-12",fin:"2026-03-12",comentario:""},
-    {id:"e4t29",nombre:"Análisis y construcción de indicador",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-18",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Almacenes", hardcoded:true, tareas:[
-    {id:"e5t01",nombre:"Análisis de tableros disponibles",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e5t02",nombre:"Reunión con referentes para planificar construcción",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
-    {id:"e5t03",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"COMEX", hardcoded:true, tareas:[
-    {id:"e5t04",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e5t05",nombre:"Reunión con referentes para planificar construcción",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
-    {id:"e5t06",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Transporte", hardcoded:true, tareas:[
-    {id:"e5t07",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-13",comentario:""},
-    {id:"e5t08",nombre:"Enviar mail con template y próximos pasos",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-20",comentario:""},
-    {id:"e5t09",nombre:"Reunión con referentes para planificar construcción",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
-    {id:"e5t10",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Stock", hardcoded:true, tareas:[
-    {id:"e5t11",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e5t12",nombre:"Reunión con referentes para planificar construcción",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"e5t13",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Spend", hardcoded:true, tareas:[
-    {id:"e5t14",nombre:"Adaptación de tablero a visuales RTIC — Total Spend",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
-    {id:"e5t15",nombre:"Análisis de desarrollo — Warning certificación",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
-    {id:"e5t16",nombre:"Reunión con referente — Días de mora en certificaciones",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
-    {id:"e5t17",nombre:"Construcción de KPIs principales y adaptación visual",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
-    {id:"e5t18",nombre:"Revisión y adaptación visual final",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-31",fin:"2026-04-04",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Inspección y Activación", hardcoded:true, tareas:[
-    {id:"e5t20",nombre:"Reunión con referente — tableros disponibles",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
-    {id:"e5t21",nombre:"Diseño de indicadores del Referente",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
-    {id:"e5t22",nombre:"Reunión de avances",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-20",fin:"2026-03-20",comentario:""},
-    {id:"e5t23",nombre:"Adaptación gráfica de KPIs con diseño RTIC",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-31",fin:"2026-04-15",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Salud Contractual (E5)", hardcoded:true, tareas:[
-    {id:"e5t24",nombre:"Análisis y adaptación — Alertas de monto/plazo",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-31",fin:"2026-04-15",comentario:""},
-    {id:"e5t25",nombre:"Reunión con referente — Toyota Well",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
-    {id:"e5t26",nombre:"Conexión de bases — Toyota Well",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-18",comentario:"Revisar ubicación de la información"},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Accidentes IFA/IFAT", hardcoded:true, tareas:[
-    {id:"e5t27",nombre:"Reunión con Dayana Méndez",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
-    {id:"e5t28",nombre:"Construcción de mockup",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-31",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Vehicular", hardcoded:true, tareas:[
-    {id:"e5t29",nombre:"Reunión con referente — tableros construidos + KPIs relevados",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
-  ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Patrimonial", hardcoded:true, tareas:[
-    {id:"e5t30",nombre:"Reunión con referente — tableros construidos + KPIs relevados",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
-  ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"Costo Pozo", hardcoded:true, tareas:[
-    {id:"e6t01",nombre:"Tarea 1 — Costo pozo",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
-  ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Calificaciones)", hardcoded:true, tareas:[
-    {id:"gipc01",nombre:"% contratos con estado de calificación / sin estado de calificación",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc02",nombre:"% proveedores no aceptados por situación económico financiera",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc03",nombre:"% contratos vigentes calificados",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc04",nombre:"% contratos vigentes no aceptados",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc05",nombre:"% contratos vigentes en proceso de calificación",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc06",nombre:"% proveedores no aceptados por incumplimiento de requisitos técnicos",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc07",nombre:"% de excepciones por proveedor en año en curso",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc08",nombre:"Ranking de proveedores no aceptados ordenados por spend",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc09",nombre:"Top 10 grupos con menor volumen por GA",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipc10",nombre:"% proveedores bloqueados y tipos de bloqueo",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-  ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Evaluaciones)", hardcoded:true, tareas:[
-    {id:"gipe01",nombre:"% contratos evaluados y sin evaluación de desempeño / Ranking por negocio de contratos sin evaluar (solicitado por WA)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipe02",nombre:"Q/% contratos evaluados con bajo desempeño (< 40%)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipe03",nombre:"Top 20 proveedores de mayor spend y su correspondiente evaluación",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipe04",nombre:"% proveedores evaluados con desempeño en seguimiento (< 40/50)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipe05",nombre:"% proveedores evaluados (con al menos 1 evaluación)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-  ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Laboral y Previsional)", hardcoded:true, tareas:[
-    {id:"gipl01",nombre:"% de subcontratación (último período) — Top 10",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipl02",nombre:"Proveedores subcontratados",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipl03",nombre:"% proveedores con Factor Laboral y Previsional BAJO y relación con impacto económico",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gipl04",nombre:"Evolutivo de personal avalado / no avalado — Top 10",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-  ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Score de Proveedores)", hardcoded:true, tareas:[
-    {id:"gips01",nombre:"Evolutivo de puntajes score por período con base y composición (base histórica + actual)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gips02",nombre:"Top proveedores con mayor desvío de puntaje entre mes actual y mes anterior",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gips03",nombre:"Top proveedores por spend (mayor certificación promedio mensual) y su puntaje asociado",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-    {id:"gips04",nombre:"Top proveedores con mala performance por factor (auditoría técnica / laboral / desempeño contractual)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
-  ]},
-  { etapa:"Etapa 7 — Desarrollar nuevos proveedores", pantalla:"Desarrollo Proveedores", hardcoded:true, tareas:[
-    {id:"e7t01",nombre:"Reunión con referentes — pasos a seguir en desarrollo",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
-    {id:"e7t02",nombre:"Reunión con referentes — análisis de las bases",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-10",fin:"2026-04-30",comentario:""},
-  ]},
-  { etapa:"DATACENTER (mock up visual)", pantalla:"Datacenter (Mock Up Visual)", hardcoded:true, tareas:[
-    {id:"dct01",nombre:"Pantalla Seguimiento Objetivos VP",progreso:90,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"dct02",nombre:"Pantalla % calidad medición por etapa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
-    {id:"dct03",nombre:"Pantalla Tiempos intermedios + gestión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
-    {id:"dct04",nombre:"Pantalla Captura de Valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
-    {id:"dct05",nombre:"Pantalla Seguimiento tarifas UP + Costo Pozo",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
-    {id:"dct06",nombre:"Pantalla Accidentes IFA/IFAT",progreso:90,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
-    {id:"dct07",nombre:"Pantalla Portfolio de iniciativas de competitividad",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
-    {id:"dct08",nombre:"Pantalla Stock",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
-  ]},
-  { etapa:"TEMPLATE (mock up visual)", pantalla:"Template / Diseño Visual", hardcoded:true, tareas:[
-    {id:"tpt01",nombre:"Armado de diseño visual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-02-20",fin:"2026-03-06",comentario:""},
-    {id:"tpt02",nombre:"Reunión con referente de diseño/imagen/marca",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:"Paleta de colores compartida por mail"},
-    {id:"tpt03",nombre:"Adaptación de recomendaciones al diseño actual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
-    {id:"tpt04",nombre:"Validación de template de imagen",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:"Falta validación"},
-  ]},
-  { etapa:"DATACENTER (desarrollo)", pantalla:"Datacenter (Desarrollo)", hardcoded:true, tareas:[
-    {id:"dcd01",nombre:"Pantalla Seguimiento Objetivos VP",               progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd02",nombre:"Pantalla % calidad medición por etapa",           progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd03",nombre:"Pantalla Tiempos intermedios + gestión",          progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd04",nombre:"Pantalla Captura de Valor",                       progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd05",nombre:"Pantalla Seguimiento tarifas UP + Costo Pozo",    progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd06",nombre:"Pantalla Accidentes IFA/IFAT",                    progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd07",nombre:"Pantalla Portfolio de iniciativas de competitividad (plazo/costo)",progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd08",nombre:"Pantalla Stock",                                  progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-    {id:"dcd09",nombre:"Pantalla COMEX",                                  progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
-  ]},
+{ etapa:“Etapa 1 — Entender demanda futura”, pantalla:“Abastecimiento contractual”, hardcoded:true, tareas:[
+{id:“e1t01”,nombre:“Adaptación de tablero desarrollado”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-05”,fin:“2026-04-30”,comentario:””},
+{id:“e1t02”,nombre:“Tarea 2 — Plan de abastecimiento compras”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-05”,fin:“2026-04-30”,comentario:””},
+{id:“e1t03”,nombre:“Tarea 1 — Plan abastecimiento vs ejecución”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-05”,fin:“2026-04-30”,comentario:””},
+{id:“e1t04”,nombre:“Tarea 2 — Plan abastecimiento vs ejecución”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-05”,fin:“2026-04-30”,comentario:””},
+]},
+{ etapa:“Etapa 1 — Entender demanda futura”, pantalla:“Planificación (E1)”, hardcoded:true, tareas:[
+{id:“e1t05”,nombre:“Reunión de relevamiento de dashboards — Nivel actividad YPF”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-06”,fin:“2026-03-06”,comentario:””},
+{id:“e1t06”,nombre:“Reunión interna para diseño visual”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-10”,fin:“2026-03-10”,comentario:””},
+{id:“e1t07”,nombre:“Reunión para cerrar formato visual”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-11”,fin:“2026-03-11”,comentario:“Enviar template final cuando esté aprobado”},
+{id:“e1t08”,nombre:“Adaptación de tableros a formato RTIC”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-12”,fin:“2026-03-18”,comentario:””},
+{id:“e1t09”,nombre:“Reunión de relevamiento — Dimensionamiento”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-06”,fin:“2026-03-06”,comentario:””},
+{id:“e1t10”,nombre:“Reunión de diseño visual — Dimensionamiento”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-10”,fin:“2026-03-10”,comentario:””},
+{id:“e1t11”,nombre:“Reunión para cerrar formato — Dimensionamiento”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-11”,fin:“2026-03-11”,comentario:””},
+{id:“e1t12”,nombre:“Adaptación de tableros — Dimensionamiento”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-18”,comentario:””},
+]},
+{ etapa:“Etapa 1 — Entender demanda futura”, pantalla:“Abastecimiento (E1)”, hardcoded:true, tareas:[
+{id:“e1t13”,nombre:“Reunión de relevamiento de datos disponibles”,progreso:90,responsable:“Flor Chavez”,inicio:“2026-03-09”,fin:“2026-03-16”,comentario:””},
+{id:“e1t14”,nombre:“Compartir template Power BI y mail”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-11”,fin:“2026-03-15”,comentario:“A la espera de validación final del template”},
+{id:“e1t15”,nombre:“Reuniones de seguimiento semanales”,progreso:10,responsable:“Flor Chavez”,inicio:“2026-03-16”,fin:“2026-03-31”,comentario:””},
+{id:“e1t16”,nombre:“Armado de mockup con visualizaciones preliminares”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-16”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 1 — Entender demanda futura”, pantalla:“Contextual (E1)”, hardcoded:true, tareas:[
+{id:“e1t17”,nombre:“Análisis de extracción del dato por API”,progreso:0,responsable:“Ari Mariño / Sebas Caviglia”,inicio:“2026-03-05”,fin:“2026-03-31”,comentario:””},
+{id:“e1t18”,nombre:“Reunión con Claus para determinar datos necesitados”,progreso:0,responsable:“Pedro/Costa”,inicio:“2026-03-05”,fin:“2026-03-13”,comentario:””},
+{id:“e1t19”,nombre:“Obtención de orígenes y armado de pantalla”,progreso:0,responsable:“Pedro/Costa”,inicio:“2026-03-13”,fin:“2026-03-27”,comentario:””},
+]},
+{ etapa:“Etapa 2 — Analizar mercado/oferta”, pantalla:“Planificación (E2)”, hardcoded:true, tareas:[
+{id:“e2t01”,nombre:“Reunión de relevamiento — Benchmarks de precios”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-06”,fin:“2026-03-06”,comentario:””},
+{id:“e2t02”,nombre:“Adaptación de tableros — Benchmarks de precios”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-18”,comentario:””},
+{id:“e2t03”,nombre:“Reunión de relevamiento — Análisis oferta/demanda”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-06”,fin:“2026-03-06”,comentario:””},
+{id:“e2t04”,nombre:“Adaptación de tableros — Análisis oferta/demanda”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-18”,comentario:””},
+]},
+{ etapa:“Etapa 2 — Analizar mercado/oferta”, pantalla:“Compre Neuquino”, hardcoded:true, tareas:[
+{id:“e2t05”,nombre:“Creación de base de datos”,progreso:100,responsable:“Juli Sanda”,inicio:“2026-02-02”,fin:“2026-02-28”,comentario:””},
+{id:“e2t06”,nombre:“Análisis de datos históricos y conexión con bases actuales”,progreso:100,responsable:“Juli Sanda”,inicio:“2026-03-02”,fin:“2026-03-06”,comentario:””},
+{id:“e2t07”,nombre:“Construcción de pantallas (Montos + Certificación)”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e2t08”,nombre:“Warning proveedores monopólicos en cartera”,progreso:0,responsable:“Pedro/Costa”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+]},
+{ etapa:“Etapa 4 — Abastecer, negociar y seleccionar”, pantalla:“Tiempos Intermedios”, hardcoded:true, tareas:[
+{id:“e4t01”,nombre:“Análisis de viabilidad de hitos y cálculos de calidad”,progreso:50,responsable:“Juli Sanda”,inicio:“2026-02-15”,fin:“2026-04-30”,comentario:“Pendiente por cálculos de viabilidad”},
+]},
+{ etapa:“Etapa 4 — Abastecer, negociar y seleccionar”, pantalla:“Seguimiento SOLPED”, hardcoded:true, tareas:[] },
+{ etapa:“Etapa 4 — Abastecer, negociar y seleccionar”, pantalla:“Licitaciones”, hardcoded:true, tareas:[
+{id:“e4t02”,nombre:“Evaluación de fuente manual Sourcing para cálculo de KPIs”,progreso:100,responsable:“Zahi Sosa”,inicio:“2026-03-05”,fin:“2026-03-09”,comentario:””},
+{id:“e4t03”,nombre:“Reunión con referente de Tecnología con avances”,progreso:50,responsable:“Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-09”,comentario:“A la espera de validación e incorporación de columnas faltantes”},
+{id:“e4t04”,nombre:“Inicio de construcción de KPIs particulares”,progreso:0,responsable:“Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-04-30”,comentario:””},
+]},
+{ etapa:“Etapa 4 — Abastecer, negociar y seleccionar”, pantalla:“Ahorros”, hardcoded:true, tareas:[
+{id:“e4t05”,nombre:“Proyectos de captura de valor por estado”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-09”,fin:“2026-04-30”,comentario:””},
+{id:“e4t06”,nombre:“Adaptación de tablero a visuales RTIC”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e4t07”,nombre:“Ahorro y captura de valor”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-09”,fin:“2026-04-30”,comentario:””},
+{id:“e4t08”,nombre:“Casos de captura de valor — Desarrollo de proveedores”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-09”,fin:“2026-04-30”,comentario:””},
+{id:“e4t09”,nombre:“Ahorros gestionados por casos de captura de valor”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-09”,fin:“2026-04-30”,comentario:””},
+]},
+{ etapa:“Etapa 4 — Abastecer, negociar y seleccionar”, pantalla:“Gestiones de Compras”, hardcoded:true, tareas:[
+{id:“e4t10”,nombre:“Detectar datos de niveles de autorización actuales en BTP”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e4t11”,nombre:“Validar códigos y funcionamiento”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e4t12”,nombre:“Corrección/Adaptación de pirámide”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-13”,fin:“2026-03-20”,comentario:””},
+{id:“e4t13”,nombre:“Tasa promedio de aprobación de Actas”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-20”,comentario:””},
+{id:“e4t14”,nombre:“Tasa de aprobación de Actas por nivel”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-20”,comentario:””},
+{id:“e4t15”,nombre:“Revisión de fórmulas — Promedio de ciclos de revisión”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e4t16”,nombre:“Adaptación de tablero RTIC — Promedio de ciclos de revisión”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e4t17”,nombre:“Revisión de fórmulas — Compra licitación vs directa”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e4t18”,nombre:“Adaptación de tablero RTIC — Compra licitación vs directa”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e4t19”,nombre:“Adaptación de tablero RTIC — Share de licitaciones”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+]},
+{ etapa:“Etapa 4 — Abastecer, negociar y seleccionar”, pantalla:“Salud Contractual (E4)”, hardcoded:true, tareas:[
+{id:“e4t20”,nombre:“Reunión interna — Análisis de KPIs y diseño preliminar”,progreso:0,responsable:“Zahi Sosa”,inicio:“2026-03-11”,fin:“2026-03-11”,comentario:””},
+{id:“e4t21”,nombre:“Construcción de pantalla Salud Contractual”,progreso:0,responsable:“Zahi Sosa”,inicio:“2026-03-11”,fin:“2026-04-15”,comentario:””},
+{id:“e4t22”,nombre:“Reunión con Fernando Gout (CIC Costo/Plazo)”,progreso:80,responsable:“Flor Chavez”,inicio:“2026-03-06”,fin:“2026-03-16”,comentario:“Pendiente: recibir accesos al tablero y Excel”},
+{id:“e4t23”,nombre:“Reunión con Victor Magnarelli — visualizaciones”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-16”,fin:“2026-03-20”,comentario:””},
+{id:“e4t24”,nombre:“Armado de mockup con visualizaciones preliminares”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-20”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 4 — Abastecer, negociar y seleccionar”, pantalla:“Pedidos”, hardcoded:true, tareas:[
+{id:“e4t25”,nombre:“Análisis de KPIs y diseño preliminar — Pedidos puntuales”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-05”,fin:“2026-03-31”,comentario:””},
+{id:“e4t26”,nombre:“Análisis de KPIs y diseño preliminar — Proveedores estratégicos”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-05”,fin:“2026-03-31”,comentario:””},
+{id:“e4t27”,nombre:“Comunicado enviado a referentes SC”,progreso:100,responsable:“Juli Sanda”,inicio:“2026-03-04”,fin:“2026-03-18”,comentario:””},
+{id:“e4t28”,nombre:“Compilación de criterios de medición”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-12”,fin:“2026-03-12”,comentario:””},
+{id:“e4t29”,nombre:“Análisis y construcción de indicador”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-18”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Almacenes”, hardcoded:true, tareas:[
+{id:“e5t01”,nombre:“Análisis de tableros disponibles”,progreso:0,responsable:“Luciano Negri”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e5t02”,nombre:“Reunión con referentes para planificar construcción”,progreso:0,responsable:“Luciano Negri”,inicio:“2026-03-12”,fin:“2026-03-18”,comentario:””},
+{id:“e5t03”,nombre:“Construcción de pantalla consolidada de KPIs”,progreso:0,responsable:“Luciano Negri”,inicio:“2026-03-16”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“COMEX”, hardcoded:true, tareas:[
+{id:“e5t04”,nombre:“Análisis de tableros disponibles”,progreso:100,responsable:“Luciano Negri”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e5t05”,nombre:“Reunión con referentes para planificar construcción”,progreso:100,responsable:“Luciano Negri”,inicio:“2026-03-12”,fin:“2026-03-18”,comentario:””},
+{id:“e5t06”,nombre:“Construcción de pantalla consolidada de KPIs”,progreso:0,responsable:“Luciano Negri”,inicio:“2026-03-09”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Transporte”, hardcoded:true, tareas:[
+{id:“e5t07”,nombre:“Análisis de tableros disponibles”,progreso:100,responsable:“Flor Chavez”,inicio:“2026-03-10”,fin:“2026-03-13”,comentario:””},
+{id:“e5t08”,nombre:“Enviar mail con template y próximos pasos”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-10”,fin:“2026-03-20”,comentario:””},
+{id:“e5t09”,nombre:“Reunión con referentes para planificar construcción”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-10”,fin:“2026-03-31”,comentario:””},
+{id:“e5t10”,nombre:“Construcción de pantalla consolidada de KPIs”,progreso:0,responsable:“Flor Chavez”,inicio:“2026-03-10”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Stock”, hardcoded:true, tareas:[
+{id:“e5t11”,nombre:“Análisis de tableros disponibles”,progreso:100,responsable:“Luciano Negri”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e5t12”,nombre:“Reunión con referentes para planificar construcción”,progreso:100,responsable:“Luciano Negri”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“e5t13”,nombre:“Construcción de pantalla consolidada de KPIs”,progreso:0,responsable:“Luciano Negri”,inicio:“2026-03-12”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Spend”, hardcoded:true, tareas:[
+{id:“e5t14”,nombre:“Adaptación de tablero a visuales RTIC — Total Spend”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-13”,fin:“2026-03-20”,comentario:””},
+{id:“e5t15”,nombre:“Análisis de desarrollo — Warning certificación”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-13”,fin:“2026-03-20”,comentario:””},
+{id:“e5t16”,nombre:“Reunión con referente — Días de mora en certificaciones”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-10”,fin:“2026-03-10”,comentario:””},
+{id:“e5t17”,nombre:“Construcción de KPIs principales y adaptación visual”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-10”,fin:“2026-03-31”,comentario:””},
+{id:“e5t18”,nombre:“Revisión y adaptación visual final”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-31”,fin:“2026-04-04”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Inspección y Activación”, hardcoded:true, tareas:[
+{id:“e5t20”,nombre:“Reunión con referente — tableros disponibles”,progreso:100,responsable:“Juli Sanda”,inicio:“2026-03-10”,fin:“2026-03-10”,comentario:””},
+{id:“e5t21”,nombre:“Diseño de indicadores del Referente”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-10”,fin:“2026-03-31”,comentario:””},
+{id:“e5t22”,nombre:“Reunión de avances”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-20”,fin:“2026-03-20”,comentario:””},
+{id:“e5t23”,nombre:“Adaptación gráfica de KPIs con diseño RTIC”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-31”,fin:“2026-04-15”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Salud Contractual (E5)”, hardcoded:true, tareas:[
+{id:“e5t24”,nombre:“Análisis y adaptación — Alertas de monto/plazo”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-31”,fin:“2026-04-15”,comentario:””},
+{id:“e5t25”,nombre:“Reunión con referente — Toyota Well”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-09”,comentario:””},
+{id:“e5t26”,nombre:“Conexión de bases — Toyota Well”,progreso:0,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-10”,fin:“2026-03-18”,comentario:“Revisar ubicación de la información”},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Accidentes IFA/IFAT”, hardcoded:true, tareas:[
+{id:“e5t27”,nombre:“Reunión con Dayana Méndez”,progreso:100,responsable:“Flor Chavez”,inicio:“2026-03-06”,fin:“2026-03-06”,comentario:””},
+{id:“e5t28”,nombre:“Construcción de mockup”,progreso:100,responsable:“Flor Chavez”,inicio:“2026-03-09”,fin:“2026-03-31”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Gestión Vehicular”, hardcoded:true, tareas:[
+{id:“e5t29”,nombre:“Reunión con referente — tableros construidos + KPIs relevados”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-09”,fin:“2026-04-30”,comentario:””},
+]},
+{ etapa:“Etapa 5 — Implementar servicios a las operaciones”, pantalla:“Gestión Patrimonial”, hardcoded:true, tareas:[
+{id:“e5t30”,nombre:“Reunión con referente — tableros construidos + KPIs relevados”,progreso:0,responsable:“Pedro/Costa”,inicio:“2026-03-13”,fin:“2026-03-20”,comentario:””},
+]},
+{ etapa:“Etapa 6 — Evaluar rendimiento de proveedores”, pantalla:“Costo Pozo”, hardcoded:true, tareas:[
+{id:“e6t01”,nombre:“Tarea 1 — Costo pozo”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-05”,fin:“2026-04-30”,comentario:””},
+]},
+{ etapa:“Etapa 6 — Evaluar rendimiento de proveedores”, pantalla:“GIP (Calificaciones)”, hardcoded:true, tareas:[
+{id:“gipc01”,nombre:”% contratos con estado de calificación / sin estado de calificación”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc02”,nombre:”% proveedores no aceptados por situación económico financiera”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc03”,nombre:”% contratos vigentes calificados”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc04”,nombre:”% contratos vigentes no aceptados”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc05”,nombre:”% contratos vigentes en proceso de calificación”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc06”,nombre:”% proveedores no aceptados por incumplimiento de requisitos técnicos”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc07”,nombre:”% de excepciones por proveedor en año en curso”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc08”,nombre:“Ranking de proveedores no aceptados ordenados por spend”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc09”,nombre:“Top 10 grupos con menor volumen por GA”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipc10”,nombre:”% proveedores bloqueados y tipos de bloqueo”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+]},
+{ etapa:“Etapa 6 — Evaluar rendimiento de proveedores”, pantalla:“GIP (Evaluaciones)”, hardcoded:true, tareas:[
+{id:“gipe01”,nombre:”% contratos evaluados y sin evaluación de desempeño / Ranking por negocio de contratos sin evaluar (solicitado por WA)”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipe02”,nombre:“Q/% contratos evaluados con bajo desempeño (< 40%)”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipe03”,nombre:“Top 20 proveedores de mayor spend y su correspondiente evaluación”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipe04”,nombre:”% proveedores evaluados con desempeño en seguimiento (< 40/50)”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipe05”,nombre:”% proveedores evaluados (con al menos 1 evaluación)”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+]},
+{ etapa:“Etapa 6 — Evaluar rendimiento de proveedores”, pantalla:“GIP (Laboral y Previsional)”, hardcoded:true, tareas:[
+{id:“gipl01”,nombre:”% de subcontratación (último período) — Top 10”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipl02”,nombre:“Proveedores subcontratados”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipl03”,nombre:”% proveedores con Factor Laboral y Previsional BAJO y relación con impacto económico”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gipl04”,nombre:“Evolutivo de personal avalado / no avalado — Top 10”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+]},
+{ etapa:“Etapa 6 — Evaluar rendimiento de proveedores”, pantalla:“GIP (Score de Proveedores)”, hardcoded:true, tareas:[
+{id:“gips01”,nombre:“Evolutivo de puntajes score por período con base y composición (base histórica + actual)”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gips02”,nombre:“Top proveedores con mayor desvío de puntaje entre mes actual y mes anterior”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gips03”,nombre:“Top proveedores por spend (mayor certificación promedio mensual) y su puntaje asociado”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+{id:“gips04”,nombre:“Top proveedores con mala performance por factor (auditoría técnica / laboral / desempeño contractual)”,progreso:0,responsable:“Juli Sanda”,inicio:””,fin:””,comentario:””},
+]},
+{ etapa:“Etapa 7 — Desarrollar nuevos proveedores”, pantalla:“Desarrollo Proveedores”, hardcoded:true, tareas:[
+{id:“e7t01”,nombre:“Reunión con referentes — pasos a seguir en desarrollo”,progreso:100,responsable:“Juli Sanda / Zahi Sosa”,inicio:“2026-03-10”,fin:“2026-03-10”,comentario:””},
+{id:“e7t02”,nombre:“Reunión con referentes — análisis de las bases”,progreso:0,responsable:“Zahi Sosa”,inicio:“2026-03-10”,fin:“2026-04-30”,comentario:””},
+]},
+{ etapa:“DATACENTER (mock up visual)”, pantalla:“Datacenter (Mock Up Visual)”, hardcoded:true, tareas:[
+{id:“dct01”,nombre:“Pantalla Seguimiento Objetivos VP”,progreso:90,responsable:“Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“dct02”,nombre:“Pantalla % calidad medición por etapa”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-16”,comentario:””},
+{id:“dct03”,nombre:“Pantalla Tiempos intermedios + gestión”,progreso:0,responsable:“Juli Sanda”,inicio:“2026-03-09”,fin:“2026-03-16”,comentario:””},
+{id:“dct04”,nombre:“Pantalla Captura de Valor”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-09”,fin:“2026-03-16”,comentario:””},
+{id:“dct05”,nombre:“Pantalla Seguimiento tarifas UP + Costo Pozo”,progreso:0,responsable:“Hernan Ambrosio”,inicio:“2026-03-09”,fin:“2026-03-16”,comentario:””},
+{id:“dct06”,nombre:“Pantalla Accidentes IFA/IFAT”,progreso:90,responsable:“Flor Chavez”,inicio:“2026-03-09”,fin:“2026-03-16”,comentario:””},
+{id:“dct07”,nombre:“Pantalla Portfolio de iniciativas de competitividad”,progreso:0,responsable:“Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-13”,comentario:””},
+{id:“dct08”,nombre:“Pantalla Stock”,progreso:0,responsable:“Luciano Negri”,inicio:“2026-03-09”,fin:“2026-03-16”,comentario:””},
+]},
+{ etapa:“TEMPLATE (mock up visual)”, pantalla:“Template / Diseño Visual”, hardcoded:true, tareas:[
+{id:“tpt01”,nombre:“Armado de diseño visual”,progreso:100,responsable:“Zahi Sosa”,inicio:“2026-02-20”,fin:“2026-03-06”,comentario:””},
+{id:“tpt02”,nombre:“Reunión con referente de diseño/imagen/marca”,progreso:100,responsable:“Zahi Sosa”,inicio:“2026-03-06”,fin:“2026-03-06”,comentario:“Paleta de colores compartida por mail”},
+{id:“tpt03”,nombre:“Adaptación de recomendaciones al diseño actual”,progreso:100,responsable:“Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-03-09”,comentario:””},
+{id:“tpt04”,nombre:“Validación de template de imagen”,progreso:0,responsable:“Zahi Sosa”,inicio:“2026-03-09”,fin:“2026-04-30”,comentario:“Falta validación”},
+]},
+{ etapa:“DATACENTER (desarrollo)”, pantalla:“Datacenter (Desarrollo)”, hardcoded:true, tareas:[
+{id:“dcd01”,nombre:“Pantalla Seguimiento Objetivos VP”,               progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd02”,nombre:“Pantalla % calidad medición por etapa”,           progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd03”,nombre:“Pantalla Tiempos intermedios + gestión”,          progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd04”,nombre:“Pantalla Captura de Valor”,                       progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd05”,nombre:“Pantalla Seguimiento tarifas UP + Costo Pozo”,    progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd06”,nombre:“Pantalla Accidentes IFA/IFAT”,                    progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd07”,nombre:“Pantalla Portfolio de iniciativas de competitividad (plazo/costo)”,progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd08”,nombre:“Pantalla Stock”,                                  progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+{id:“dcd09”,nombre:“Pantalla COMEX”,                                  progreso:0,responsable:””,inicio:””,fin:””,comentario:””},
+]},
 ];
 
 const ETAPAS_LISTA = [
-  "Etapa 1 — Entender demanda futura",
-  "Etapa 2 — Analizar mercado/oferta",
-  "Etapa 3 — Planificar sourcing",
-  "Etapa 4 — Abastecer, negociar y seleccionar",
-  "Etapa 5 — Implementar servicios a las operaciones",
-  "Etapa 6 — Evaluar rendimiento de proveedores",
-  "Etapa 7 — Desarrollar nuevos proveedores",
-  "DATACENTER (mock up visual)",
-  "DATACENTER (desarrollo)",
-  "TEMPLATE (mock up visual)",
-  "Otro",
+“Etapa 1 — Entender demanda futura”,
+“Etapa 2 — Analizar mercado/oferta”,
+“Etapa 3 — Planificar sourcing”,
+“Etapa 4 — Abastecer, negociar y seleccionar”,
+“Etapa 5 — Implementar servicios a las operaciones”,
+“Etapa 6 — Evaluar rendimiento de proveedores”,
+“Etapa 7 — Desarrollar nuevos proveedores”,
+“DATACENTER (mock up visual)”,
+“DATACENTER (desarrollo)”,
+“TEMPLATE (mock up visual)”,
+“Otro”,
 ];
+</script>
+
+<script type="text/babel">
+const { useState, useMemo, useEffect, useCallback } = React;
+
+const SUPABASE_URL      = "https://tuqladhxuegvqqwyriqi.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xf2BijTju7QqbI2iQAnYOg_6ERMSr9n";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const PANTALLAS_AREA = ["Datacenter (Mock Up Visual)", "Template / Diseño Visual", "Datacenter (Desarrollo)"];
+const PANTALLA_DATACENTER_DEV = "Datacenter (Desarrollo)";
+
+const TEAM = [
+  { id:"zsosa",     name:"Zahi Sosa",       role:"Analista RTIC" },
+  { id:"jsanda",    name:"Juli Sanda",       role:"Analista RTIC" },
+  { id:"fchavez",   name:"Flor Chavez",      role:"Analista RTIC" },
+  { id:"lnegri",    name:"Luciano Negri",    role:"Analista RTIC" },
+  { id:"hambrosio", name:"Hernan Ambrosio",  role:"Analista RTIC" },
+  { id:"pcosta",    name:"Pedro/Costa",      role:"Analista RTIC" },
+];
+
+const AREAS = [
+  "Datacenter","Template / Diseño Visual","Planificación","Abastecimiento","Contextual",
+  "Compre Neuquino","Tiempos Intermedios","Licitaciones","Ahorros","Gestiones de Compras",
+  "Salud Contractual","Pedidos","Almacenes","COMEX","Transporte","Stock","Spend","CAPEX",
+  "Inspección y Activación","Accidentes IFA/IFAT","Gestión Vehicular","Gestión Patrimonial",
+  "Costo Pozo","GIP (Proveedores)","Desarrollo Proveedores","Datos & Digitalización","Otro",
+];
+
+
 
 const INIT  = { 1: SEED };
 const uid   = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -401,9 +406,17 @@ async function dbUpsertPantallaConfig(pantalla, fields) {
 
 /* ─── pantallas_cronograma helpers ─── */
 async function dbLoadPantallasCronograma() {
-  const { data, error } = await sb.from("pantallas_cronograma").select("*").eq("deleted", false).order("orden");
-  if (error) throw error;
-  return data || [];
+  try {
+    const { data, error } = await sb.from("pantallas_cronograma").select("*").eq("deleted", false).order("orden");
+    if (error) {
+      console.warn("pantallas_cronograma no disponible:", error.message || "sin detalle");
+      return [];
+    }
+    return data || [];
+  } catch(e) {
+    console.warn("pantallas_cronograma excepcion:", e && e.message ? e.message : String(e));
+    return [];
+  }
 }
 async function dbUpsertPantallaCronograma(id, fields) {
   const { error } = await sb.from("pantallas_cronograma").upsert(
@@ -500,8 +513,18 @@ function BarAcum({ label, pct, done, total, color }) {
 }
 
 /* ─── App principal ─── */
+const RANGOS_IND = [
+  { k:"Todos",  label:"Todos",    fn:()=>true },
+  { k:"0",      label:"0%",       fn:p=>p===0 },
+  { k:"1-25",   label:"1%-25%",   fn:p=>p>=1&&p<=25 },
+  { k:"25-50",  label:"25%-50%",  fn:p=>p>25&&p<=50 },
+  { k:"50-80",  label:"50%-80%",  fn:p=>p>50&&p<=80 },
+  { k:"80-99",  label:"80%-99%",  fn:p=>p>=80&&p<=99 },
+  { k:"100",    label:"100%",     fn:p=>p>=100 },
+];
+
 function App() {
-  const [pg,  setPg]  = useState("cover");
+  const [pg,  setPg]  = useState("avance");
   const [wk,  setWk]  = useState(1);
   const [dt,  setDt]  = useState(INIT);
   const [ed,  setEd]  = useState(null);
@@ -521,6 +544,7 @@ function App() {
   const [busqueda, setBusqueda]         = useState("");
   const [filtroEtapa, setFiltroEtapa]   = useState("Todas");
   const [filtroEstado, setFiltroEstado] = useState("Todos");
+  const [filtroRango,  setFiltroRango]  = useState("Todos");
   const [svTarea, setSvTarea]           = useState(null);
   const [editFechaFin, setEditFechaFin] = useState(null);
 
@@ -529,6 +553,7 @@ function App() {
   const [showAddPantalla, setShowAddPantalla] = useState(false);
   const [newPantalla, setNewPantalla]   = useState({ pantalla:"", etapa:ETAPAS_LISTA[0] });
   const [svPantalla, setSvPantalla]     = useState(null);
+  const [rangoInd,   setRangoInd]       = useState("Todos");
 
   useEffect(() => {
     const t = setInterval(() => setToday(new Date()), 60_000);
@@ -536,23 +561,37 @@ function App() {
   }, []);
 
   useEffect(() => {
-    Promise.all([
-      dbLoad(),
-      dbLoadTareas(),
-      dbLoadPantallaConfig(),
-      dbLoadPantallasCronograma(),
-    ]).then(([d, { map: tareas, tareasPorPantallaDin }, pconf, pantallasDin]) => {
-      setDt(d);
-      setTareaOv(tareas);
-      setPantallaConfig(pconf);
+    async function cargarTodo() {
+      try {
+        const d = await dbLoad();
+        setDt(d);
+      } catch(e) { console.warn("Error weekly_data:", e && e.message ? e.message : String(e)); }
+
+      let tareas = {}, tareasPorPantallaDin = {};
+      try {
+        const r = await dbLoadTareas();
+        tareas = r.map;
+        tareasPorPantallaDin = r.tareasPorPantallaDin;
+        setTareaOv(tareas);
+      } catch(e) { console.warn("Error task_progress:", e && e.message ? e.message : String(e)); }
+
+      let pconf = {};
+      try {
+        pconf = await dbLoadPantallaConfig();
+        setPantallaConfig(pconf);
+      } catch(e) { console.warn("Error pantalla_config:", e && e.message ? e.message : String(e)); }
+
+      let pantallasDin = [];
+      try {
+        pantallasDin = await dbLoadPantallasCronograma();
+      } catch(e) { console.warn("Error pantallas_cronograma:", e && e.message ? e.message : String(e)); }
 
       /* Merge: base hardcodeada (no eliminadas) + dinámicas de Supabase */
       const deletedHardcoded = new Set(
-        Object.entries(pconf).filter(([,v])=>v.deleted).map(([k])=>k)
+        Object.entries(pconf).filter(([,v])=>v&&v.deleted).map(([k])=>k)
       );
       const baseViva = CRONOGRAMA_BASE.filter(p => !deletedHardcoded.has(p.pantalla));
 
-      /* Pantallas dinámicas: inyectar sus tareas guardadas en Supabase */
       const pantallaNames = new Set(baseViva.map(p=>p.pantalla));
       const extras = pantallasDin
         .filter(p => !pantallaNames.has(p.pantalla))
@@ -566,7 +605,8 @@ function App() {
 
       setCronograma([...baseViva, ...extras]);
       setLd(false);
-    }).catch(e => { setErr("No se pudo conectar con Supabase."); setLd(false); console.error(e); });
+    }
+    cargarTodo().catch(e => { console.warn("cargarTodo fatal:", e && e.message ? e.message : String(e)); setLd(false); });
   }, []);
 
   const wd = dt[wk] || {};
@@ -689,6 +729,17 @@ function App() {
     return matchBusq && matchEtapa && matchEstado;
   });
 
+  const RANGOS = [
+    { k:"Todos",   label:"Todos",    fn:()=>true },
+    { k:"0",       label:"0%",       fn:p=>p===0 },
+    { k:"1-30",    label:"1%-30%",    fn:p=>p>=1&&p<=30 },
+    { k:"31-50",   label:"31%-50%",   fn:p=>p>=31&&p<=50 },
+    { k:"51-79",   label:"51%-79%",   fn:p=>p>=51&&p<=79 },
+    { k:"80-99",   label:"80%-99%",   fn:p=>p>=80&&p<=99 },
+    { k:"100",     label:"100%",     fn:p=>p>=100 },
+  ];
+  const rangoActivo = RANGOS.find(r=>r.k===filtroRango) || RANGOS[0];
+
   const _tts = cronograma.filter(p=>!PANTALLAS_AREA.includes(p.pantalla)).flatMap(p=>p.tareas);
   const avanceGlobal = _tts.length ? Math.round(_tts.reduce((s,t)=>{ const ov=tareaOv[t.id]; return s+(ov?normalizarProgreso(ov.progreso):normalizarProgreso(t.progreso)); },0)/_tts.length) : 0;
 
@@ -742,666 +793,765 @@ function App() {
       <div style={{ width:36, height:36, border:`3px solid ${C.bd}`, borderTop:`3px solid ${C.teal}`, borderRadius:"50%", animation:"sp 1s linear infinite" }}/>
       <div style={{ color:C.teal, fontSize:13 }}>Conectando con Supabase…</div>
       <style>{`@keyframes sp{to{transform:rotate(360deg)}}`}</style>
+
+```
+</div>
+```
+
+);
+
+return (
+<div style={{ fontFamily:”‘Segoe UI’,‘Helvetica Neue’,sans-serif”, background:”#e8ecf1”, minHeight:“100vh” }}>
+
+```
+  {/* NAV */}
+  <div style={{ background:C.navy, display:"flex", alignItems:"center", padding:"0 10px", borderBottom:`2px solid ${C.teal}`, position:"sticky", top:0, zIndex:100, flexWrap:"wrap" }}>
+    {[["avance","Avance"],["indicadores","Indicadores"],["input","Carga Semanal"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
+      <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px", border:"none", background:pg===k?C.nl:"transparent", color:pg===k?C.teal:C.gl2, fontSize:12, fontWeight:pg===k?600:400, cursor:"pointer", borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
+    ))}
+    <div style={{ marginLeft:"auto", padding:"6px 0" }}>
+      <select value={wk} onChange={e=>setWk(Number(e.target.value))}
+        style={{ background:C.nl, border:`1px solid ${C.bd}`, color:C.teal, padding:"5px 8px", borderRadius:4, fontSize:12, fontWeight:700, outline:"none" }}>
+        {WEEKS.map(w=><option key={w.n} value={w.n}>Sem {w.n} ({w.s}–{w.e})</option>)}
+      </select>
     </div>
-  );
+  </div>
 
-  return (
-    <div style={{ fontFamily:"'Segoe UI','Helvetica Neue',sans-serif", background:"#e8ecf1", minHeight:"100vh" }}>
+  {/* ── PORTADA ── */}
+  {/* ── AVANCE ── */}
+  {pg==="avance" && (() => {
+    const colAvance      = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?C.grn:a>0?C.gold:C.g; };
+    const estadoPantalla = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?"Completada":a>0?"En curso":"Pendiente"; };
 
-      {/* NAV */}
-      <div style={{ background:C.navy, display:"flex", alignItems:"center", padding:"0 10px", borderBottom:`2px solid ${C.teal}`, position:"sticky", top:0, zIndex:100, flexWrap:"wrap" }}>
-        {[["cover","Portada"],["input","Carga Semanal"],["avance","Avance"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
-          <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px", border:"none", background:pg===k?C.nl:"transparent", color:pg===k?C.teal:C.gl2, fontSize:12, fontWeight:pg===k?600:400, cursor:"pointer", borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
-        ))}
-        <div style={{ marginLeft:"auto", padding:"6px 0" }}>
-          <select value={wk} onChange={e=>setWk(Number(e.target.value))}
-            style={{ background:C.nl, border:`1px solid ${C.bd}`, color:C.teal, padding:"5px 8px", borderRadius:4, fontSize:12, fontWeight:700, outline:"none" }}>
-            {WEEKS.map(w=><option key={w.n} value={w.n}>Sem {w.n} ({w.s}–{w.e})</option>)}
-          </select>
-        </div>
-      </div>
+    const tareasParaContar   = cronograma.filter(p => !PANTALLAS_AREA.includes(p.pantalla));
+    const totalInd           = tareasParaContar.reduce((s,p) => s+p.tareas.length, 0);
+    const completadosInd     = tareasParaContar.reduce((s,p) => s+p.tareas.filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)>=100).length, 0);
+    const enCursoInd         = tareasParaContar.reduce((s,p) => s+p.tareas.filter(t=>{const v=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return v>0&&v<100;}).length, 0);
+    const pendientesInd      = totalInd - completadosInd - enCursoInd;
+    const statsInd = [
+      { v:totalInd,       l:"Total",        col:C.teal, bg:"rgba(0,188,212,0.12)" },
+      { v:completadosInd, l:"Completados",   col:C.gl,   bg:"rgba(76,175,80,0.12)" },
+      { v:enCursoInd,     l:"En curso",      col:C.gold, bg:"rgba(232,168,56,0.12)" },
+      { v:pendientesInd,  l:"Pendientes",    col:C.rl,   bg:"rgba(239,83,80,0.12)" },
+      { v:15,             l:"Indicadores Agregados", col:"#7c4dff", bg:"rgba(124,77,255,0.12)" },
+    ];
 
-      {/* ── PORTADA ── */}
-      {pg==="cover" && (
-        <div style={{ background:C.navy, minHeight:"calc(100vh - 46px)", display:"flex", flexDirection:"column", justifyContent:"center", padding:"50px 70px", position:"relative" }}>
-          <div style={{ maxWidth:750 }}>
-            <h1 style={{ fontSize:48, fontWeight:300, color:C.w, lineHeight:1.1, margin:0 }}>REAL TIME INTELLIGENCE CENTER</h1>
-            <div style={{ width:350, height:4, background:C.teal, margin:"28px 0" }}/>
-            <h2 style={{ fontSize:24, fontWeight:300, color:C.teal, margin:"0 0 40px" }}>Resumen Ejecutivo Semanal</h2>
-            <div style={{ background:C.nl, border:`1px solid ${C.bd}`, borderRadius:4, padding:"22px 26px", maxWidth:460 }}>
-              {[["SEMANA",`N°${wk} — ${wc.sf} al ${wc.ef}`],["RESPONSABLE","Claus Drescher"],["ÁREA","Supply Chain — Performance"],["VERSIÓN","v1.0"]].map(([l,v])=>(
-                <div key={l} style={{ marginBottom:11 }}>
-                  <span style={{ fontSize:11, fontWeight:700, color:C.teal, letterSpacing:1.5, marginRight:10 }}>{l}</span>
-                  <span style={{ fontSize:13, color:C.w }}>{v}</span>
+    return (
+      <div style={{ background:"#e8ecf1" }}>
+        {PH("AVANCE DE PANTALLAS")}
+
+        {/* Barras + contador */}
+        <div style={{ background:C.navy, padding:"16px 28px", display:"flex", flexDirection:"column", gap:14, borderBottom:`1px solid ${C.bd}` }}>
+
+          {/* Avance promedio indicadores */}
+          <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+            <span style={{ fontSize:11, color:C.g, minWidth:250 }}>AVANCE DE INDICADORES (ponderado por avance)</span>
+            <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
+              <div style={{ width:`${avanceGlobal}%`, height:"100%", background:avanceGlobal>=100?C.gl:avanceGlobal>30?C.teal:C.gold, borderRadius:99, transition:"width .4s" }}/>
+            </div>
+            <span style={{ fontSize:15, fontWeight:700, color:C.teal, minWidth:44 }}>{avanceGlobal}%</span>
+            {svTarea && <span style={{ fontSize:10, color:svTarea==="ok"?C.gl:svTarea==="error"?C.rl:C.gold, marginLeft:"auto" }}>{svTarea==="saving"?"Guardando…":svTarea==="ok"?"✓ Guardado":"⚠ Error al guardar"}</span>}
+            {svPantalla && <span style={{ fontSize:10, color:svPantalla==="ok"?C.gl:svPantalla==="error"?C.rl:C.gold, marginLeft: svTarea?"8px":"auto" }}>{svPantalla==="saving"?"Guardando pantalla…":svPantalla==="ok"?"✓ Pantalla guardada":"⚠ Error"}</span>}
+          </div>
+
+          {/* Avance acumulado a la fecha */}
+          <BarAcum
+            label="AVANCE ACUMULADO A LA FECHA"
+            pct={indicadoresHoy.pctTareas}
+            done={indicadoresHoy.tareasDone}
+            total={indicadoresHoy.tareasTotal}
+          />
+
+          {/* ── NUEVA BARRA: Datacenter Desarrollo ── */}
+          <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+            <span style={{ fontSize:11, color:C.g, minWidth:250 }}>
+              DATACENTER (DESARROLLO)
+            </span>
+            <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
+              <div style={{
+                width:`${datacenterDevStats.pct}%`,
+                height:"100%",
+                background: datacenterDevStats.pct>=100 ? C.gl : datacenterDevStats.pct>0 ? "#7c4dff" : C.g,
+                borderRadius:99,
+                transition:"width .5s"
+              }}/>
+            </div>
+            <span style={{ fontSize:15, fontWeight:700, color: datacenterDevStats.pct>=100 ? C.gl : datacenterDevStats.pct>0 ? "#7c4dff" : C.g, minWidth:44 }}>
+              {datacenterDevStats.pct}%
+            </span>
+            <span style={{ fontSize:10, color:C.g }}>
+              {datacenterDevStats.total === 0
+                ? "Sin pantallas registradas"
+                : `${datacenterDevStats.completadas}/${datacenterDevStats.total} pantallas completadas`}
+            </span>
+          </div>
+
+          {/* Contador indicadores */}
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ fontSize:11, color:C.g, minWidth:250 }}>TOTAL INDICADORES</span>
+            <div style={{ display:"flex", gap:8 }}>
+              {statsInd.map(s=>(
+                <div key={s.l} style={{ textAlign:"center", padding:"12px 24px", borderRadius:8, background:s.bg, border:`1px solid ${s.col}44` }}>
+                  <div style={{ fontSize:36, fontWeight:700, color:s.col, lineHeight:1 }}>{s.v}</div>
+                  <div style={{ fontSize:11, color:s.col, marginTop:6, letterSpacing:0.5, fontWeight:500 }}>{s.l}</div>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ position:"absolute", bottom:24, left:0, right:0, textAlign:"center", fontSize:11, color:C.g }}>PRIVADO — USO INTERNO</div>
-        </div>
-      )}
 
-      {/* ── AVANCE ── */}
-      {pg==="avance" && (() => {
-        const colAvance      = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?C.grn:a>0?C.gold:C.g; };
-        const estadoPantalla = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?"Completada":a>0?"En curso":"Pendiente"; };
-
-        const tareasParaContar   = cronograma.filter(p => !PANTALLAS_AREA.includes(p.pantalla));
-        const totalInd           = tareasParaContar.reduce((s,p) => s+p.tareas.length, 0);
-        const completadosInd     = tareasParaContar.reduce((s,p) => s+p.tareas.filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)>=100).length, 0);
-        const enCursoInd         = tareasParaContar.reduce((s,p) => s+p.tareas.filter(t=>{const v=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return v>0&&v<100;}).length, 0);
-        const pendientesInd      = totalInd - completadosInd - enCursoInd;
-        const statsInd = [
-          { v:totalInd,       l:"Total",        col:C.teal, bg:"rgba(0,188,212,0.12)" },
-          { v:completadosInd, l:"Completados",   col:C.gl,   bg:"rgba(76,175,80,0.12)" },
-          { v:enCursoInd,     l:"En curso",      col:C.gold, bg:"rgba(232,168,56,0.12)" },
-          { v:pendientesInd,  l:"Pendientes",    col:C.rl,   bg:"rgba(239,83,80,0.12)" },
-          { v:15,             l:"Indicadores Agregados", col:"#7c4dff", bg:"rgba(124,77,255,0.12)" },
-        ];
-
-        return (
-          <div style={{ background:"#e8ecf1" }}>
-            {PH("AVANCE DE PANTALLAS")}
-
-            {/* Barras + contador */}
-            <div style={{ background:C.navy, padding:"16px 28px", display:"flex", flexDirection:"column", gap:14, borderBottom:`1px solid ${C.bd}` }}>
-
-              {/* Avance promedio de indicadores) */}
-              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>AVANCE DE INDICADORES (ponderado por avance)</span>
-                <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
-                  <div style={{ width:`${avanceGlobal}%`, height:"100%", background:avanceGlobal>=100?C.gl:avanceGlobal>30?C.teal:C.gold, borderRadius:99, transition:"width .4s" }}/>
-                </div>
-                <span style={{ fontSize:15, fontWeight:700, color:C.teal, minWidth:44 }}>{avanceGlobal}%</span>
-                {svTarea && <span style={{ fontSize:10, color:svTarea==="ok"?C.gl:svTarea==="error"?C.rl:C.gold, marginLeft:"auto" }}>{svTarea==="saving"?"Guardando…":svTarea==="ok"?"✓ Guardado":"⚠ Error al guardar"}</span>}
-                {svPantalla && <span style={{ fontSize:10, color:svPantalla==="ok"?C.gl:svPantalla==="error"?C.rl:C.gold, marginLeft: svTarea?"8px":"auto" }}>{svPantalla==="saving"?"Guardando pantalla…":svPantalla==="ok"?"✓ Pantalla guardada":"⚠ Error"}</span>}
-              </div>
-
-              {/* Avance acumulado a la fecha */}
-              <BarAcum
-                label="AVANCE ACUMULADO A LA FECHA"
-                pct={indicadoresHoy.pctTareas}
-                done={indicadoresHoy.tareasDone}
-                total={indicadoresHoy.tareasTotal}
-              />
-
-              {/* ── NUEVA BARRA: Datacenter Desarrollo ── */}
-              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
-                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>
-                  DATACENTER (DESARROLLO)
-                </span>
-                <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
-                  <div style={{
-                    width:`${datacenterDevStats.pct}%`,
-                    height:"100%",
-                    background: datacenterDevStats.pct>=100 ? C.gl : datacenterDevStats.pct>0 ? "#7c4dff" : C.g,
-                    borderRadius:99,
-                    transition:"width .5s"
-                  }}/>
-                </div>
-                <span style={{ fontSize:15, fontWeight:700, color: datacenterDevStats.pct>=100 ? C.gl : datacenterDevStats.pct>0 ? "#7c4dff" : C.g, minWidth:44 }}>
-                  {datacenterDevStats.pct}%
-                </span>
-                <span style={{ fontSize:10, color:C.g }}>
-                  {datacenterDevStats.total === 0
-                    ? "Sin pantallas registradas"
-                    : `${datacenterDevStats.completadas}/${datacenterDevStats.total} pantallas completadas`}
-                </span>
-              </div>
-
-              {/* Contador indicadores */}
+          {/* Contador por rango de avance */}
+          {(() => {
+            const todasInd = tareasParaContar.flatMap(p => p.tareas);
+            const getP = t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso);
+            const rangosContador = [
+              { k:"0",     label:"0%",      col:"#90a4ae", bg:"rgba(144,164,174,0.12)", fn:p=>p===0 },
+              { k:"1-30",  label:"1%-30%",  col:C.rl,      bg:"rgba(239,83,80,0.10)",   fn:p=>p>=1&&p<=30 },
+              { k:"31-50", label:"31%-50%", col:C.gold,    bg:"rgba(232,168,56,0.10)",  fn:p=>p>=31&&p<=50 },
+              { k:"51-79", label:"51%-79%", col:"#26c6da", bg:"rgba(38,198,218,0.10)",  fn:p=>p>=51&&p<=79 },
+              { k:"80-99", label:"80%-99%", col:C.teal,    bg:"rgba(0,188,212,0.12)",   fn:p=>p>=80&&p<=99 },
+              { k:"100",   label:"100%",    col:C.gl,      bg:"rgba(76,175,80,0.12)",   fn:p=>p>=100 },
+            ];
+            return (
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>TOTAL INDICADORES</span>
-                <div style={{ display:"flex", gap:8 }}>
-                  {statsInd.map(s=>(
-                    <div key={s.l} style={{ textAlign:"center", padding:"12px 24px", borderRadius:8, background:s.bg, border:`1px solid ${s.col}44` }}>
-                      <div style={{ fontSize:36, fontWeight:700, color:s.col, lineHeight:1 }}>{s.v}</div>
-                      <div style={{ fontSize:11, color:s.col, marginTop:6, letterSpacing:0.5, fontWeight:500 }}>{s.l}</div>
-                    </div>
-                  ))}
+                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>INDICADORES POR RANGO</span>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  {rangosContador.map(r => {
+                    const count = todasInd.filter(t => r.fn(getP(t))).length;
+                    return (
+                      <div key={r.k} style={{ textAlign:"center", padding:"10px 18px", borderRadius:8, background:r.bg, border:`1px solid ${r.col}44`, minWidth:72 }}>
+                        <div style={{ fontSize:30, fontWeight:700, color:r.col, lineHeight:1 }}>{count}</div>
+                        <div style={{ fontSize:10, color:r.col, marginTop:5, fontWeight:600, letterSpacing:0.3 }}>{r.label}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
+            );
+          })()}
+        </div>
 
-            {/* Filtros */}
-            <div style={{ padding:"12px 24px", background:C.w, borderBottom:"1px solid #e8ecf1", display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
-              <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="🔍 Buscar pantalla..."
-                style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12, width:220 }}/>
-              <select value={filtroEtapa} onChange={e=>setFiltroEtapa(e.target.value)}
-                style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12 }}>
-                <option value="Todas">Todas las etapas</option>
-                {etapas.map(e=><option key={e} value={e}>{e}</option>)}
-              </select>
-              <select value={filtroEstado} onChange={e=>setFiltroEstado(e.target.value)}
-                style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12 }}>
-                {["Todos","Pendiente","En curso","Completada"].map(e=><option key={e} value={e}>{e}</option>)}
-              </select>
-              <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
-            </div>
+        {/* Filtros */}
+        <div style={{ padding:"12px 24px", background:C.w, borderBottom:"1px solid #e8ecf1", display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
+          <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="🔍 Buscar pantalla..."
+            style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12, width:220 }}/>
+          <select value={filtroEtapa} onChange={e=>setFiltroEtapa(e.target.value)}
+            style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12 }}>
+            <option value="Todas">Todas las etapas</option>
+            {etapas.map(e=><option key={e} value={e}>{e}</option>)}
+          </select>
+          <select value={filtroEstado} onChange={e=>setFiltroEstado(e.target.value)}
+            style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12 }}>
+            {["Todos","Pendiente","En curso","Completada"].map(e=><option key={e} value={e}>{e}</option>)}
+          </select>
+          <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+            {RANGOS.map(r=>(
+              <button key={r.k} onClick={()=>setFiltroRango(r.k)}
+                style={{ padding:"5px 10px", borderRadius:4, border:`1px solid ${filtroRango===r.k?C.teal:"#dde"}`, background:filtroRango===r.k?"rgba(0,188,212,0.10)":"#fff", color:filtroRango===r.k?C.td:"#546e7a", fontSize:11, fontWeight:filtroRango===r.k?700:400, cursor:"pointer", whiteSpace:"nowrap" }}>
+                {r.label}
+              </button>
+            ))}
+          </div>
+          <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
+        </div>
 
-            {/* Cards */}
-            <div style={{ padding:"18px 24px" }}>
-              {pantallasVisibles.map(p => {
-                const avance         = calcularAvancePantalla(p.tareas, tareaOv);
-                const estado         = estadoPantalla(p);
-                const col            = colAvance(p);
-                const isExp          = expandedP === p.pantalla;
-                const completadas    = p.tareas.filter(t=>normalizarProgreso((tareaOv[t.id]||t).progreso)>=100).length;
-                const enCurso        = p.tareas.filter(t=>{const v=normalizarProgreso((tareaOv[t.id]||t).progreso);return v>0&&v<100;}).length;
-                const pendientes     = p.tareas.filter(t=>normalizarProgreso((tareaOv[t.id]||t).progreso)===0).length;
-                const isAddingHere   = newTarea === p.pantalla;
-                const ffVal          = pantallaConfig[p.pantalla]?.fecha_fin || "";
-                const esPantallaArea = PANTALLAS_AREA.includes(p.pantalla);
-                const labelItem      = esPantallaArea ? "Pantallas de Área" : "indicadores";
-                return (
-                  <div key={p.pantalla} style={{ background:C.w, borderRadius:6, marginBottom:10, border:`1px solid ${isExp?C.teal:"#e0e0e0"}`, overflow:"hidden", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
-                    {/* Cabecera */}
-                    <div style={{ padding:"14px 18px", display:"flex", alignItems:"center", gap:14 }}>
-                      {/* Zona clickeable para expandir */}
-                      <div onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }}
-                        style={{ flex:1, cursor:"pointer" }}>
-                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                          <span style={{ fontSize:14, fontWeight:700, color:C.navy }}>{p.pantalla}</span>
-                          <span style={{ fontSize:10, color:C.g }}>{p.etapa}</span>
-                          {!p.hardcoded && <span style={{ fontSize:9, padding:"1px 6px", borderRadius:99, background:"rgba(0,188,212,0.1)", color:C.teal, fontWeight:600 }}>DINÁMICA</span>}
-                          <span style={{ padding:"2px 8px", borderRadius:99, fontSize:9, fontWeight:700, background:estado==="Completada"?"rgba(46,125,50,0.1)":estado==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.15)", color:estado==="Completada"?C.grn:estado==="En curso"?"#b8860b":C.g, marginLeft:"auto" }}>{estado}</span>
-                        </div>
-                        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                          <div style={{ flex:1, height:8, background:"#f0f0f0", borderRadius:99 }}>
-                            <div style={{ width:`${avance}%`, height:"100%", background:col, borderRadius:99, transition:"width .4s" }}/>
-                          </div>
-                          <span style={{ fontSize:13, fontWeight:700, color:col, minWidth:38, textAlign:"right" }}>{avance}%</span>
-                        </div>
-                        <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10, color:C.g, alignItems:"center", flexWrap:"wrap" }}>
-                          <span>📋 {p.tareas.length} {labelItem}</span>
-                          <span style={{ color:C.grn }}>✓ {completadas}</span>
-                          <span style={{ color:"#b8860b" }}>◑ {enCurso}</span>
-                          <span>○ {pendientes}</span>
-                          <span style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:4 }}>
-                            🗓 Fecha fin:
-                            {editFechaFin === p.pantalla
-                              ? <span onClick={e=>e.stopPropagation()} style={{ display:"flex", gap:4, alignItems:"center" }}>
-                                  <input type="date" defaultValue={ffVal} id={`ff-${p.pantalla.replace(/[^a-zA-Z0-9]/g,"_")}`}
-                                    style={{ padding:"2px 5px", border:"1px solid #dde", borderRadius:3, fontSize:10 }}/>
-                                  <button onClick={async e => {
-                                    e.stopPropagation();
-                                    const val = document.getElementById(`ff-${p.pantalla.replace(/[^a-zA-Z0-9]/g,"_")}`).value;
-                                    try { await dbUpsertPantallaConfig(p.pantalla, { fecha_fin:val||null }); setPantallaConfig(prev=>({...prev,[p.pantalla]:{...prev[p.pantalla],fecha_fin:val}})); }
-                                    catch(e){ console.error(e); }
-                                    setEditFechaFin(null);
-                                  }} style={{ padding:"2px 7px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
-                                  <button onClick={e=>{e.stopPropagation();setEditFechaFin(null);}} style={{ padding:"2px 6px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
-                                </span>
-                              : <span onClick={e=>{e.stopPropagation();setEditFechaFin(p.pantalla);}} style={{ cursor:"pointer", color:ffVal?C.navy:"#bbb", textDecoration:"underline dotted" }}>
-                                  {ffVal || "Sin definir"}
-                                </span>
-                            }
-                          </span>
-                        </div>
+        {/* Cards */}
+        <div style={{ padding:"18px 24px" }}>
+          {pantallasVisibles.map(p => {
+            const avance         = calcularAvancePantalla(p.tareas, tareaOv);
+            const estado         = estadoPantalla(p);
+            const col            = colAvance(p);
+            const isExp          = expandedP === p.pantalla;
+            const completadas    = p.tareas.filter(t=>normalizarProgreso((tareaOv[t.id]||t).progreso)>=100).length;
+            const enCurso        = p.tareas.filter(t=>{const v=normalizarProgreso((tareaOv[t.id]||t).progreso);return v>0&&v<100;}).length;
+            const pendientes     = p.tareas.filter(t=>normalizarProgreso((tareaOv[t.id]||t).progreso)===0).length;
+            const isAddingHere   = newTarea === p.pantalla;
+            const ffVal          = pantallaConfig[p.pantalla]?.fecha_fin || "";
+            const esPantallaArea = PANTALLAS_AREA.includes(p.pantalla);
+            const labelItem      = esPantallaArea ? "Pantallas de Área" : "indicadores";
+            return (
+              <div key={p.pantalla} style={{ background:C.w, borderRadius:6, marginBottom:10, border:`1px solid ${isExp?C.teal:"#e0e0e0"}`, overflow:"hidden", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
+                {/* Cabecera */}
+                <div style={{ padding:"14px 18px", display:"flex", alignItems:"center", gap:14 }}>
+                  {/* Zona clickeable para expandir */}
+                  <div onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }}
+                    style={{ flex:1, cursor:"pointer" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                      <span style={{ fontSize:14, fontWeight:700, color:C.navy }}>{p.pantalla}</span>
+                      <span style={{ fontSize:10, color:C.g }}>{p.etapa}</span>
+                      {!p.hardcoded && <span style={{ fontSize:9, padding:"1px 6px", borderRadius:99, background:"rgba(0,188,212,0.1)", color:C.teal, fontWeight:600 }}>DINÁMICA</span>}
+                      <span style={{ padding:"2px 8px", borderRadius:99, fontSize:9, fontWeight:700, background:estado==="Completada"?"rgba(46,125,50,0.1)":estado==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.15)", color:estado==="Completada"?C.grn:estado==="En curso"?"#b8860b":C.g, marginLeft:"auto" }}>{estado}</span>
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <div style={{ flex:1, height:8, background:"#f0f0f0", borderRadius:99 }}>
+                        <div style={{ width:`${avance}%`, height:"100%", background:col, borderRadius:99, transition:"width .4s" }}/>
                       </div>
-                      {/* Botón eliminar pantalla — fuera de la zona clickeable */}
-                      <button
-                        onClick={e=>{ e.stopPropagation(); eliminarPantalla(p); }}
-                        title="Eliminar pantalla"
-                        style={{ padding:"5px 9px", border:"1px solid rgba(198,40,40,0.2)", background:"rgba(198,40,40,0.06)", color:C.red, borderRadius:4, fontSize:12, cursor:"pointer", flexShrink:0 }}>
-                        🗑️
-                      </button>
-                      <span onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }} style={{ fontSize:16, color:C.g, userSelect:"none", cursor:"pointer" }}>{isExp?"▲":"▼"}</span>
+                      <span style={{ fontSize:13, fontWeight:700, color:col, minWidth:38, textAlign:"right" }}>{avance}%</span>
+                    </div>
+                    <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10, color:C.g, alignItems:"center", flexWrap:"wrap" }}>
+                      <span>📋 {p.tareas.length} {labelItem}</span>
+                      <span style={{ color:C.grn }}>✓ {completadas}</span>
+                      <span style={{ color:"#b8860b" }}>◑ {enCurso}</span>
+                      <span>○ {pendientes}</span>
+                      <span style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:4 }}>
+                        🗓 Fecha fin:
+                        {editFechaFin === p.pantalla
+                          ? <span onClick={e=>e.stopPropagation()} style={{ display:"flex", gap:4, alignItems:"center" }}>
+                              <input type="date" defaultValue={ffVal} id={`ff-${p.pantalla.replace(/[^a-zA-Z0-9]/g,"_")}`}
+                                style={{ padding:"2px 5px", border:"1px solid #dde", borderRadius:3, fontSize:10 }}/>
+                              <button onClick={async e => {
+                                e.stopPropagation();
+                                const val = document.getElementById(`ff-${p.pantalla.replace(/[^a-zA-Z0-9]/g,"_")}`).value;
+                                try { await dbUpsertPantallaConfig(p.pantalla, { fecha_fin:val||null }); setPantallaConfig(prev=>({...prev,[p.pantalla]:{...prev[p.pantalla],fecha_fin:val}})); }
+                                catch(e){ console.error(e); }
+                                setEditFechaFin(null);
+                              }} style={{ padding:"2px 7px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
+                              <button onClick={e=>{e.stopPropagation();setEditFechaFin(null);}} style={{ padding:"2px 6px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
+                            </span>
+                          : <span onClick={e=>{e.stopPropagation();setEditFechaFin(p.pantalla);}} style={{ cursor:"pointer", color:ffVal?C.navy:"#bbb", textDecoration:"underline dotted" }}>
+                              {ffVal || "Sin definir"}
+                            </span>
+                        }
+                      </span>
+                    </div>
+                  </div>
+                  {/* Botón eliminar pantalla — fuera de la zona clickeable */}
+                  <button
+                    onClick={e=>{ e.stopPropagation(); eliminarPantalla(p); }}
+                    title="Eliminar pantalla"
+                    style={{ padding:"5px 9px", border:"1px solid rgba(198,40,40,0.2)", background:"rgba(198,40,40,0.06)", color:C.red, borderRadius:4, fontSize:12, cursor:"pointer", flexShrink:0 }}>
+                    🗑️
+                  </button>
+                  <span onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }} style={{ fontSize:16, color:C.g, userSelect:"none", cursor:"pointer" }}>{isExp?"▲":"▼"}</span>
+                </div>
+
+                {/* Detalle expandido */}
+                {isExp && (
+                  <div style={{ borderTop:`1px solid #f0f0f0` }}>
+                    <div style={{ overflowX:"auto" }}>
+                      <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                        <thead>
+                          <tr style={{ background:"#f7f9fb" }}>
+                            {[esPantallaArea?"Pantalla de Área":"Indicador","Progreso","Estado","Responsable","Inicio","Fin","Comentario",""].map(h=>(
+                              <th key={h} style={{ padding:"7px 8px", textAlign:"left", color:C.g, fontWeight:600, fontSize:10, borderBottom:"1px solid #eee" }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {p.tareas.filter(t => { const prog = normalizarProgreso((tareaOv[t.id]||t).progreso); return rangoActivo.fn(prog); }).map(t => {
+                            const ov     = tareaOv[t.id] || {};
+                            const prog   = normalizarProgreso(ov.progreso!==undefined?ov.progreso:t.progreso);
+                            const resp   = ov.responsable || t.responsable;
+                            const ini    = ov.inicio || t.inicio;
+                            const fin2   = ov.fin || t.fin;
+                            const coment = ov.comentario!==undefined?ov.comentario:t.comentario;
+                            const est    = estadoTarea(prog);
+                            const isEditing = editTarea?.id === t.id;
+                            return (
+                              <tr key={t.id} style={{ borderBottom:"1px solid #f5f5f5", background:isEditing?"#fffdf0":"transparent" }}>
+                                <td style={{ padding:"8px", color:C.navy, maxWidth:200 }}>{t.nombre}</td>
+                                <td style={{ padding:"8px", minWidth:100 }}>
+                                  {isEditing
+                                    ? <input type="number" min={0} max={100} value={editTarea.progreso} onChange={e=>setEditTarea(p=>({...p,progreso:e.target.value}))}
+                                        style={{ width:60, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                    : <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                                        <div style={{ width:60, height:5, background:"#f0f0f0", borderRadius:99 }}>
+                                          <div style={{ width:`${prog}%`, height:"100%", background:prog>=100?C.grn:prog>0?C.gold:C.g, borderRadius:99 }}/>
+                                        </div>
+                                        <span style={{ fontWeight:700, color:prog>=100?C.grn:prog>0?"#b8860b":C.g }}>{prog}%</span>
+                                      </div>
+                                  }
+                                </td>
+                                <td style={{ padding:"8px" }}>
+                                  <span style={{ padding:"2px 6px", borderRadius:3, fontSize:9, fontWeight:700, background:est==="Completada"?"rgba(46,125,50,0.1)":est==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.1)", color:est==="Completada"?C.grn:est==="En curso"?"#b8860b":C.g }}>{est}</span>
+                                </td>
+                                <td style={{ padding:"8px" }}>
+                                  {isEditing
+                                    ? <><input value={editTarea.responsable} onChange={e=>setEditTarea(p=>({...p,responsable:e.target.value}))}
+                                        list="resp-list-edit"
+                                        style={{ width:110, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                      <datalist id="resp-list-edit">{responsablesLista.map(r=><option key={r} value={r}/>)}</datalist></>
+                                    : <span style={{ color:"#546e7a" }}>{resp}</span>}
+                                </td>
+                                <td style={{ padding:"8px" }}>
+                                  {isEditing
+                                    ? <input type="date" value={editTarea.inicio} onChange={e=>setEditTarea(p=>({...p,inicio:e.target.value}))}
+                                        style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                    : <span style={{ color:"#90a4ae" }}>{ini}</span>}
+                                </td>
+                                <td style={{ padding:"8px" }}>
+                                  {isEditing
+                                    ? <input type="date" value={editTarea.fin} onChange={e=>setEditTarea(p=>({...p,fin:e.target.value}))}
+                                        style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                    : <span style={{ color:"#90a4ae" }}>{fin2}</span>}
+                                </td>
+                                <td style={{ padding:"8px", maxWidth:160 }}>
+                                  {isEditing
+                                    ? <input value={editTarea.comentario} onChange={e=>setEditTarea(p=>({...p,comentario:e.target.value}))}
+                                        style={{ width:"100%", padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
+                                    : <span style={{ color:"#90a4ae", fontStyle:"italic" }}>{coment||"—"}</span>}
+                                </td>
+                                <td style={{ padding:"8px", whiteSpace:"nowrap" }}>
+                                  {isEditing
+                                    ? <div style={{ display:"flex", gap:4 }}>
+                                        <button onClick={()=>guardarTarea(t,editTarea)} style={{ padding:"3px 8px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
+                                        <button onClick={()=>setEditTarea(null)} style={{ padding:"3px 7px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
+                                      </div>
+                                    : <div style={{ display:"flex", gap:4 }}>
+                                        <button onClick={()=>setEditTarea({id:t.id,progreso:prog,responsable:resp,inicio:ini,fin:fin2,comentario:coment})} style={{ padding:"3px 8px", background:C.nl, color:C.gl2, border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✏️</button>
+                                        <button onClick={()=>borrarTarea(t,p.pantalla)} style={{ padding:"3px 8px", background:"rgba(198,40,40,0.08)", color:C.red, border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>🗑️</button>
+                                      </div>
+                                  }
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
 
-                    {/* Detalle expandido */}
-                    {isExp && (
-                      <div style={{ borderTop:`1px solid #f0f0f0` }}>
-                        <div style={{ overflowX:"auto" }}>
-                          <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
-                            <thead>
-                              <tr style={{ background:"#f7f9fb" }}>
-                                {[esPantallaArea?"Pantalla de Área":"Indicador","Progreso","Estado","Responsable","Inicio","Fin","Comentario",""].map(h=>(
-                                  <th key={h} style={{ padding:"7px 8px", textAlign:"left", color:C.g, fontWeight:600, fontSize:10, borderBottom:"1px solid #eee" }}>{h}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {p.tareas.map(t => {
-                                const ov     = tareaOv[t.id] || {};
-                                const prog   = normalizarProgreso(ov.progreso!==undefined?ov.progreso:t.progreso);
-                                const resp   = ov.responsable || t.responsable;
-                                const ini    = ov.inicio || t.inicio;
-                                const fin2   = ov.fin || t.fin;
-                                const coment = ov.comentario!==undefined?ov.comentario:t.comentario;
-                                const est    = estadoTarea(prog);
-                                const isEditing = editTarea?.id === t.id;
-                                return (
-                                  <tr key={t.id} style={{ borderBottom:"1px solid #f5f5f5", background:isEditing?"#fffdf0":"transparent" }}>
-                                    <td style={{ padding:"8px", color:C.navy, maxWidth:200 }}>{t.nombre}</td>
-                                    <td style={{ padding:"8px", minWidth:100 }}>
-                                      {isEditing
-                                        ? <input type="number" min={0} max={100} value={editTarea.progreso} onChange={e=>setEditTarea(p=>({...p,progreso:e.target.value}))}
-                                            style={{ width:60, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                        : <div style={{ display:"flex", alignItems:"center", gap:5 }}>
-                                            <div style={{ width:60, height:5, background:"#f0f0f0", borderRadius:99 }}>
-                                              <div style={{ width:`${prog}%`, height:"100%", background:prog>=100?C.grn:prog>0?C.gold:C.g, borderRadius:99 }}/>
-                                            </div>
-                                            <span style={{ fontWeight:700, color:prog>=100?C.grn:prog>0?"#b8860b":C.g }}>{prog}%</span>
-                                          </div>
-                                      }
-                                    </td>
-                                    <td style={{ padding:"8px" }}>
-                                      <span style={{ padding:"2px 6px", borderRadius:3, fontSize:9, fontWeight:700, background:est==="Completada"?"rgba(46,125,50,0.1)":est==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.1)", color:est==="Completada"?C.grn:est==="En curso"?"#b8860b":C.g }}>{est}</span>
-                                    </td>
-                                    <td style={{ padding:"8px" }}>
-                                      {isEditing
-                                        ? <><input value={editTarea.responsable} onChange={e=>setEditTarea(p=>({...p,responsable:e.target.value}))}
-                                            list="resp-list-edit"
-                                            style={{ width:110, padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                          <datalist id="resp-list-edit">{responsablesLista.map(r=><option key={r} value={r}/>)}</datalist></>
-                                        : <span style={{ color:"#546e7a" }}>{resp}</span>}
-                                    </td>
-                                    <td style={{ padding:"8px" }}>
-                                      {isEditing
-                                        ? <input type="date" value={editTarea.inicio} onChange={e=>setEditTarea(p=>({...p,inicio:e.target.value}))}
-                                            style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                        : <span style={{ color:"#90a4ae" }}>{ini}</span>}
-                                    </td>
-                                    <td style={{ padding:"8px" }}>
-                                      {isEditing
-                                        ? <input type="date" value={editTarea.fin} onChange={e=>setEditTarea(p=>({...p,fin:e.target.value}))}
-                                            style={{ padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                        : <span style={{ color:"#90a4ae" }}>{fin2}</span>}
-                                    </td>
-                                    <td style={{ padding:"8px", maxWidth:160 }}>
-                                      {isEditing
-                                        ? <input value={editTarea.comentario} onChange={e=>setEditTarea(p=>({...p,comentario:e.target.value}))}
-                                            style={{ width:"100%", padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                        : <span style={{ color:"#90a4ae", fontStyle:"italic" }}>{coment||"—"}</span>}
-                                    </td>
-                                    <td style={{ padding:"8px", whiteSpace:"nowrap" }}>
-                                      {isEditing
-                                        ? <div style={{ display:"flex", gap:4 }}>
-                                            <button onClick={()=>guardarTarea(t,editTarea)} style={{ padding:"3px 8px", background:C.teal, color:C.w, border:"none", borderRadius:3, fontSize:10, fontWeight:700, cursor:"pointer" }}>✓</button>
-                                            <button onClick={()=>setEditTarea(null)} style={{ padding:"3px 7px", background:"#eee", border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✕</button>
-                                          </div>
-                                        : <div style={{ display:"flex", gap:4 }}>
-                                            <button onClick={()=>setEditTarea({id:t.id,progreso:prog,responsable:resp,inicio:ini,fin:fin2,comentario:coment})} style={{ padding:"3px 8px", background:C.nl, color:C.gl2, border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>✏️</button>
-                                            <button onClick={()=>borrarTarea(t,p.pantalla)} style={{ padding:"3px 8px", background:"rgba(198,40,40,0.08)", color:C.red, border:"none", borderRadius:3, fontSize:10, cursor:"pointer" }}>🗑️</button>
-                                          </div>
-                                      }
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Agregar indicador/pantalla */}
-                        {isAddingHere
-                          ? <div style={{ padding:"12px 16px", background:"rgba(0,188,212,0.04)", borderTop:"1px solid #e0f7fa" }}>
-                              <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ {esPantallaArea?"Nueva Pantalla de Área":"Nuevo indicador"} en {p.pantalla}</div>
-                              <div style={{ display:"grid", gridTemplateColumns:"2fr 80px 1fr 1fr 1fr 2fr auto", gap:6, alignItems:"center" }}>
-                                <input value={newForm.nombre} onChange={e=>setNewForm(f=>({...f,nombre:e.target.value}))} placeholder={esPantallaArea?"Nombre de la pantalla *":"Nombre del indicador *"}
-                                  style={{ padding:"5px 7px", border:`1px solid ${newForm.nombre?"#dde":C.rl}`, borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
-                                <input type="number" min={0} max={100} value={newForm.progreso} onChange={e=>setNewForm(f=>({...f,progreso:e.target.value}))}
-                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
-                                <input value={newForm.responsable} onChange={e=>setNewForm(f=>({...f,responsable:e.target.value}))} placeholder="Responsable"
-                                  list="resp-list"
-                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
-                                <datalist id="resp-list">{responsablesLista.map(r=><option key={r} value={r}/>)}</datalist>
-                                <input type="date" value={newForm.inicio} onChange={e=>setNewForm(f=>({...f,inicio:e.target.value}))}
-                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
-                                <input type="date" value={newForm.fin} onChange={e=>setNewForm(f=>({...f,fin:e.target.value}))}
-                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
-                                <input value={newForm.comentario} onChange={e=>setNewForm(f=>({...f,comentario:e.target.value}))} placeholder="Comentario"
-                                  style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
-                                <div style={{ display:"flex", gap:4 }}>
-                                  <button onClick={()=>agregarTarea(p.pantalla)} style={{ padding:"5px 10px", background:C.teal, color:C.w, border:"none", borderRadius:4, fontSize:11, fontWeight:700, cursor:"pointer" }}>Guardar</button>
-                                  <button onClick={()=>{ setNewTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }} style={{ padding:"5px 8px", background:"#eee", border:"none", borderRadius:4, fontSize:11, cursor:"pointer" }}>✕</button>
-                                </div>
-                              </div>
+                    {/* Agregar indicador/pantalla */}
+                    {isAddingHere
+                      ? <div style={{ padding:"12px 16px", background:"rgba(0,188,212,0.04)", borderTop:"1px solid #e0f7fa" }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ {esPantallaArea?"Nueva Pantalla de Área":"Nuevo indicador"} en {p.pantalla}</div>
+                          <div style={{ display:"grid", gridTemplateColumns:"2fr 80px 1fr 1fr 1fr 2fr auto", gap:6, alignItems:"center" }}>
+                            <input value={newForm.nombre} onChange={e=>setNewForm(f=>({...f,nombre:e.target.value}))} placeholder={esPantallaArea?"Nombre de la pantalla *":"Nombre del indicador *"}
+                              style={{ padding:"5px 7px", border:`1px solid ${newForm.nombre?"#dde":C.rl}`, borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
+                            <input type="number" min={0} max={100} value={newForm.progreso} onChange={e=>setNewForm(f=>({...f,progreso:e.target.value}))}
+                              style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
+                            <input value={newForm.responsable} onChange={e=>setNewForm(f=>({...f,responsable:e.target.value}))} placeholder="Responsable"
+                              list="resp-list"
+                              style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
+                            <datalist id="resp-list">{responsablesLista.map(r=><option key={r} value={r}/>)}</datalist>
+                            <input type="date" value={newForm.inicio} onChange={e=>setNewForm(f=>({...f,inicio:e.target.value}))}
+                              style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
+                            <input type="date" value={newForm.fin} onChange={e=>setNewForm(f=>({...f,fin:e.target.value}))}
+                              style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11 }}/>
+                            <input value={newForm.comentario} onChange={e=>setNewForm(f=>({...f,comentario:e.target.value}))} placeholder="Comentario"
+                              style={{ padding:"5px 7px", border:"1px solid #dde", borderRadius:4, fontSize:11, fontFamily:"inherit" }}/>
+                            <div style={{ display:"flex", gap:4 }}>
+                              <button onClick={()=>agregarTarea(p.pantalla)} style={{ padding:"5px 10px", background:C.teal, color:C.w, border:"none", borderRadius:4, fontSize:11, fontWeight:700, cursor:"pointer" }}>Guardar</button>
+                              <button onClick={()=>{ setNewTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }} style={{ padding:"5px 8px", background:"#eee", border:"none", borderRadius:4, fontSize:11, cursor:"pointer" }}>✕</button>
                             </div>
-                          : <div style={{ padding:"8px 16px", borderTop:"1px solid #f0f0f0" }}>
-                              <button onClick={()=>{ setNewTarea(p.pantalla); setEditTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }}
-                                style={{ padding:"5px 12px", border:`1px dashed ${C.teal}`, borderRadius:4, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:11, fontWeight:600, cursor:"pointer" }}>
-                                + {esPantallaArea ? "Agregar Pantalla de Área" : "Agregar indicador"}
-                              </button>
-                            </div>
-                        }
-                        {p.tareas.length===0 && !isAddingHere && (
-                          <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>
-                            {esPantallaArea ? "Sin pantallas de área cargadas" : "Sin indicadores cargados"}
                           </div>
-                        )}
+                        </div>
+                      : <div style={{ padding:"8px 16px", borderTop:"1px solid #f0f0f0" }}>
+                          <button onClick={()=>{ setNewTarea(p.pantalla); setEditTarea(null); setNewForm({nombre:"",progreso:0,responsable:"",inicio:"",fin:"",comentario:""}); }}
+                            style={{ padding:"5px 12px", border:`1px dashed ${C.teal}`, borderRadius:4, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:11, fontWeight:600, cursor:"pointer" }}>
+                            + {esPantallaArea ? "Agregar Pantalla de Área" : "Agregar indicador"}
+                          </button>
+                        </div>
+                    }
+                    {p.tareas.length===0 && !isAddingHere && (
+                      <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>
+                        {esPantallaArea ? "Sin pantallas de área cargadas" : "Sin indicadores cargados"}
                       </div>
                     )}
                   </div>
-                );
-              })}
-
-              {pantallasVisibles.length===0 && !showAddPantalla && (
-                <div style={{ textAlign:"center", padding:40, color:"#90a4ae", fontSize:13 }}>No se encontraron pantallas con esos filtros.</div>
-              )}
-
-              {/* ── BOTÓN Y FORMULARIO: Agregar pantalla al cronograma ── */}
-              <div style={{ marginTop:8 }}>
-                {showAddPantalla ? (
-                  <div style={{ background:C.w, borderRadius:6, border:`2px dashed ${C.teal}`, padding:"18px 20px" }}>
-                    <div style={{ fontSize:13, fontWeight:700, color:C.teal, marginBottom:14 }}>+ Nueva pantalla al cronograma</div>
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
-                      <div>
-                        <label style={{ fontSize:10, fontWeight:600, color:C.g, display:"block", marginBottom:4 }}>NOMBRE DE LA PANTALLA *</label>
-                        <input
-                          value={newPantalla.pantalla}
-                          onChange={e=>setNewPantalla(f=>({...f,pantalla:e.target.value}))}
-                          placeholder="Ej: Gestión de Contratos"
-                          style={{ width:"100%", padding:"7px 10px", border:`1px solid ${newPantalla.pantalla?"#dde":C.rl}`, borderRadius:4, fontSize:12, fontFamily:"inherit" }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ fontSize:10, fontWeight:600, color:C.g, display:"block", marginBottom:4 }}>ETAPA</label>
-                        <select
-                          value={newPantalla.etapa}
-                          onChange={e=>setNewPantalla(f=>({...f,etapa:e.target.value}))}
-                          style={{ width:"100%", padding:"7px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12, background:"#fff" }}>
-                          {ETAPAS_LISTA.map(et=><option key={et} value={et}>{et}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                    <div style={{ display:"flex", gap:8 }}>
-                      <button onClick={agregarPantalla}
-                        style={{ padding:"8px 20px", background:C.teal, color:C.w, border:"none", borderRadius:4, fontSize:12, fontWeight:700, cursor:"pointer" }}>
-                        Guardar pantalla
-                      </button>
-                      <button onClick={()=>{ setShowAddPantalla(false); setNewPantalla({ pantalla:"", etapa:ETAPAS_LISTA[0] }); }}
-                        style={{ padding:"8px 14px", background:"#eee", border:"none", borderRadius:4, fontSize:12, cursor:"pointer" }}>
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={()=>setShowAddPantalla(true)}
-                    style={{ width:"100%", padding:"14px", border:`2px dashed ${C.teal}`, borderRadius:6, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:13, fontWeight:600, cursor:"pointer", letterSpacing:0.3 }}>
-                    + Agregar nueva pantalla al cronograma
-                  </button>
                 )}
               </div>
-            </div>
-            {PF}
-          </div>
-        );
-      })()}
+            );
+          })}
 
-      {/* ── CARGA SEMANAL ── */}
-      {pg==="input" && (
-        <div style={{ background:"#e8ecf1" }}>{PH("CARGA SEMANAL — 5 Preguntas Clave")}
-          <div style={{ padding:"18px 24px" }}>
-            <div style={{ marginBottom:14, padding:"10px 12px", background:C.w, borderRadius:6, borderLeft:`4px solid ${C.teal}`, fontSize:12, color:"#546e7a" }}>
-              Cada integrante carga entregables y actividades <strong>asociados al KPI/pantalla</strong>. Los datos se guardan en Supabase y son visibles para todo el equipo.
+          {pantallasVisibles.length===0 && !showAddPantalla && (
+            <div style={{ textAlign:"center", padding:40, color:"#90a4ae", fontSize:13 }}>No se encontraron pantallas con esos filtros.</div>
+          )}
+
+          {/* ── BOTÓN Y FORMULARIO: Agregar pantalla al cronograma ── */}
+          <div style={{ marginTop:8 }}>
+            {showAddPantalla ? (
+              <div style={{ background:C.w, borderRadius:6, border:`2px dashed ${C.teal}`, padding:"18px 20px" }}>
+                <div style={{ fontSize:13, fontWeight:700, color:C.teal, marginBottom:14 }}>+ Nueva pantalla al cronograma</div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
+                  <div>
+                    <label style={{ fontSize:10, fontWeight:600, color:C.g, display:"block", marginBottom:4 }}>NOMBRE DE LA PANTALLA *</label>
+                    <input
+                      value={newPantalla.pantalla}
+                      onChange={e=>setNewPantalla(f=>({...f,pantalla:e.target.value}))}
+                      placeholder="Ej: Gestión de Contratos"
+                      style={{ width:"100%", padding:"7px 10px", border:`1px solid ${newPantalla.pantalla?"#dde":C.rl}`, borderRadius:4, fontSize:12, fontFamily:"inherit" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize:10, fontWeight:600, color:C.g, display:"block", marginBottom:4 }}>ETAPA</label>
+                    <select
+                      value={newPantalla.etapa}
+                      onChange={e=>setNewPantalla(f=>({...f,etapa:e.target.value}))}
+                      style={{ width:"100%", padding:"7px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12, background:"#fff" }}>
+                      {ETAPAS_LISTA.map(et=><option key={et} value={et}>{et}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={agregarPantalla}
+                    style={{ padding:"8px 20px", background:C.teal, color:C.w, border:"none", borderRadius:4, fontSize:12, fontWeight:700, cursor:"pointer" }}>
+                    Guardar pantalla
+                  </button>
+                  <button onClick={()=>{ setShowAddPantalla(false); setNewPantalla({ pantalla:"", etapa:ETAPAS_LISTA[0] }); }}
+                    style={{ padding:"8px 14px", background:"#eee", border:"none", borderRadius:4, fontSize:12, cursor:"pointer" }}>
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={()=>setShowAddPantalla(true)}
+                style={{ width:"100%", padding:"14px", border:`2px dashed ${C.teal}`, borderRadius:6, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:13, fontWeight:600, cursor:"pointer", letterSpacing:0.3 }}>
+                + Agregar nueva pantalla al cronograma
+              </button>
+            )}
+          </div>
+        </div>
+        {PF}
+      </div>
+    );
+  })()}
+
+  {/* ── INDICADORES ── */}
+  {pg==="indicadores" && (() => {
+    const rangoActivoInd = RANGOS_IND.find(r=>r.k===rangoInd) || RANGOS_IND[0];
+
+    const todasLasTareas = cronograma
+      .filter(p => !PANTALLAS_AREA.includes(p.pantalla))
+      .flatMap(p => p.tareas.map(t => ({ ...t, pantalla: p.pantalla })));
+
+    const getProgTarea = t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso);
+
+    const tareasFiltradas = todasLasTareas.filter(t => rangoActivoInd.fn(getProgTarea(t)));
+
+    const colProg = p => p >= 100 ? C.gl : p >= 50 ? C.teal : p >= 25 ? C.gold : p > 0 ? C.rl : C.g;
+
+    return (
+      <div style={{ background:"#e8ecf1", minHeight:"100vh" }}>
+        {PH("INDICADORES")}
+
+        {/* Filtros de rango */}
+        <div style={{ background:C.navy, padding:"14px 28px", display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", borderBottom:`1px solid ${C.bd}` }}>
+          <span style={{ fontSize:11, color:C.g, marginRight:4 }}>FILTRAR POR AVANCE:</span>
+          {RANGOS_IND.map(r => (
+            <button key={r.k} onClick={()=>setRangoInd(r.k)}
+              style={{ padding:"5px 12px", borderRadius:4, border:`1px solid ${rangoInd===r.k?C.teal:"rgba(255,255,255,0.15)"}`, background:rangoInd===r.k?"rgba(0,188,212,0.18)":"rgba(255,255,255,0.05)", color:rangoInd===r.k?C.teal:C.g, fontSize:11, fontWeight:rangoInd===r.k?700:400, cursor:"pointer" }}>
+              {r.label}
+            </button>
+          ))}
+          <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{tareasFiltradas.length} indicadores</span>
+        </div>
+
+        {/* Grid de indicadores */}
+        <div style={{ padding:"20px 24px", display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:10 }}>
+          {tareasFiltradas.map(t => {
+            const prog = getProgTarea(t);
+            const col  = colProg(prog);
+            const est  = estadoTarea(prog);
+            return (
+              <div key={t.id} style={{ background:C.w, borderRadius:6, overflow:"hidden", border:`1px solid ${col}33`, boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
+                {/* Barra superior de color */}
+                <div style={{ height:3, background:col }}/>
+                <div style={{ padding:"12px 14px" }}>
+                  {/* Nombre pantalla */}
+                  <div style={{ fontSize:9, fontWeight:700, color:col, letterSpacing:0.8, textTransform:"uppercase", marginBottom:4 }}>{t.pantalla}</div>
+                  {/* Nombre indicador */}
+                  <div style={{ fontSize:12, fontWeight:600, color:C.navy, lineHeight:1.4, marginBottom:10 }}>{t.nombre}</div>
+                  {/* Barra de progreso */}
+                  <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                    <div style={{ flex:1, height:6, background:"#f0f0f0", borderRadius:99 }}>
+                      <div style={{ width:`${prog}%`, height:"100%", background:col, borderRadius:99, transition:"width .4s" }}/>
+                    </div>
+                    <span style={{ fontSize:14, fontWeight:700, color:col, minWidth:38, textAlign:"right" }}>{prog}%</span>
+                  </div>
+                  {/* Estado */}
+                  <div style={{ marginTop:8, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                    <span style={{ padding:"2px 7px", borderRadius:3, fontSize:9, fontWeight:700, background:est==="Completada"?"rgba(46,125,50,0.1)":est==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.1)", color:est==="Completada"?C.grn:est==="En curso"?"#b8860b":C.g }}>{est}</span>
+                    {(tareaOv[t.id]?.responsable||t.responsable) && <span style={{ fontSize:9, color:C.g }}>{(tareaOv[t.id]?.responsable||t.responsable).split("/")[0].trim()}</span>}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {tareasFiltradas.length === 0 && (
+            <div style={{ gridColumn:"1/-1", textAlign:"center", padding:60, color:"#90a4ae", fontSize:13 }}>
+              No hay indicadores en ese rango.
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(380px, 1fr))", gap:12 }}>
-              {TEAM.map(m => {
-                const d=wd[m.id], filled=!!d?.items?.length, isE=ed===m.id, conf=d?.confidence;
-                return (
-                  <div key={m.id} style={{ background:C.w, borderRadius:6, overflow:"hidden", border:`1px solid ${filled?(conf==="Red"?C.rl:conf==="Amber"?C.gold:C.gl):"#ddd"}`, boxShadow:"0 1px 6px rgba(0,0,0,0.05)" }}>
-                    <div style={{ background:C.navy, padding:"10px 12px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                      <div>
-                        <div style={{ fontSize:13, fontWeight:600, color:C.w }}>{m.name}</div>
-                        <div style={{ fontSize:10, color:C.g }}>{m.role}</div>
+          )}
+        </div>
+        {PF}
+      </div>
+    );
+  })()}
+
+  {/* ── CARGA SEMANAL ── */}
+  {pg==="input" && (
+    <div style={{ background:"#e8ecf1" }}>{PH("CARGA SEMANAL — 5 Preguntas Clave")}
+      <div style={{ padding:"18px 24px" }}>
+        <div style={{ marginBottom:14, padding:"10px 12px", background:C.w, borderRadius:6, borderLeft:`4px solid ${C.teal}`, fontSize:12, color:"#546e7a" }}>
+          Cada integrante carga entregables y actividades <strong>asociados al KPI/pantalla</strong>. Los datos se guardan en Supabase y son visibles para todo el equipo.
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(380px, 1fr))", gap:12 }}>
+          {TEAM.map(m => {
+            const d=wd[m.id], filled=!!d?.items?.length, isE=ed===m.id, conf=d?.confidence;
+            return (
+              <div key={m.id} style={{ background:C.w, borderRadius:6, overflow:"hidden", border:`1px solid ${filled?(conf==="Red"?C.rl:conf==="Amber"?C.gold:C.gl):"#ddd"}`, boxShadow:"0 1px 6px rgba(0,0,0,0.05)" }}>
+                <div style={{ background:C.navy, padding:"10px 12px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:600, color:C.w }}>{m.name}</div>
+                    <div style={{ fontSize:10, color:C.g }}>{m.role}</div>
+                  </div>
+                  <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                    {filled && <span style={{ padding:"2px 7px", borderRadius:99, fontSize:9, fontWeight:700, background:conf==="Red"?"rgba(198,40,40,0.15)":conf==="Amber"?"rgba(232,168,56,0.15)":"rgba(46,125,50,0.15)", color:conf==="Red"?C.rl:conf==="Amber"?C.gold:C.gl }}>{conf==="Red"?"🔴":conf==="Amber"?"🟡":"🟢"} {conf}</span>}
+                    {isE
+                      ? <div style={{ display:"flex", gap:3 }}>
+                          <button onClick={saveEd} style={{ padding:"4px 10px", borderRadius:4, border:"none", fontSize:10, fontWeight:600, cursor:"pointer", background:C.teal, color:C.w }}>Guardar</button>
+                          <button onClick={()=>setEd(null)} style={{ padding:"4px 7px", borderRadius:4, border:"none", fontSize:10, cursor:"pointer", background:C.nl, color:C.gl2 }}>✕</button>
+                        </div>
+                      : <button onClick={()=>startEd(m.id)} style={{ padding:"4px 10px", borderRadius:4, border:"none", fontSize:10, fontWeight:600, cursor:"pointer", background:C.nl, color:C.w }}>{filled?"Editar":"Cargar"}</button>
+                    }
+                  </div>
+                </div>
+                {isE ? (
+                  <div style={{ padding:12 }}>
+                    <div style={{ marginBottom:12 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:5 }}>
+                        <label style={{ fontSize:11, fontWeight:700, color:C.grn }}>1. ¿Qué entregaste esta semana?</label>
+                        <button onClick={()=>addI("completed")} style={{ padding:"2px 7px", border:`1px solid ${C.grn}`, borderRadius:4, background:"rgba(46,125,50,0.06)", color:C.grn, fontSize:10, fontWeight:600, cursor:"pointer" }}>+ Hito</button>
                       </div>
-                      <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                        {filled && <span style={{ padding:"2px 7px", borderRadius:99, fontSize:9, fontWeight:700, background:conf==="Red"?"rgba(198,40,40,0.15)":conf==="Amber"?"rgba(232,168,56,0.15)":"rgba(46,125,50,0.15)", color:conf==="Red"?C.rl:conf==="Amber"?C.gold:C.gl }}>{conf==="Red"?"🔴":conf==="Amber"?"🟡":"🟢"} {conf}</span>}
-                        {isE
-                          ? <div style={{ display:"flex", gap:3 }}>
-                              <button onClick={saveEd} style={{ padding:"4px 10px", borderRadius:4, border:"none", fontSize:10, fontWeight:600, cursor:"pointer", background:C.teal, color:C.w }}>Guardar</button>
-                              <button onClick={()=>setEd(null)} style={{ padding:"4px 7px", borderRadius:4, border:"none", fontSize:10, cursor:"pointer", background:C.nl, color:C.gl2 }}>✕</button>
-                            </div>
-                          : <button onClick={()=>startEd(m.id)} style={{ padding:"4px 10px", borderRadius:4, border:"none", fontSize:10, fontWeight:600, cursor:"pointer", background:C.nl, color:C.w }}>{filled?"Editar":"Cargar"}</button>
-                        }
+                      {fi.filter(x=>x.type==="completed").length===0 && <div style={{ fontSize:10, color:"#aaa", fontStyle:"italic" }}>Hacé clic en "+ Hito" para agregar.</div>}
+                      {fi.map((x,i) => x.type==="completed" ? <ItemRow key={x._id} item={x} idx={i} onUp={upI} onRm={rmI}/> : null)}
+                    </div>
+                    <div style={{ marginBottom:12 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:5 }}>
+                        <label style={{ fontSize:11, fontWeight:700, color:"#b8860b" }}>2. ¿Prioridad próxima semana?</label>
+                        <button onClick={()=>addI("activity")} style={{ padding:"2px 7px", border:`1px solid ${C.gold}`, borderRadius:4, background:"rgba(232,168,56,0.06)", color:"#b8860b", fontSize:10, fontWeight:600, cursor:"pointer" }}>+ Actividad</button>
+                      </div>
+                      {fi.filter(x=>x.type==="activity").length===0 && <div style={{ fontSize:10, color:"#aaa", fontStyle:"italic" }}>Hacé clic en "+ Actividad".</div>}
+                      {fi.map((x,i) => x.type==="activity" ? <ItemRow key={x._id} item={x} idx={i} onUp={upI} onRm={rmI}/> : null)}
+                    </div>
+                    <div style={{ marginBottom:8 }}>
+                      <label style={{ fontSize:11, fontWeight:700, color:C.navy, display:"block", marginBottom:3 }}>3. ¿Algo bloqueado?</label>
+                      <textarea value={fm.blocked} onChange={e=>setFm(p=>({...p,blocked:e.target.value}))} rows={2}
+                        style={{ width:"100%", padding:6, border:"1px solid #dde", borderRadius:4, fontSize:11, resize:"vertical", fontFamily:"inherit", boxSizing:"border-box" }}/>
+                    </div>
+                    <div style={{ marginBottom:8 }}>
+                      <label style={{ fontSize:11, fontWeight:700, color:C.navy, display:"block", marginBottom:3 }}>4. ¿Decisión o escalamiento?</label>
+                      <textarea value={fm.decision} onChange={e=>setFm(p=>({...p,decision:e.target.value}))} rows={2}
+                        style={{ width:"100%", padding:6, border:"1px solid #dde", borderRadius:4, fontSize:11, resize:"vertical", fontFamily:"inherit", boxSizing:"border-box" }}/>
+                    </div>
+                    <div>
+                      <label style={{ fontSize:11, fontWeight:700, color:C.navy, display:"block", marginBottom:4 }}>5. Confidence</label>
+                      <div style={{ display:"flex", gap:6 }}>
+                        {["Green","Amber","Red"].map(c=>(
+                          <button key={c} onClick={()=>setFm(p=>({...p,confidence:c}))}
+                            style={{ flex:1, padding:"6px 0", borderRadius:4, border:`2px solid ${fm.confidence===c?(c==="Red"?C.red:c==="Amber"?C.gold:C.grn):"#ddd"}`, background:fm.confidence===c?(c==="Red"?"rgba(198,40,40,0.08)":c==="Amber"?"rgba(232,168,56,0.08)":"rgba(46,125,50,0.08)"):"#fff", fontSize:11, fontWeight:600, cursor:"pointer", color:c==="Red"?C.red:c==="Amber"?"#b8860b":C.grn }}>
+                            {c==="Red"?"🔴":c==="Amber"?"🟡":"🟢"} {c}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                    {isE ? (
-                      <div style={{ padding:12 }}>
-                        <div style={{ marginBottom:12 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:5 }}>
-                            <label style={{ fontSize:11, fontWeight:700, color:C.grn }}>1. ¿Qué entregaste esta semana?</label>
-                            <button onClick={()=>addI("completed")} style={{ padding:"2px 7px", border:`1px solid ${C.grn}`, borderRadius:4, background:"rgba(46,125,50,0.06)", color:C.grn, fontSize:10, fontWeight:600, cursor:"pointer" }}>+ Hito</button>
-                          </div>
-                          {fi.filter(x=>x.type==="completed").length===0 && <div style={{ fontSize:10, color:"#aaa", fontStyle:"italic" }}>Hacé clic en "+ Hito" para agregar.</div>}
-                          {fi.map((x,i) => x.type==="completed" ? <ItemRow key={x._id} item={x} idx={i} onUp={upI} onRm={rmI}/> : null)}
-                        </div>
-                        <div style={{ marginBottom:12 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:5 }}>
-                            <label style={{ fontSize:11, fontWeight:700, color:"#b8860b" }}>2. ¿Prioridad próxima semana?</label>
-                            <button onClick={()=>addI("activity")} style={{ padding:"2px 7px", border:`1px solid ${C.gold}`, borderRadius:4, background:"rgba(232,168,56,0.06)", color:"#b8860b", fontSize:10, fontWeight:600, cursor:"pointer" }}>+ Actividad</button>
-                          </div>
-                          {fi.filter(x=>x.type==="activity").length===0 && <div style={{ fontSize:10, color:"#aaa", fontStyle:"italic" }}>Hacé clic en "+ Actividad".</div>}
-                          {fi.map((x,i) => x.type==="activity" ? <ItemRow key={x._id} item={x} idx={i} onUp={upI} onRm={rmI}/> : null)}
-                        </div>
-                        <div style={{ marginBottom:8 }}>
-                          <label style={{ fontSize:11, fontWeight:700, color:C.navy, display:"block", marginBottom:3 }}>3. ¿Algo bloqueado?</label>
-                          <textarea value={fm.blocked} onChange={e=>setFm(p=>({...p,blocked:e.target.value}))} rows={2}
-                            style={{ width:"100%", padding:6, border:"1px solid #dde", borderRadius:4, fontSize:11, resize:"vertical", fontFamily:"inherit", boxSizing:"border-box" }}/>
-                        </div>
-                        <div style={{ marginBottom:8 }}>
-                          <label style={{ fontSize:11, fontWeight:700, color:C.navy, display:"block", marginBottom:3 }}>4. ¿Decisión o escalamiento?</label>
-                          <textarea value={fm.decision} onChange={e=>setFm(p=>({...p,decision:e.target.value}))} rows={2}
-                            style={{ width:"100%", padding:6, border:"1px solid #dde", borderRadius:4, fontSize:11, resize:"vertical", fontFamily:"inherit", boxSizing:"border-box" }}/>
-                        </div>
-                        <div>
-                          <label style={{ fontSize:11, fontWeight:700, color:C.navy, display:"block", marginBottom:4 }}>5. Confidence</label>
-                          <div style={{ display:"flex", gap:6 }}>
-                            {["Green","Amber","Red"].map(c=>(
-                              <button key={c} onClick={()=>setFm(p=>({...p,confidence:c}))}
-                                style={{ flex:1, padding:"6px 0", borderRadius:4, border:`2px solid ${fm.confidence===c?(c==="Red"?C.red:c==="Amber"?C.gold:C.grn):"#ddd"}`, background:fm.confidence===c?(c==="Red"?"rgba(198,40,40,0.08)":c==="Amber"?"rgba(232,168,56,0.08)":"rgba(46,125,50,0.08)"):"#fff", fontSize:11, fontWeight:600, cursor:"pointer", color:c==="Red"?C.red:c==="Amber"?"#b8860b":C.grn }}>
-                                {c==="Red"?"🔴":c==="Amber"?"🟡":"🟢"} {c}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                  </div>
+                ) : filled ? (
+                  <div style={{ padding:12, fontSize:11, color:"#37474f" }}>
+                    <div style={{ display:"flex", gap:12, marginBottom:5 }}>
+                      <span style={{ color:C.grn, fontWeight:600 }}>{d.items.filter(x=>x.type==="completed").length} hitos</span>
+                      <span style={{ color:"#b8860b", fontWeight:600 }}>{d.items.filter(x=>x.type==="activity").length} actividades</span>
+                    </div>
+                    {d.items.slice(0,3).map((x,i)=>(
+                      <div key={i} style={{ fontSize:10, marginBottom:2, color:"#546e7a" }}>
+                        <span style={{ background:x.type==="completed"?"rgba(46,125,50,0.1)":"rgba(232,168,56,0.1)", padding:"1px 4px", borderRadius:3, fontSize:9, marginRight:4, fontWeight:600, color:x.type==="completed"?C.grn:"#b8860b" }}>{x.area}</span>
+                        {x.text.substring(0,65)}{x.text.length>65?"…":""}
                       </div>
-                    ) : filled ? (
-                      <div style={{ padding:12, fontSize:11, color:"#37474f" }}>
-                        <div style={{ display:"flex", gap:12, marginBottom:5 }}>
-                          <span style={{ color:C.grn, fontWeight:600 }}>{d.items.filter(x=>x.type==="completed").length} hitos</span>
-                          <span style={{ color:"#b8860b", fontWeight:600 }}>{d.items.filter(x=>x.type==="activity").length} actividades</span>
-                        </div>
-                        {d.items.slice(0,3).map((x,i)=>(
-                          <div key={i} style={{ fontSize:10, marginBottom:2, color:"#546e7a" }}>
-                            <span style={{ background:x.type==="completed"?"rgba(46,125,50,0.1)":"rgba(232,168,56,0.1)", padding:"1px 4px", borderRadius:3, fontSize:9, marginRight:4, fontWeight:600, color:x.type==="completed"?C.grn:"#b8860b" }}>{x.area}</span>
-                            {x.text.substring(0,65)}{x.text.length>65?"…":""}
-                          </div>
-                        ))}
-                        {d.items.length>3 && <div style={{ fontSize:9, color:"#90a4ae", marginTop:2 }}>+{d.items.length-3} más</div>}
-                        {d.blocked && !d.blocked.toLowerCase().includes("sin bloqueo") && (
-                          <div style={{ marginTop:5, padding:"4px 6px", background:"rgba(198,40,40,0.05)", borderRadius:3, fontSize:10, color:C.red }}>⚠ {d.blocked.substring(0,80)}</div>
-                        )}
-                      </div>
-                    ) : (
-                      <div style={{ padding:18, textAlign:"center", color:"#90a4ae", fontSize:12 }}>Sin carga esta semana</div>
+                    ))}
+                    {d.items.length>3 && <div style={{ fontSize:9, color:"#90a4ae", marginTop:2 }}>+{d.items.length-3} más</div>}
+                    {d.blocked && !d.blocked.toLowerCase().includes("sin bloqueo") && (
+                      <div style={{ marginTop:5, padding:"4px 6px", background:"rgba(198,40,40,0.05)", borderRadius:3, fontSize:10, color:C.red }}>⚠ {d.blocked.substring(0,80)}</div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-          {PF}
+                ) : (
+                  <div style={{ padding:18, textAlign:"center", color:"#90a4ae", fontSize:12 }}>Sin carga esta semana</div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
-
-      {/* ── CALENDARIO ── */}
-      {pg==="calendar" && (
-        <div style={{ background:"#e8ecf1" }}>{PH("Calendario")}
-          <div style={{ padding:"18px 24px" }}>
-            <div style={{ background:"#f5f7fa", borderRadius:8, padding:18, display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12 }}>
-              {WEEKS.map(w=>{
-                const d2=dt[w.n], f=d2?Object.keys(d2).filter(k=>k!=='_global').length:0, cur=w.n===wk;
-                return (
-                  <div key={w.n} onClick={()=>{setWk(w.n);setPg("resumen");}} style={{ background:C.w, borderRadius:6, overflow:"hidden", cursor:"pointer", border:cur?`2px solid ${C.teal}`:"1px solid #e0e0e0", boxShadow:cur?"0 0 10px rgba(0,188,212,0.2)":"0 1px 3px rgba(0,0,0,0.04)" }}>
-                    <div style={{ background:C.navy, padding:"6px 10px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                      <div style={{ width:7, height:7, borderRadius:99, background:f>3?C.gl:f>0?C.gold:"#546e7a" }}/>
-                      {cur && <span style={{ fontSize:8, color:C.teal, fontWeight:700 }}>ACTUAL</span>}
-                    </div>
-                    <div style={{ padding:"12px 10px", textAlign:"center" }}>
-                      <div style={{ fontSize:18, fontWeight:300, color:C.navy }}>SEMANA {w.n}</div>
-                      <div style={{ fontSize:10, color:"#90a4ae", marginTop:3 }}>{w.s} — {w.e}</div>
-                      {f>0 && <div style={{ fontSize:9, color:C.teal, marginTop:4, fontWeight:600 }}>{f}/{TEAM.length} cargas</div>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          {PF}
-        </div>
-      )}
-
-      {/* ── RESUMEN ── */}
-      {pg==="resumen" && (
-        <div style={{ background:"#e8ecf1" }}>{PH("RESUMEN EJECUTIVO")}
-          <div style={{ padding:"18px 24px" }}>
-            <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:12, marginBottom:16 }}>
-              <div style={{ background:C.w, borderLeft:`5px solid ${sum.ov==="GREEN"?C.grn:sum.ov==="AMBER"?C.gold:sum.ov==="RED"?C.red:"#90a4ae"}`, borderRadius:"0 6px 6px 0", padding:"14px 20px" }}>
-                <div style={{ fontSize:12, color:C.g, fontWeight:500, letterSpacing:1 }}>ESTADO GENERAL</div>
-                <div style={{ fontSize:24, fontWeight:700, marginTop:3, color:sum.ov==="GREEN"?C.grn:sum.ov==="AMBER"?"#b8860b":sum.ov==="RED"?C.red:"#90a4ae" }}>{sum.ov==="GREEN"?"EN CURSO":sum.ov==="AMBER"?"EN RIESGO":sum.ov==="RED"?"CRÍTICO":"SIN DATOS"}</div>
-              </div>
-              <div style={{ background:C.w, borderRadius:6, padding:"14px 20px", borderTop:`3px solid ${C.gold}` }}>
-                <div style={{ fontSize:12, color:C.g, fontWeight:500, letterSpacing:1 }}>SEMANA</div>
-                <div style={{ fontSize:32, fontWeight:300, color:C.navy }}>N° {wk}</div>
-              </div>
-            </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-              <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("HITOS ALCANZADOS",C.grn)}
-                <div style={{ padding:"12px 16px" }}>
-                  {Object.keys(sum.hm).length===0 ? <p style={{ color:"#90a4ae", fontSize:12, fontStyle:"italic" }}>Sin hitos cargados.</p>
-                    : Object.entries(sum.hm).map(([a,its])=>(
-                      <div key={a} style={{ marginBottom:12 }}>
-                        <div style={{ fontSize:13, fontWeight:700, color:C.navy, marginBottom:3 }}>{a}</div>
-                        {its.map((x,i)=><div key={i} style={{ fontSize:11, color:"#546e7a", lineHeight:1.5, fontStyle:"italic", paddingLeft:9, borderLeft:"2px solid #e0e0e0", marginBottom:3 }}>{x.text}</div>)}
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-              <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("ACTIVIDADES EN CURSO",C.gold)}
-                <div style={{ padding:"12px 16px" }}>
-                  {Object.keys(sum.am).length===0 ? <p style={{ color:"#90a4ae", fontSize:12, fontStyle:"italic" }}>Sin actividades.</p>
-                    : Object.entries(sum.am).map(([a,its])=>(
-                      <div key={a} style={{ marginBottom:12 }}>
-                        <div style={{ fontSize:13, fontWeight:700, color:C.navy, marginBottom:3 }}>{a}</div>
-                        {its.map((x,i)=><div key={i} style={{ fontSize:11, color:"#546e7a", lineHeight:1.5, fontStyle:"italic", paddingLeft:9, borderLeft:"2px solid #e0e0e0", marginBottom:3 }}>{x.text}</div>)}
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-          {PF}
-        </div>
-      )}
-
-      {/* ── MÉTRICAS ── */}
-      {pg==="metricas" && (
-        <div style={{ background:"#e8ecf1" }}>{PH("MÉTRICAS DE AVANCE Y KPIs")}
-          <div style={{ padding:"18px 24px" }}>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:18 }}>
-              {[
-                { v:sum.dr===-1?"✓":sum.dr===null?"—":sum.dr, l:sum.dr===-1?"Proyecto Finalizado":"Días Restantes", bc:sum.dr===-1?C.grn:C.navy },
-                { v:sum.bl.length, l:"Issues Abiertos", bc:C.red }
-              ].map((c,i)=>(
-                <div key={i} style={{ background:C.w, borderRadius:6, overflow:"hidden", textAlign:"center" }}>
-                  <div style={{ height:5, background:c.bc }}/>
-                  <div style={{ padding:"22px 16px" }}>
-                    <div style={{ fontSize:44, fontWeight:300, color:c.bc, fontFamily:"Georgia,serif" }}>[ {c.v} ]</div>
-                    <div style={{ fontSize:14, fontWeight:600, color:C.navy, marginTop:3 }}>{c.l}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
-              <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("PRÓXIMOS PASOS",C.td)}
-                <div style={{ padding:"12px 16px", minHeight:160 }}>
-                  {Object.keys(sum.am).length===0 ? <p style={{ color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin datos.</p>
-                    : Object.entries(sum.am).slice(0,5).map(([a,its])=>(
-                      <div key={a} style={{ marginBottom:8 }}><div style={{ fontSize:12, fontWeight:700, color:C.navy }}>{a}</div>{its.slice(0,2).map((x,i)=><div key={i} style={{ fontSize:11, color:"#546e7a", fontStyle:"italic" }}>{x.text}</div>)}</div>
-                    ))
-                  }
-                </div>
-              </div>
-              <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("DECISIONES REQUERIDAS",C.navy)}
-                <div style={{ padding:"12px 16px", minHeight:160 }}>
-                  {sum.dc.length===0 ? <p style={{ color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin decisiones.</p>
-                    : sum.dc.map((d,i)=>(
-                      <div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:12, fontWeight:700, color:C.navy }}>{d.text}</div><div style={{ fontSize:10, color:C.g }}>Solicitado por: {d.name}</div></div>
-                    ))
-                  }
-                </div>
-              </div>
-              <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("RIESGOS / BLOQUEOS",C.red)}
-                <div style={{ padding:"12px 16px", minHeight:160 }}>
-                  {sum.bl.length===0 ? <p style={{ color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin bloqueos.</p>
-                    : sum.bl.map((b,i)=>(
-                      <div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:12, fontWeight:700, color:C.navy }}>{b.text}</div><div style={{ fontSize:10, color:C.g }}>Reportado por: {b.name}</div></div>
-                    ))
-                  }
-                </div>
-              </div>
-            </div>
-            <div style={{ marginTop:16, background:C.w, borderRadius:6, padding:16 }}>
-              <div style={{ fontSize:12, fontWeight:600, color:C.navy, marginBottom:8 }}>Confidence — Semana {wk}</div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:6 }}>
-                {TEAM.map(m=>{
-                  const c=wd[m.id]?.confidence;
-                  return (
-                    <div key={m.id} style={{ textAlign:"center", padding:"8px 4px", borderRadius:6, background:c==="Red"?"rgba(198,40,40,0.08)":c==="Amber"?"rgba(232,168,56,0.08)":c==="Green"?"rgba(46,125,50,0.08)":"#f5f5f5", border:`1px solid ${c==="Red"?"rgba(198,40,40,0.2)":c==="Amber"?"rgba(232,168,56,0.2)":c==="Green"?"rgba(46,125,50,0.2)":"#e0e0e0"}` }}>
-                      <div style={{ fontSize:16 }}>{c==="Red"?"🔴":c==="Amber"?"🟡":c==="Green"?"🟢":"⚪"}</div>
-                      <div style={{ fontSize:10, fontWeight:600, color:C.navy }}>{m.name.split(" ")[0]}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-          {PF}
-        </div>
-      )}
-
-      {/* ── ADMIN ── */}
-      {pg==="admin" && (
-        <div style={{ background:"#e8ecf1" }}>{PH("ADMINISTRACIÓN")}
-          <div style={{ padding:"18px 24px", maxWidth:720 }}>
-            <div style={{ background:C.w, borderRadius:6, padding:16, marginBottom:14, borderLeft:`4px solid ${C.teal}` }}>
-              <div style={{ fontSize:12, fontWeight:600, color:C.navy, marginBottom:6 }}>Almacenamiento</div>
-              <div style={{ display:"flex", gap:16, alignItems:"center", flexWrap:"wrap" }}>
-                <span style={{ fontSize:11, color:"#546e7a" }}>☁️ Guardado en <strong>Supabase</strong> — compartido con todo el equipo</span>
-                {svt && <span style={{ fontSize:10, color:C.gl }}>✓ Último guardado: {svt}</span>}
-              </div>
-            </div>
-            <div style={{ background:C.w, borderRadius:6, padding:16 }}>
-              <div style={{ fontSize:12, fontWeight:600, color:C.navy, marginBottom:10 }}>Estado por semana</div>
-              {WEEKS.map(w=>{
-                const d2=dt[w.n], f=d2?Object.keys(d2).filter(k=>k!=='_global').length:0;
-                return (
-                  <div key={w.n} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 10px", borderRadius:5, background:f>0?"rgba(0,188,212,0.04)":"#fafafa", border:`1px solid ${f>0?C.bd:"#eee"}`, marginBottom:4 }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                      <div style={{ width:6, height:6, borderRadius:99, background:f>3?C.gl:f>0?C.gold:"#ddd" }}/>
-                      <span style={{ fontSize:11, color:C.navy }}>Sem {w.n}</span>
-                      <span style={{ fontSize:10, color:C.g }}>{w.s}–{w.e}</span>
-                    </div>
-                    <span style={{ fontSize:10, color:f>0?C.teal:"#bbb" }}>{f}/{TEAM.length} cargas</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          {PF}
-        </div>
-      )}
+      </div>
+      {PF}
     </div>
-  );
+  )}
+
+  {/* ── CALENDARIO ── */}
+  {pg==="calendar" && (
+    <div style={{ background:"#e8ecf1" }}>{PH("Calendario")}
+      <div style={{ padding:"18px 24px" }}>
+        <div style={{ background:"#f5f7fa", borderRadius:8, padding:18, display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12 }}>
+          {WEEKS.map(w=>{
+            const d2=dt[w.n], f=d2?Object.keys(d2).filter(k=>k!=='_global').length:0, cur=w.n===wk;
+            return (
+              <div key={w.n} onClick={()=>{setWk(w.n);setPg("resumen");}} style={{ background:C.w, borderRadius:6, overflow:"hidden", cursor:"pointer", border:cur?`2px solid ${C.teal}`:"1px solid #e0e0e0", boxShadow:cur?"0 0 10px rgba(0,188,212,0.2)":"0 1px 3px rgba(0,0,0,0.04)" }}>
+                <div style={{ background:C.navy, padding:"6px 10px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                  <div style={{ width:7, height:7, borderRadius:99, background:f>3?C.gl:f>0?C.gold:"#546e7a" }}/>
+                  {cur && <span style={{ fontSize:8, color:C.teal, fontWeight:700 }}>ACTUAL</span>}
+                </div>
+                <div style={{ padding:"12px 10px", textAlign:"center" }}>
+                  <div style={{ fontSize:18, fontWeight:300, color:C.navy }}>SEMANA {w.n}</div>
+                  <div style={{ fontSize:10, color:"#90a4ae", marginTop:3 }}>{w.s} — {w.e}</div>
+                  {f>0 && <div style={{ fontSize:9, color:C.teal, marginTop:4, fontWeight:600 }}>{f}/{TEAM.length} cargas</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {PF}
+    </div>
+  )}
+
+  {/* ── RESUMEN ── */}
+  {pg==="resumen" && (
+    <div style={{ background:"#e8ecf1" }}>{PH("RESUMEN EJECUTIVO")}
+      <div style={{ padding:"18px 24px" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:12, marginBottom:16 }}>
+          <div style={{ background:C.w, borderLeft:`5px solid ${sum.ov==="GREEN"?C.grn:sum.ov==="AMBER"?C.gold:sum.ov==="RED"?C.red:"#90a4ae"}`, borderRadius:"0 6px 6px 0", padding:"14px 20px" }}>
+            <div style={{ fontSize:12, color:C.g, fontWeight:500, letterSpacing:1 }}>ESTADO GENERAL</div>
+            <div style={{ fontSize:24, fontWeight:700, marginTop:3, color:sum.ov==="GREEN"?C.grn:sum.ov==="AMBER"?"#b8860b":sum.ov==="RED"?C.red:"#90a4ae" }}>{sum.ov==="GREEN"?"EN CURSO":sum.ov==="AMBER"?"EN RIESGO":sum.ov==="RED"?"CRÍTICO":"SIN DATOS"}</div>
+          </div>
+          <div style={{ background:C.w, borderRadius:6, padding:"14px 20px", borderTop:`3px solid ${C.gold}` }}>
+            <div style={{ fontSize:12, color:C.g, fontWeight:500, letterSpacing:1 }}>SEMANA</div>
+            <div style={{ fontSize:32, fontWeight:300, color:C.navy }}>N° {wk}</div>
+          </div>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+          <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("HITOS ALCANZADOS",C.grn)}
+            <div style={{ padding:"12px 16px" }}>
+              {Object.keys(sum.hm).length===0 ? <p style={{ color:"#90a4ae", fontSize:12, fontStyle:"italic" }}>Sin hitos cargados.</p>
+                : Object.entries(sum.hm).map(([a,its])=>(
+                  <div key={a} style={{ marginBottom:12 }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:C.navy, marginBottom:3 }}>{a}</div>
+                    {its.map((x,i)=><div key={i} style={{ fontSize:11, color:"#546e7a", lineHeight:1.5, fontStyle:"italic", paddingLeft:9, borderLeft:"2px solid #e0e0e0", marginBottom:3 }}>{x.text}</div>)}
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+          <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("ACTIVIDADES EN CURSO",C.gold)}
+            <div style={{ padding:"12px 16px" }}>
+              {Object.keys(sum.am).length===0 ? <p style={{ color:"#90a4ae", fontSize:12, fontStyle:"italic" }}>Sin actividades.</p>
+                : Object.entries(sum.am).map(([a,its])=>(
+                  <div key={a} style={{ marginBottom:12 }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:C.navy, marginBottom:3 }}>{a}</div>
+                    {its.map((x,i)=><div key={i} style={{ fontSize:11, color:"#546e7a", lineHeight:1.5, fontStyle:"italic", paddingLeft:9, borderLeft:"2px solid #e0e0e0", marginBottom:3 }}>{x.text}</div>)}
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      {PF}
+    </div>
+  )}
+
+  {/* ── MÉTRICAS ── */}
+  {pg==="metricas" && (
+    <div style={{ background:"#e8ecf1" }}>{PH("MÉTRICAS DE AVANCE Y KPIs")}
+      <div style={{ padding:"18px 24px" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:18 }}>
+          {[
+            { v:sum.dr===-1?"✓":sum.dr===null?"—":sum.dr, l:sum.dr===-1?"Proyecto Finalizado":"Días Restantes", bc:sum.dr===-1?C.grn:C.navy },
+            { v:sum.bl.length, l:"Issues Abiertos", bc:C.red }
+          ].map((c,i)=>(
+            <div key={i} style={{ background:C.w, borderRadius:6, overflow:"hidden", textAlign:"center" }}>
+              <div style={{ height:5, background:c.bc }}/>
+              <div style={{ padding:"22px 16px" }}>
+                <div style={{ fontSize:44, fontWeight:300, color:c.bc, fontFamily:"Georgia,serif" }}>[ {c.v} ]</div>
+                <div style={{ fontSize:14, fontWeight:600, color:C.navy, marginTop:3 }}>{c.l}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
+          <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("PRÓXIMOS PASOS",C.td)}
+            <div style={{ padding:"12px 16px", minHeight:160 }}>
+              {Object.keys(sum.am).length===0 ? <p style={{ color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin datos.</p>
+                : Object.entries(sum.am).slice(0,5).map(([a,its])=>(
+                  <div key={a} style={{ marginBottom:8 }}><div style={{ fontSize:12, fontWeight:700, color:C.navy }}>{a}</div>{its.slice(0,2).map((x,i)=><div key={i} style={{ fontSize:11, color:"#546e7a", fontStyle:"italic" }}>{x.text}</div>)}</div>
+                ))
+              }
+            </div>
+          </div>
+          <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("DECISIONES REQUERIDAS",C.navy)}
+            <div style={{ padding:"12px 16px", minHeight:160 }}>
+              {sum.dc.length===0 ? <p style={{ color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin decisiones.</p>
+                : sum.dc.map((d,i)=>(
+                  <div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:12, fontWeight:700, color:C.navy }}>{d.text}</div><div style={{ fontSize:10, color:C.g }}>Solicitado por: {d.name}</div></div>
+                ))
+              }
+            </div>
+          </div>
+          <div style={{ background:C.w, borderRadius:6, overflow:"hidden" }}>{SH("RIESGOS / BLOQUEOS",C.red)}
+            <div style={{ padding:"12px 16px", minHeight:160 }}>
+              {sum.bl.length===0 ? <p style={{ color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>Sin bloqueos.</p>
+                : sum.bl.map((b,i)=>(
+                  <div key={i} style={{ marginBottom:10 }}><div style={{ fontSize:12, fontWeight:700, color:C.navy }}>{b.text}</div><div style={{ fontSize:10, color:C.g }}>Reportado por: {b.name}</div></div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop:16, background:C.w, borderRadius:6, padding:16 }}>
+          <div style={{ fontSize:12, fontWeight:600, color:C.navy, marginBottom:8 }}>Confidence — Semana {wk}</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:6 }}>
+            {TEAM.map(m=>{
+              const c=wd[m.id]?.confidence;
+              return (
+                <div key={m.id} style={{ textAlign:"center", padding:"8px 4px", borderRadius:6, background:c==="Red"?"rgba(198,40,40,0.08)":c==="Amber"?"rgba(232,168,56,0.08)":c==="Green"?"rgba(46,125,50,0.08)":"#f5f5f5", border:`1px solid ${c==="Red"?"rgba(198,40,40,0.2)":c==="Amber"?"rgba(232,168,56,0.2)":c==="Green"?"rgba(46,125,50,0.2)":"#e0e0e0"}` }}>
+                  <div style={{ fontSize:16 }}>{c==="Red"?"🔴":c==="Amber"?"🟡":c==="Green"?"🟢":"⚪"}</div>
+                  <div style={{ fontSize:10, fontWeight:600, color:C.navy }}>{m.name.split(" ")[0]}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      {PF}
+    </div>
+  )}
+
+  {/* ── ADMIN ── */}
+  {pg==="admin" && (
+    <div style={{ background:"#e8ecf1" }}>{PH("ADMINISTRACIÓN")}
+      <div style={{ padding:"18px 24px", maxWidth:720 }}>
+        <div style={{ background:C.w, borderRadius:6, padding:16, marginBottom:14, borderLeft:`4px solid ${C.teal}` }}>
+          <div style={{ fontSize:12, fontWeight:600, color:C.navy, marginBottom:6 }}>Almacenamiento</div>
+          <div style={{ display:"flex", gap:16, alignItems:"center", flexWrap:"wrap" }}>
+            <span style={{ fontSize:11, color:"#546e7a" }}>☁️ Guardado en <strong>Supabase</strong> — compartido con todo el equipo</span>
+            {svt && <span style={{ fontSize:10, color:C.gl }}>✓ Último guardado: {svt}</span>}
+          </div>
+        </div>
+        <div style={{ background:C.w, borderRadius:6, padding:16 }}>
+          <div style={{ fontSize:12, fontWeight:600, color:C.navy, marginBottom:10 }}>Estado por semana</div>
+          {WEEKS.map(w=>{
+            const d2=dt[w.n], f=d2?Object.keys(d2).filter(k=>k!=='_global').length:0;
+            return (
+              <div key={w.n} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 10px", borderRadius:5, background:f>0?"rgba(0,188,212,0.04)":"#fafafa", border:`1px solid ${f>0?C.bd:"#eee"}`, marginBottom:4 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <div style={{ width:6, height:6, borderRadius:99, background:f>3?C.gl:f>0?C.gold:"#ddd" }}/>
+                  <span style={{ fontSize:11, color:C.navy }}>Sem {w.n}</span>
+                  <span style={{ fontSize:10, color:C.g }}>{w.s}–{w.e}</span>
+                </div>
+                <span style={{ fontSize:10, color:f>0?C.teal:"#bbb" }}>{f}/{TEAM.length} cargas</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {PF}
+    </div>
+  )}
+</div>
+```
+
+);
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+ReactDOM.createRoot(document.getElementById(“root”)).render(<App/>);
 </script>
+
 </body>
 </html>
