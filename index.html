@@ -971,17 +971,7 @@ function App() {
                               </tr>
                             </thead>
                             <tbody>
-                              {p.tareas.filter(t => {
-  if (filtroRangoInd==="Todos") return true;
-  const prog = normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso);
-  if (filtroRangoInd==="0")     return prog === 0;
-  if (filtroRangoInd==="1-30")  return prog >= 1  && prog <= 30;
-  if (filtroRangoInd==="31-50") return prog >= 31 && prog <= 50;
-  if (filtroRangoInd==="51-79") return prog >= 51 && prog <= 79;
-  if (filtroRangoInd==="80-99") return prog >= 80 && prog <= 99;
-  if (filtroRangoInd==="100")   return prog === 100;
-  return true;
-}).map(t => {
+                             {p.tareas.map(t => {
                                 const ov     = tareaOv[t.id] || {};
                                 const prog   = normalizarProgreso(ov.progreso!==undefined?ov.progreso:t.progreso);
                                 const resp   = ov.responsable || t.responsable;
