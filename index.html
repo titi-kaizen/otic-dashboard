@@ -689,7 +689,7 @@ function App() {
     return matchBusq && matchEtapa && matchEstado;
   });
 
-  const _tts = cronograma.flatMap(p=>p.tareas);
+  const _tts = CRONOGRAMA.filter(p => !PANTALLAS_AREA.includes(p.pantalla)).flatMap(p=>p.tareas);
   const avanceGlobal = _tts.length ? Math.round(_tts.reduce((s,t)=>{ const ov=tareaOv[t.id]; return s+(ov?normalizarProgreso(ov.progreso):normalizarProgreso(t.progreso)); },0)/_tts.length) : 0;
 
   const indicadoresHoy = useMemo(() => {
