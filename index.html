@@ -342,23 +342,40 @@ async function dbLoadTareas() {
   const { data, error } = await sb.from("task_progress").select("*");
   if (error) throw error;
   const map = {};
+  /* mapa pantalla → lista de tareas para pantallas dinámicas (no en CRONOGRAMA_BASE) */
+  const tareasPorPantallaDin = {};
+
   (data||[]).filter(r => r.deleted).forEach(r => {
     const idx = CRONOGRAMA_BASE.findIndex(p => p.tareas.some(t => t.id === r.task_id));
     if (idx !== -1) CRONOGRAMA_BASE[idx].tareas = CRONOGRAMA_BASE[idx].tareas.filter(t => t.id !== r.task_id);
   });
+
   (data||[]).filter(r => !r.deleted).forEach(r => {
     map[r.task_id] = r;
     if (r.task_id.startsWith("usr_") && r.pantalla) {
+      /* intentar inyectar en CRONOGRAMA_BASE si la pantalla existe ahí */
       const idx = CRONOGRAMA_BASE.findIndex(p => p.pantalla === r.pantalla);
-      if (idx !== -1 && !CRONOGRAMA_BASE[idx].tareas.find(t => t.id === r.task_id)) {
-        CRONOGRAMA_BASE[idx].tareas.push({
-          id:r.task_id, nombre:r.nombre||"", progreso:r.progreso||0,
-          responsable:r.responsable||"", inicio:r.inicio||"", fin:r.fin||"", comentario:r.comentario||""
-        });
+      if (idx !== -1) {
+        if (!CRONOGRAMA_BASE[idx].tareas.find(t => t.id === r.task_id)) {
+          CRONOGRAMA_BASE[idx].tareas.push({
+            id:r.task_id, nombre:r.nombre||"", progreso:r.progreso||0,
+            responsable:r.responsable||"", inicio:r.inicio||"", fin:r.fin||"", comentario:r.comentario||""
+          });
+        }
+      } else {
+        /* pantalla dinámica — acumular aparte para merge posterior */
+        if (!tareasPorPantallaDin[r.pantalla]) tareasPorPantallaDin[r.pantalla] = [];
+        if (!tareasPorPantallaDin[r.pantalla].find(t => t.id === r.task_id)) {
+          tareasPorPantallaDin[r.pantalla].push({
+            id:r.task_id, nombre:r.nombre||"", progreso:r.progreso||0,
+            responsable:r.responsable||"", inicio:r.inicio||"", fin:r.fin||"", comentario:r.comentario||""
+          });
+        }
       }
     }
   });
-  return map;
+
+  return { map, tareasPorPantallaDin };
 }
 async function dbUpsertTarea(taskId, fields) {
   const { error } = await sb.from("task_progress").upsert(
@@ -524,7 +541,7 @@ function App() {
       dbLoadTareas(),
       dbLoadPantallaConfig(),
       dbLoadPantallasCronograma(),
-    ]).then(([d, tareas, pconf, pantallasDin]) => {
+    ]).then(([d, { map: tareas, tareasPorPantallaDin }, pconf, pantallasDin]) => {
       setDt(d);
       setTareaOv(tareas);
       setPantallaConfig(pconf);
@@ -535,11 +552,17 @@ function App() {
       );
       const baseViva = CRONOGRAMA_BASE.filter(p => !deletedHardcoded.has(p.pantalla));
 
-      /* Pantallas dinámicas que no existen ya en base */
+      /* Pantallas dinámicas: inyectar sus tareas guardadas en Supabase */
       const pantallaNames = new Set(baseViva.map(p=>p.pantalla));
       const extras = pantallasDin
         .filter(p => !pantallaNames.has(p.pantalla))
-        .map(p => ({ id:p.id, etapa:p.etapa, pantalla:p.pantalla, hardcoded:false, tareas:[] }));
+        .map(p => ({
+          id:p.id,
+          etapa:p.etapa,
+          pantalla:p.pantalla,
+          hardcoded:false,
+          tareas: tareasPorPantallaDin[p.pantalla] || []
+        }));
 
       setCronograma([...baseViva, ...extras]);
       setLd(false);
