@@ -798,15 +798,6 @@ function App() {
           { v:pendientesInd,  l:"Pendientes",    col:C.rl,   bg:"rgba(239,83,80,0.12)" },
           { v:14,             l:"Indicadores Agregados", col:"#7c4dff", bg:"rgba(124,77,255,0.12)" },
         ];
-      const rangosInd = [
-  { l:"0%",      col:"#90a4ae", bg:"rgba(144,164,174,0.12)", count: tareasParaContar.flatMap(p=>p.tareas).filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)===0).length },
-  { l:"1–30%",   col:C.rl,     bg:"rgba(239,83,80,0.12)",   count: tareasParaContar.flatMap(p=>p.tareas).filter(t=>{const v=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return v>=1&&v<=30;}).length },
-  { l:"31–50%",  col:C.gold,   bg:"rgba(232,168,56,0.12)",  count: tareasParaContar.flatMap(p=>p.tareas).filter(t=>{const v=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return v>=31&&v<=50;}).length },
-  { l:"51–79%",  col:"#fb8c00",bg:"rgba(251,140,0,0.12)",   count: tareasParaContar.flatMap(p=>p.tareas).filter(t=>{const v=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return v>=51&&v<=79;}).length },
-  { l:"80–99%",  col:C.teal,   bg:"rgba(0,188,212,0.12)",   count: tareasParaContar.flatMap(p=>p.tareas).filter(t=>{const v=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return v>=80&&v<=99;}).length },
-  { l:"100%",    col:C.gl,     bg:"rgba(76,175,80,0.12)",   count: tareasParaContar.flatMap(p=>p.tareas).filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)>=100).length },
-];
-      
 
         return (
           <div style={{ background:"#e8ecf1" }}>
@@ -872,18 +863,6 @@ function App() {
               </div>
             </div>
 
-            {/* Contador por rango */}
-<div style={{ display:"flex", alignItems:"center", gap:10, paddingTop:4 }}>
-  <span style={{ fontSize:11, color:C.g, minWidth:250 }}>INDICADORES POR RANGO</span>
-  <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-    {rangosInd.map(r=>(
-      <div key={r.l} style={{ textAlign:"center", padding:"10px 18px", borderRadius:8, background:r.bg, border:1px solid ${r.col}44 }}>
-        <div style={{ fontSize:28, fontWeight:700, color:r.col, lineHeight:1 }}>{r.count}</div>
-        <div style={{ fontSize:10, color:r.col, marginTop:4, fontWeight:500 }}>{r.l}</div>
-      </div>
-    ))}
-  </div>
-</div>
             {/* Filtros */}
             <div style={{ padding:"12px 24px", background:C.w, borderBottom:"1px solid #e8ecf1", display:"flex", gap:10, flexWrap:"wrap", alignItems:"center" }}>
               <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="🔍 Buscar pantalla..."
