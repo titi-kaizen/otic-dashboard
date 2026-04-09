@@ -672,7 +672,7 @@ function App() {
     const avance      = calcularAvancePantalla(p.tareas, tareaOv);
     const estado      = avance>=100?"Completada":avance>0?"En curso":"Pendiente";
     const matchEstado = filtroEstado==="Todos" || estado===filtroEstado;
-    const matchRango  = filtroRango==="Todos" || (filtroRango==="0" && avance===0) || (filtroRango==="1-50" && avance>=1 && avance<=50) || (filtroRango==="51-99" && avance>=51 && avance<=99) || (filtroRango==="100" && avance>=100);
+    const matchRango  = filtroRango==="Todos" || (filtroRango==="0" && avance===0) || (filtroRango==="1-24" && avance>=1 && avance<=24) || (filtroRango==="25-50" && avance>=25 && avance<=50) || (filtroRango==="51-79" && avance>=51 && avance<=79) || (filtroRango==="80-99" && avance>=80 && avance<=99) || (filtroRango==="100" && avance>=100);
     return matchBusq && matchEtapa && matchEstado && matchRango;
   });
 
@@ -857,18 +857,20 @@ function App() {
               </select>
               <select value={filtroRango} onChange={e=>setFiltroRango(e.target.value)}
                 style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12 }}>
-                {[["Todos","Todos los rangos"],["0","0%"],["1-50","1–50%"],["51-99","51–99%"],["100","100%"]].map(([v,l])=><option key={v} value={v}>{l}</option>)}
+                {[["Todos","Todos los rangos"],["0","0%"],["1-24","1–24%"],["25-50","25–50%"],["51-79","51–79%"],["80-99","80–99%"],["100","100%"]].map(([v,l])=><option key={v} value={v}>{l}</option>)}
               </select>
               <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
               <div style={{ display:"flex", gap:6, marginLeft:8 }}>
-                {[["0","0%"],["1-50","1–50%"],["51-99","51–99%"],["100","100%"]].map(([v,l])=>{
+                {[["0","0%"],["1-24","1–24%"],["25-50","25–50%"],["51-79","51–79%"],["80-99","80–99%"],["100","100%"]].map(([v,l])=>{
                   const allTareas = cronograma.filter(p=>!PANTALLAS_AREA.includes(p.pantalla)).flatMap(p=>p.tareas);
                   const cnt = v==="0"?allTareas.filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)===0).length
-                    :v==="1-50"?allTareas.filter(t=>{const a=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return a>=1&&a<=50;}).length
-                    :v==="51-99"?allTareas.filter(t=>{const a=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return a>=51&&a<=99;}).length
+                    :v==="1-24"?allTareas.filter(t=>{const a=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return a>=1&&a<=24;}).length
+                    :v==="25-50"?allTareas.filter(t=>{const a=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return a>=25&&a<=50;}).length
+                    :v==="51-79"?allTareas.filter(t=>{const a=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return a>=51&&a<=79;}).length
+                    :v==="80-99"?allTareas.filter(t=>{const a=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return a>=80&&a<=99;}).length
                     :allTareas.filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)>=100).length;
                   const active = filtroRango===v;
-                  const colMap = {0:C.rl,"1-50":C.gold,"51-99":C.teal,"100":C.gl};
+                  const colMap = {0:C.rl,"1-24":"#ff7043","25-50":C.gold,"51-79":C.teal,"80-99":"#7c4dff","100":C.gl};
                   const cc = colMap[v];
                   return <button key={v} onClick={()=>setFiltroRango(active?"Todos":v)} style={{ padding:"8px 16px", borderRadius:6, border:active?`2px solid ${cc}`:`1px solid #dde`, background:active?`${cc}15`:"#fff", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:2, minWidth:70 }}>
                     <span style={{ fontSize:18, fontWeight:700, color:active?cc:"#546e7a", lineHeight:1 }}>{cnt}</span>
@@ -883,12 +885,12 @@ function App() {
                 const allInd = cronograma.filter(p=>!PANTALLAS_AREA.includes(p.pantalla)).flatMap(p=>p.tareas.map(t=>({...t,pantalla:p.pantalla})));
                 const filtered = allInd.filter(t => {
                   const a = normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);
-                  return filtroRango==="0"?a===0:filtroRango==="1-50"?(a>=1&&a<=50):filtroRango==="51-99"?(a>=51&&a<=99):a>=100;
+                  return filtroRango==="0"?a===0:filtroRango==="1-24"?(a>=1&&a<=24):filtroRango==="25-50"?(a>=25&&a<=50):filtroRango==="51-79"?(a>=51&&a<=79):filtroRango==="80-99"?(a>=80&&a<=99):a>=100;
                 });
                 return (
                   <div style={{ background:C.w, borderRadius:6, overflow:"hidden", border:"1px solid #e0e0e0" }}>
                     <div style={{ padding:"12px 16px", background:"#f7f9fb", borderBottom:"1px solid #eee", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                      <span style={{ fontSize:13, fontWeight:700, color:C.navy }}>{filtered.length} indicadores en rango {filtroRango==="0"?"0%":filtroRango==="1-50"?"1–50%":filtroRango==="51-99"?"51–99%":"100%"}</span>
+                      <span style={{ fontSize:13, fontWeight:700, color:C.navy }}>{filtered.length} indicadores en rango {filtroRango==="0"?"0%":filtroRango==="1-24"?"1–24%":filtroRango==="25-50"?"25–50%":filtroRango==="51-79"?"51–79%":filtroRango==="80-99"?"80–99%":"100%"}</span>
                       <button onClick={()=>setFiltroRango("Todos")} style={{ padding:"4px 10px", border:`1px solid ${C.teal}`, borderRadius:4, background:"rgba(0,188,212,0.06)", color:C.teal, fontSize:11, fontWeight:600, cursor:"pointer" }}>← Volver a pantallas</button>
                     </div>
                     <div style={{ overflowX:"auto" }}>
