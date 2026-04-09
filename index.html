@@ -516,7 +516,6 @@ const [newForm, setNewForm]           = useState({ nombre:””, progreso:0, re
 const [busqueda, setBusqueda]         = useState(””);
 const [filtroEtapa, setFiltroEtapa]   = useState(“Todas”);
 const [filtroEstado, setFiltroEstado] = useState(“Todos”);
-const [filtroAvance, setFiltroAvance] = useState(“Todos”);
 const [svTarea, setSvTarea]           = useState(null);
 const [editFechaFin, setEditFechaFin] = useState(null);
 
@@ -850,15 +849,28 @@ return (
             style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12 }}>
             {["Todos","Pendiente","En curso","Completada"].map(e=><option key={e} value={e}>{e}</option>)}
           </select>
-          <div style={{ display:"flex", gap:0, borderRadius:4, overflow:"hidden", border:"1px solid #dde" }}>
-            {[{k:"Todos",l:"Todos"},{k:"0",l:"0%"},{k:"1-30",l:"1–30%"},{k:"31-50",l:"31–50%"},{k:"51-79",l:"51–79%"},{k:"80-99",l:"80–99%"},{k:"100",l:"100%"}].map(r=>(
-              <button key={r.k} onClick={()=>setFiltroAvance(r.k)}
-                style={{ padding:"5px 9px", border:"none", borderRight:"1px solid #eee", fontSize:10, fontWeight:filtroAvance===r.k?700:400, cursor:"pointer",
-                  background:filtroAvance===r.k?C.teal:"#fff", color:filtroAvance===r.k?"#fff":"#546e7a" }}>
-                {r.l}
-              </button>
-            ))}
-          </div>
+          {(() => {
+            const allT = cronograma.filter(p=>!PANTALLAS_AREA.includes(p.pantalla)).flatMap(p=>p.tareas);
+            const pg = t => { const ov2=tareaOv[t.id]||{}; return normalizarProgreso(ov2.progreso!==undefined?ov2.progreso:t.progreso); };
+            const ranges = [
+              {l:"0%",col:C.g,bg:"rgba(144,164,174,0.12)",count:allT.filter(t=>pg(t)===0).length},
+              {l:"1–30%",col:C.rl,bg:"rgba(239,83,80,0.10)",count:allT.filter(t=>{const v=pg(t);return v>=1&&v<=30;}).length},
+              {l:"31–50%",col:C.gold,bg:"rgba(232,168,56,0.10)",count:allT.filter(t=>{const v=pg(t);return v>=31&&v<=50;}).length},
+              {l:"51–79%",col:C.td,bg:"rgba(0,151,167,0.10)",count:allT.filter(t=>{const v=pg(t);return v>=51&&v<=79;}).length},
+              {l:"80–99%",col:C.teal,bg:"rgba(0,188,212,0.10)",count:allT.filter(t=>{const v=pg(t);return v>=80&&v<=99;}).length},
+              {l:"100%",col:C.gl,bg:"rgba(76,175,80,0.10)",count:allT.filter(t=>pg(t)>=100).length},
+            ];
+            return (
+              <div style={{ display:"flex", gap:4 }}>
+                {ranges.map(r=>(
+                  <div key={r.l} style={{ textAlign:"center", padding:"4px 10px", borderRadius:4, background:r.bg, border:`1px solid ${r.col}33`, minWidth:52 }}>
+                    <div style={{ fontSize:16, fontWeight:700, color:r.col, lineHeight:1 }}>{r.count}</div>
+                    <div style={{ fontSize:9, color:r.col, marginTop:2, fontWeight:500 }}>{r.l}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
           <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
         </div>
 
@@ -940,18 +952,7 @@ return (
                           </tr>
                         </thead>
                         <tbody>
-                          {p.tareas.filter(t => {
-                            if (filtroAvance==="Todos") return true;
-                            const ov2=tareaOv[t.id]||{};
-                            const pr=normalizarProgreso(ov2.progreso!==undefined?ov2.progreso:t.progreso);
-                            if (filtroAvance==="0") return pr===0;
-                            if (filtroAvance==="100") return pr>=100;
-                            if (filtroAvance==="1-30") return pr>=1&&pr<=30;
-                            if (filtroAvance==="31-50") return pr>=31&&pr<=50;
-                            if (filtroAvance==="51-79") return pr>=51&&pr<=79;
-                            if (filtroAvance==="80-99") return pr>=80&&pr<=99;
-                            return true;
-                          }).map(t => {
+                          {p.tareas.map(t => {
                             const ov     = tareaOv[t.id] || {};
                             const prog   = normalizarProgreso(ov.progreso!==undefined?ov.progreso:t.progreso);
                             const resp   = ov.responsable || t.responsable;
@@ -1057,21 +1058,6 @@ return (
                     {p.tareas.length===0 && !isAddingHere && (
                       <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>
                         {esPantallaArea ? "Sin pantallas de área cargadas" : "Sin indicadores cargados"}
-                      </div>
-                    )}
-                    {p.tareas.length>0 && filtroAvance!=="Todos" && p.tareas.filter(t => {
-                      const ov2=tareaOv[t.id]||{};
-                      const pr=normalizarProgreso(ov2.progreso!==undefined?ov2.progreso:t.progreso);
-                      if (filtroAvance==="0") return pr===0;
-                      if (filtroAvance==="100") return pr>=100;
-                      if (filtroAvance==="1-30") return pr>=1&&pr<=30;
-                      if (filtroAvance==="31-50") return pr>=31&&pr<=50;
-                      if (filtroAvance==="51-79") return pr>=51&&pr<=79;
-                      if (filtroAvance==="80-99") return pr>=80&&pr<=99;
-                      return true;
-                    }).length===0 && (
-                      <div style={{ padding:16, textAlign:"center", color:"#90a4ae", fontSize:11, fontStyle:"italic" }}>
-                        Ningún indicador en el rango seleccionado.
                       </div>
                     )}
                   </div>
