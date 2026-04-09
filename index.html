@@ -878,8 +878,15 @@ function App() {
                 style={{ padding:"6px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12 }}>
                 {["Todos","Pendiente","En curso","Completada"].map(e=><option key={e} value={e}>{e}</option>)}
               </select>
-              <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
-            </div>
+              <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+  {[["Todos","Todos"],["0","0%"],["1-30","1–30%"],["31-50","31–50%"],["51-79","51–79%"],["80-99","80–99%"],["100","100%"]].map(([val,lbl])=>(
+    <button key={val} onClick={()=>setFiltroRangoInd(val)}
+      style={{ padding:"5px 10px", border:1px solid ${filtroRangoInd===val?C.teal:"#dde"}, borderRadius:4, background:filtroRangoInd===val?"rgba(0,188,212,0.1)":"#fff", color:filtroRangoInd===val?C.teal:"#546e7a", fontSize:11, fontWeight:filtroRangoInd===val?700:400, cursor:"pointer" }}>
+      {lbl}
+    </button>
+  ))}
+</div>
+<span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
 
             {/* Cards */}
             <div style={{ padding:"18px 24px" }}>
@@ -964,7 +971,17 @@ function App() {
                               </tr>
                             </thead>
                             <tbody>
-                              {p.tareas.map(t => {
+                              {p.tareas.filter(t => {
+  if (filtroRangoInd==="Todos") return true;
+  const prog = normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso);
+  if (filtroRangoInd==="0")     return prog === 0;
+  if (filtroRangoInd==="1-30")  return prog >= 1  && prog <= 30;
+  if (filtroRangoInd==="31-50") return prog >= 31 && prog <= 50;
+  if (filtroRangoInd==="51-79") return prog >= 51 && prog <= 79;
+  if (filtroRangoInd==="80-99") return prog >= 80 && prog <= 99;
+  if (filtroRangoInd==="100")   return prog === 100;
+  return true;
+}).map(t => {
                                 const ov     = tareaOv[t.id] || {};
                                 const prog   = normalizarProgreso(ov.progreso!==undefined?ov.progreso:t.progreso);
                                 const resp   = ov.responsable || t.responsable;
