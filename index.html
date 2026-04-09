@@ -860,7 +860,9 @@ function App() {
                 {[["Todos","Todos los rangos"],["0","0%"],["1-24","1–24%"],["25-50","25–50%"],["51-79","51–79%"],["80-99","80–99%"],["100","100%"]].map(([v,l])=><option key={v} value={v}>{l}</option>)}
               </select>
               <span style={{ fontSize:11, color:C.g, marginLeft:"auto" }}>{pantallasVisibles.length} pantallas</span>
-              <div style={{ display:"flex", gap:6, marginLeft:8 }}>
+              <div style={{ display:"flex", flexDirection:"column", gap:4, marginLeft:8 }}>
+                <span style={{ fontSize:10, fontWeight:700, color:C.g, letterSpacing:1 }}>INDICADORES POR RANGO DE AVANCE</span>
+                <div style={{ display:"flex", gap:6 }}>
                 {[["0","0%"],["1-24","1–24%"],["25-50","25–50%"],["51-79","51–79%"],["80-99","80–99%"],["100","100%"]].map(([v,l])=>{
                   const allTareas = cronograma.filter(p=>!PANTALLAS_AREA.includes(p.pantalla)).flatMap(p=>p.tareas);
                   const cnt = v==="0"?allTareas.filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)===0).length
@@ -877,6 +879,7 @@ function App() {
                     <span style={{ fontSize:10, fontWeight:600, color:active?cc:"#90a4ae" }}>{l}</span>
                   </button>;
                 })}
+              </div>
               </div>
             </div>
 
