@@ -549,8 +549,8 @@ function App() {
     const matchEstado = filtroEstado==="Todos" || estado===filtroEstado;
     return matchBusq && matchEtapa && matchEstado;
   });
-  const avanceGlobal = CRONOGRAMA.length ? Math.round(CRONOGRAMA.reduce((s,p)=>s+calcularAvancePantalla(p.tareas,tareaOv),0)/CRONOGRAMA.length) : 0;
-
+  const _tts = CRONOGRAMA.flatMap(p=>p.tareas);
+  const avanceGlobal = _tts.length ? Math.round(_tts.reduce((s,t)=>{ const ov=tareaOv[t.id]; return s+(ov?normalizarProgreso(ov.progreso):normalizarProgreso(t.progreso)); },0)/_tts.length) : 0;
   const indicadoresHoy = useMemo(() => {
     const ahora = new Date(today); ahora.setHours(23,59,59,999);
     const hoyMs = ahora.getTime();
