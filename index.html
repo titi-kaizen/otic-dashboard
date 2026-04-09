@@ -529,6 +529,8 @@ function App() {
   const [showAddPantalla, setShowAddPantalla] = useState(false);
   const [newPantalla, setNewPantalla]   = useState({ pantalla:"", etapa:ETAPAS_LISTA[0] });
   const [svPantalla, setSvPantalla]     = useState(null);
+  const [filtroRangoInd, setFiltroRangoInd] = useState("Todos");
+  
 
   useEffect(() => {
     const t = setInterval(() => setToday(new Date()), 60_000);
