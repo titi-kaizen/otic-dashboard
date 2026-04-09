@@ -19,8 +19,8 @@ const SUPABASE_URL      = "https://tuqladhxuegvqqwyriqi.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Xf2BijTju7QqbI2iQAnYOg_6ERMSr9n";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* Pantallas que usan "Pantallas de Área" y se excluyen del contador de indicadores */
 const PANTALLAS_AREA = ["Datacenter (Mock Up Visual)", "Template / Diseño Visual", "Datacenter (Desarrollo)"];
+const PANTALLA_DATACENTER_DEV = "Datacenter (Desarrollo)";
 
 const TEAM = [
   { id:"zsosa",     name:"Zahi Sosa",       role:"Analista RTIC" },
@@ -92,14 +92,14 @@ const SEED = {
   ], blocked:"", decision:"", confidence:"" },
 };
 
-const CRONOGRAMA = [
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento contractual", tareas:[
+const CRONOGRAMA_BASE = [
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento contractual", hardcoded:true, tareas:[
     {id:"e1t01",nombre:"Adaptación de tablero desarrollado",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
     {id:"e1t02",nombre:"Tarea 2 — Plan de abastecimiento compras",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
     {id:"e1t03",nombre:"Tarea 1 — Plan abastecimiento vs ejecución",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
     {id:"e1t04",nombre:"Tarea 2 — Plan abastecimiento vs ejecución",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
   ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Planificación (E1)", tareas:[
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Planificación (E1)", hardcoded:true, tareas:[
     {id:"e1t05",nombre:"Reunión de relevamiento de dashboards — Nivel actividad YPF",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
     {id:"e1t06",nombre:"Reunión interna para diseño visual",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
     {id:"e1t07",nombre:"Reunión para cerrar formato visual",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:"Enviar template final cuando esté aprobado"},
@@ -109,46 +109,46 @@ const CRONOGRAMA = [
     {id:"e1t11",nombre:"Reunión para cerrar formato — Dimensionamiento",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:""},
     {id:"e1t12",nombre:"Adaptación de tableros — Dimensionamiento",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
   ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento (E1)", tareas:[
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Abastecimiento (E1)", hardcoded:true, tareas:[
     {id:"e1t13",nombre:"Reunión de relevamiento de datos disponibles",progreso:90,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
     {id:"e1t14",nombre:"Compartir template Power BI y mail",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-11",fin:"2026-03-15",comentario:"A la espera de validación final del template"},
     {id:"e1t15",nombre:"Reuniones de seguimiento semanales",progreso:10,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
     {id:"e1t16",nombre:"Armado de mockup con visualizaciones preliminares",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Contextual (E1)", tareas:[
+  { etapa:"Etapa 1 — Entender demanda futura", pantalla:"Contextual (E1)", hardcoded:true, tareas:[
     {id:"e1t17",nombre:"Análisis de extracción del dato por API",progreso:0,responsable:"Ari Mariño / Sebas Caviglia",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
     {id:"e1t18",nombre:"Reunión con Claus para determinar datos necesitados",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-05",fin:"2026-03-13",comentario:""},
     {id:"e1t19",nombre:"Obtención de orígenes y armado de pantalla",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-13",fin:"2026-03-27",comentario:""},
   ]},
-  { etapa:"Etapa 2 — Analizar mercado/oferta", pantalla:"Planificación (E2)", tareas:[
+  { etapa:"Etapa 2 — Analizar mercado/oferta", pantalla:"Planificación (E2)", hardcoded:true, tareas:[
     {id:"e2t01",nombre:"Reunión de relevamiento — Benchmarks de precios",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
     {id:"e2t02",nombre:"Adaptación de tableros — Benchmarks de precios",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
     {id:"e2t03",nombre:"Reunión de relevamiento — Análisis oferta/demanda",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
     {id:"e2t04",nombre:"Adaptación de tableros — Análisis oferta/demanda",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-18",comentario:""},
   ]},
-  { etapa:"Etapa 2 — Analizar mercado/oferta", pantalla:"Compre Neuquino", tareas:[
+  { etapa:"Etapa 2 — Analizar mercado/oferta", pantalla:"Compre Neuquino", hardcoded:true, tareas:[
     {id:"e2t05",nombre:"Creación de base de datos",progreso:100,responsable:"Juli Sanda",inicio:"2026-02-02",fin:"2026-02-28",comentario:""},
     {id:"e2t06",nombre:"Análisis de datos históricos y conexión con bases actuales",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-02",fin:"2026-03-06",comentario:""},
     {id:"e2t07",nombre:"Construcción de pantallas (Montos + Certificación)",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e2t08",nombre:"Warning proveedores monopólicos en cartera",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
   ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Tiempos Intermedios", tareas:[
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Tiempos Intermedios", hardcoded:true, tareas:[
     {id:"e4t01",nombre:"Análisis de viabilidad de hitos y cálculos de calidad",progreso:50,responsable:"Juli Sanda",inicio:"2026-02-15",fin:"2026-04-30",comentario:"Pendiente por cálculos de viabilidad"},
   ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Seguimiento SOLPED", tareas:[] },
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Licitaciones", tareas:[
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Seguimiento SOLPED", hardcoded:true, tareas:[] },
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Licitaciones", hardcoded:true, tareas:[
     {id:"e4t02",nombre:"Evaluación de fuente manual Sourcing para cálculo de KPIs",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-05",fin:"2026-03-09",comentario:""},
     {id:"e4t03",nombre:"Reunión con referente de Tecnología con avances",progreso:50,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:"A la espera de validación e incorporación de columnas faltantes"},
     {id:"e4t04",nombre:"Inicio de construcción de KPIs particulares",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
   ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Ahorros", tareas:[
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Ahorros", hardcoded:true, tareas:[
     {id:"e4t05",nombre:"Proyectos de captura de valor por estado",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
     {id:"e4t06",nombre:"Adaptación de tablero a visuales RTIC",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e4t07",nombre:"Ahorro y captura de valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
     {id:"e4t08",nombre:"Casos de captura de valor — Desarrollo de proveedores",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
     {id:"e4t09",nombre:"Ahorros gestionados por casos de captura de valor",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
   ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Gestiones de Compras", tareas:[
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Gestiones de Compras", hardcoded:true, tareas:[
     {id:"e4t10",nombre:"Detectar datos de niveles de autorización actuales en BTP",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e4t11",nombre:"Validar códigos y funcionamiento",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e4t12",nombre:"Corrección/Adaptación de pirámide",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
@@ -160,73 +160,73 @@ const CRONOGRAMA = [
     {id:"e4t18",nombre:"Adaptación de tablero RTIC — Compra licitación vs directa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e4t19",nombre:"Adaptación de tablero RTIC — Share de licitaciones",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
   ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Salud Contractual (E4)", tareas:[
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Salud Contractual (E4)", hardcoded:true, tareas:[
     {id:"e4t20",nombre:"Reunión interna — Análisis de KPIs y diseño preliminar",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-11",fin:"2026-03-11",comentario:""},
     {id:"e4t21",nombre:"Construcción de pantalla Salud Contractual",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-11",fin:"2026-04-15",comentario:""},
     {id:"e4t22",nombre:"Reunión con Fernando Gout (CIC Costo/Plazo)",progreso:80,responsable:"Flor Chavez",inicio:"2026-03-06",fin:"2026-03-16",comentario:"Pendiente: recibir accesos al tablero y Excel"},
     {id:"e4t23",nombre:"Reunión con Victor Magnarelli — visualizaciones",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-16",fin:"2026-03-20",comentario:""},
     {id:"e4t24",nombre:"Armado de mockup con visualizaciones preliminares",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-20",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Pedidos", tareas:[
+  { etapa:"Etapa 4 — Abastecer, negociar y seleccionar", pantalla:"Pedidos", hardcoded:true, tareas:[
     {id:"e4t25",nombre:"Análisis de KPIs y diseño preliminar — Pedidos puntuales",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
     {id:"e4t26",nombre:"Análisis de KPIs y diseño preliminar — Proveedores estratégicos",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-05",fin:"2026-03-31",comentario:""},
     {id:"e4t27",nombre:"Comunicado enviado a referentes SC",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-04",fin:"2026-03-18",comentario:""},
     {id:"e4t28",nombre:"Compilación de criterios de medición",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-12",fin:"2026-03-12",comentario:""},
     {id:"e4t29",nombre:"Análisis y construcción de indicador",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-18",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Almacenes", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Almacenes", hardcoded:true, tareas:[
     {id:"e5t01",nombre:"Análisis de tableros disponibles",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e5t02",nombre:"Reunión con referentes para planificar construcción",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
     {id:"e5t03",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-16",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"COMEX", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"COMEX", hardcoded:true, tareas:[
     {id:"e5t04",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e5t05",nombre:"Reunión con referentes para planificar construcción",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-18",comentario:""},
     {id:"e5t06",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Transporte", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Transporte", hardcoded:true, tareas:[
     {id:"e5t07",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-13",comentario:""},
     {id:"e5t08",nombre:"Enviar mail con template y próximos pasos",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-20",comentario:""},
     {id:"e5t09",nombre:"Reunión con referentes para planificar construcción",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
     {id:"e5t10",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Flor Chavez",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Stock", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Stock", hardcoded:true, tareas:[
     {id:"e5t11",nombre:"Análisis de tableros disponibles",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e5t12",nombre:"Reunión con referentes para planificar construcción",progreso:100,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"e5t13",nombre:"Construcción de pantalla consolidada de KPIs",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-12",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Spend", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Spend", hardcoded:true, tareas:[
     {id:"e5t14",nombre:"Adaptación de tablero a visuales RTIC — Total Spend",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
     {id:"e5t15",nombre:"Análisis de desarrollo — Warning certificación",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
     {id:"e5t16",nombre:"Reunión con referente — Días de mora en certificaciones",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
     {id:"e5t17",nombre:"Construcción de KPIs principales y adaptación visual",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
     {id:"e5t18",nombre:"Revisión y adaptación visual final",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-31",fin:"2026-04-04",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Inspección y Activación", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Inspección y Activación", hardcoded:true, tareas:[
     {id:"e5t20",nombre:"Reunión con referente — tableros disponibles",progreso:100,responsable:"Juli Sanda",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
     {id:"e5t21",nombre:"Diseño de indicadores del Referente",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-10",fin:"2026-03-31",comentario:""},
     {id:"e5t22",nombre:"Reunión de avances",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-20",fin:"2026-03-20",comentario:""},
     {id:"e5t23",nombre:"Adaptación gráfica de KPIs con diseño RTIC",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-31",fin:"2026-04-15",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Salud Contractual (E5)", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Salud Contractual (E5)", hardcoded:true, tareas:[
     {id:"e5t24",nombre:"Análisis y adaptación — Alertas de monto/plazo",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-31",fin:"2026-04-15",comentario:""},
     {id:"e5t25",nombre:"Reunión con referente — Toyota Well",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
     {id:"e5t26",nombre:"Conexión de bases — Toyota Well",progreso:0,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-18",comentario:"Revisar ubicación de la información"},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Accidentes IFA/IFAT", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Accidentes IFA/IFAT", hardcoded:true, tareas:[
     {id:"e5t27",nombre:"Reunión con Dayana Méndez",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-06",fin:"2026-03-06",comentario:""},
     {id:"e5t28",nombre:"Construcción de mockup",progreso:100,responsable:"Flor Chavez",inicio:"2026-03-09",fin:"2026-03-31",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Vehicular", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Vehicular", hardcoded:true, tareas:[
     {id:"e5t29",nombre:"Reunión con referente — tableros construidos + KPIs relevados",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-09",fin:"2026-04-30",comentario:""},
   ]},
-  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Patrimonial", tareas:[
+  { etapa:"Etapa 5 — Implementar servicios a las operaciones", pantalla:"Gestión Patrimonial", hardcoded:true, tareas:[
     {id:"e5t30",nombre:"Reunión con referente — tableros construidos + KPIs relevados",progreso:0,responsable:"Pedro/Costa",inicio:"2026-03-13",fin:"2026-03-20",comentario:""},
   ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"Costo Pozo", tareas:[
+  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"Costo Pozo", hardcoded:true, tareas:[
     {id:"e6t01",nombre:"Tarea 1 — Costo pozo",progreso:0,responsable:"Hernan Ambrosio",inicio:"2026-03-05",fin:"2026-04-30",comentario:""},
   ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Calificaciones)", tareas:[
+  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Calificaciones)", hardcoded:true, tareas:[
     {id:"gipc01",nombre:"% contratos con estado de calificación / sin estado de calificación",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipc02",nombre:"% proveedores no aceptados por situación económico financiera",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipc03",nombre:"% contratos vigentes calificados",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
@@ -238,30 +238,30 @@ const CRONOGRAMA = [
     {id:"gipc09",nombre:"Top 10 grupos con menor volumen por GA",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipc10",nombre:"% proveedores bloqueados y tipos de bloqueo",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
   ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Evaluaciones)", tareas:[
+  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Evaluaciones)", hardcoded:true, tareas:[
     {id:"gipe01",nombre:"% contratos evaluados y sin evaluación de desempeño / Ranking por negocio de contratos sin evaluar (solicitado por WA)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipe02",nombre:"Q/% contratos evaluados con bajo desempeño (< 40%)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipe03",nombre:"Top 20 proveedores de mayor spend y su correspondiente evaluación",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipe04",nombre:"% proveedores evaluados con desempeño en seguimiento (< 40/50)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipe05",nombre:"% proveedores evaluados (con al menos 1 evaluación)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
   ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Laboral y Previsional)", tareas:[
+  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Laboral y Previsional)", hardcoded:true, tareas:[
     {id:"gipl01",nombre:"% de subcontratación (último período) — Top 10",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipl02",nombre:"Proveedores subcontratados",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipl03",nombre:"% proveedores con Factor Laboral y Previsional BAJO y relación con impacto económico",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gipl04",nombre:"Evolutivo de personal avalado / no avalado — Top 10",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
   ]},
-  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Score de Proveedores)", tareas:[
+  { etapa:"Etapa 6 — Evaluar rendimiento de proveedores", pantalla:"GIP (Score de Proveedores)", hardcoded:true, tareas:[
     {id:"gips01",nombre:"Evolutivo de puntajes score por período con base y composición (base histórica + actual)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gips02",nombre:"Top proveedores con mayor desvío de puntaje entre mes actual y mes anterior",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gips03",nombre:"Top proveedores por spend (mayor certificación promedio mensual) y su puntaje asociado",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
     {id:"gips04",nombre:"Top proveedores con mala performance por factor (auditoría técnica / laboral / desempeño contractual)",progreso:0,responsable:"Juli Sanda",inicio:"",fin:"",comentario:""},
   ]},
-  { etapa:"Etapa 7 — Desarrollar nuevos proveedores", pantalla:"Desarrollo Proveedores", tareas:[
+  { etapa:"Etapa 7 — Desarrollar nuevos proveedores", pantalla:"Desarrollo Proveedores", hardcoded:true, tareas:[
     {id:"e7t01",nombre:"Reunión con referentes — pasos a seguir en desarrollo",progreso:100,responsable:"Juli Sanda / Zahi Sosa",inicio:"2026-03-10",fin:"2026-03-10",comentario:""},
     {id:"e7t02",nombre:"Reunión con referentes — análisis de las bases",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-10",fin:"2026-04-30",comentario:""},
   ]},
-  { etapa:"DATACENTER (mock up visual)", pantalla:"Datacenter (Mock Up Visual)", tareas:[
+  { etapa:"DATACENTER (mock up visual)", pantalla:"Datacenter (Mock Up Visual)", hardcoded:true, tareas:[
     {id:"dct01",nombre:"Pantalla Seguimiento Objetivos VP",progreso:90,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"dct02",nombre:"Pantalla % calidad medición por etapa",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
     {id:"dct03",nombre:"Pantalla Tiempos intermedios + gestión",progreso:0,responsable:"Juli Sanda",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
@@ -271,13 +271,13 @@ const CRONOGRAMA = [
     {id:"dct07",nombre:"Pantalla Portfolio de iniciativas de competitividad",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-13",comentario:""},
     {id:"dct08",nombre:"Pantalla Stock",progreso:0,responsable:"Luciano Negri",inicio:"2026-03-09",fin:"2026-03-16",comentario:""},
   ]},
-  { etapa:"TEMPLATE (mock up visual)", pantalla:"Template / Diseño Visual", tareas:[
+  { etapa:"TEMPLATE (mock up visual)", pantalla:"Template / Diseño Visual", hardcoded:true, tareas:[
     {id:"tpt01",nombre:"Armado de diseño visual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-02-20",fin:"2026-03-06",comentario:""},
     {id:"tpt02",nombre:"Reunión con referente de diseño/imagen/marca",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-06",fin:"2026-03-06",comentario:"Paleta de colores compartida por mail"},
     {id:"tpt03",nombre:"Adaptación de recomendaciones al diseño actual",progreso:100,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-03-09",comentario:""},
     {id:"tpt04",nombre:"Validación de template de imagen",progreso:0,responsable:"Zahi Sosa",inicio:"2026-03-09",fin:"2026-04-30",comentario:"Falta validación"},
   ]},
-  { etapa:"DATACENTER (desarrollo)", pantalla:"Datacenter (Desarrollo)", tareas:[
+  { etapa:"DATACENTER (desarrollo)", pantalla:"Datacenter (Desarrollo)", hardcoded:true, tareas:[
     {id:"dcd01",nombre:"Pantalla Seguimiento Objetivos VP",               progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
     {id:"dcd02",nombre:"Pantalla % calidad medición por etapa",           progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
     {id:"dcd03",nombre:"Pantalla Tiempos intermedios + gestión",          progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
@@ -286,7 +286,22 @@ const CRONOGRAMA = [
     {id:"dcd06",nombre:"Pantalla Accidentes IFA/IFAT",                    progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
     {id:"dcd07",nombre:"Pantalla Portfolio de iniciativas de competitividad (plazo/costo)",progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
     {id:"dcd08",nombre:"Pantalla Stock",                                  progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
+    {id:"dcd09",nombre:"Pantalla COMEX",                                  progreso:0,responsable:"",inicio:"",fin:"",comentario:""},
   ]},
+];
+
+const ETAPAS_LISTA = [
+  "Etapa 1 — Entender demanda futura",
+  "Etapa 2 — Analizar mercado/oferta",
+  "Etapa 3 — Planificar sourcing",
+  "Etapa 4 — Abastecer, negociar y seleccionar",
+  "Etapa 5 — Implementar servicios a las operaciones",
+  "Etapa 6 — Evaluar rendimiento de proveedores",
+  "Etapa 7 — Desarrollar nuevos proveedores",
+  "DATACENTER (mock up visual)",
+  "DATACENTER (desarrollo)",
+  "TEMPLATE (mock up visual)",
+  "Otro",
 ];
 
 const INIT  = { 1: SEED };
@@ -328,15 +343,15 @@ async function dbLoadTareas() {
   if (error) throw error;
   const map = {};
   (data||[]).filter(r => r.deleted).forEach(r => {
-    const idx = CRONOGRAMA.findIndex(p => p.tareas.some(t => t.id === r.task_id));
-    if (idx !== -1) CRONOGRAMA[idx].tareas = CRONOGRAMA[idx].tareas.filter(t => t.id !== r.task_id);
+    const idx = CRONOGRAMA_BASE.findIndex(p => p.tareas.some(t => t.id === r.task_id));
+    if (idx !== -1) CRONOGRAMA_BASE[idx].tareas = CRONOGRAMA_BASE[idx].tareas.filter(t => t.id !== r.task_id);
   });
   (data||[]).filter(r => !r.deleted).forEach(r => {
     map[r.task_id] = r;
     if (r.task_id.startsWith("usr_") && r.pantalla) {
-      const idx = CRONOGRAMA.findIndex(p => p.pantalla === r.pantalla);
-      if (idx !== -1 && !CRONOGRAMA[idx].tareas.find(t => t.id === r.task_id)) {
-        CRONOGRAMA[idx].tareas.push({
+      const idx = CRONOGRAMA_BASE.findIndex(p => p.pantalla === r.pantalla);
+      if (idx !== -1 && !CRONOGRAMA_BASE[idx].tareas.find(t => t.id === r.task_id)) {
+        CRONOGRAMA_BASE[idx].tareas.push({
           id:r.task_id, nombre:r.nombre||"", progreso:r.progreso||0,
           responsable:r.responsable||"", inicio:r.inicio||"", fin:r.fin||"", comentario:r.comentario||""
         });
@@ -367,6 +382,32 @@ async function dbUpsertPantallaConfig(pantalla, fields) {
   if (error) throw error;
 }
 
+/* ─── pantallas_cronograma helpers ─── */
+async function dbLoadPantallasCronograma() {
+  const { data, error } = await sb.from("pantallas_cronograma").select("*").eq("deleted", false).order("orden");
+  if (error) throw error;
+  return data || [];
+}
+async function dbUpsertPantallaCronograma(id, fields) {
+  const { error } = await sb.from("pantallas_cronograma").upsert(
+    { id, ...fields, updated_at:new Date().toISOString() },
+    { onConflict:"id" }
+  );
+  if (error) throw error;
+}
+async function dbDeletePantallaCronograma(id) {
+  const { error } = await sb.from("pantallas_cronograma").update({ deleted:true, updated_at:new Date().toISOString() }).eq("id", id);
+  if (error) throw error;
+}
+/* También soft-delete pantallas hardcodeadas via pantalla_config */
+async function dbSoftDeletePantallaHardcoded(pantalla) {
+  const { error } = await sb.from("pantalla_config").upsert(
+    { pantalla, deleted:true, updated_at:new Date().toISOString() },
+    { onConflict:"pantalla" }
+  );
+  if (error) throw error;
+}
+
 /* ─── Lógica de negocio ─── */
 function normalizarProgreso(v) {
   if (v===null||v===undefined||v==="") return 0;
@@ -383,6 +424,17 @@ function calcularAvancePantalla(tareas, overrides) {
   }, 0);
   return Math.round(total / tareas.length);
 }
+
+/* Avance datacenter desarrollo: binario completadas/total */
+function calcularAvanceDatacenterDev(tareas, overrides) {
+  if (!tareas.length) return { completadas:0, total:0, pct:0 };
+  const completadas = tareas.filter(t => {
+    const ov = overrides[t.id];
+    return normalizarProgreso(ov ? ov.progreso : t.progreso) >= 100;
+  }).length;
+  return { completadas, total:tareas.length, pct:Math.round((completadas/tareas.length)*100) };
+}
+
 function getDaysRemaining(isoTarget, fromDate = new Date()) {
   const target = new Date(isoTarget + "T00:00:00Z");
   const from   = Date.UTC(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
@@ -414,8 +466,8 @@ function ItemRow({ item, idx, onUp, onRm }) {
   );
 }
 
-function BarAcum({ label, pct, done, total }) {
-  const col = pct >= 100 ? C.gl : pct >= 60 ? C.gold : pct > 0 ? C.rl : C.g;
+function BarAcum({ label, pct, done, total, color }) {
+  const col = color || (pct >= 100 ? C.gl : pct >= 60 ? C.gold : pct > 0 ? C.rl : C.g);
   return (
     <div style={{ display:"flex", alignItems:"center", gap:14 }}>
       <span style={{ fontSize:11, color:C.g, minWidth:250 }}>{label}</span>
@@ -424,7 +476,7 @@ function BarAcum({ label, pct, done, total }) {
       </div>
       <span style={{ fontSize:15, fontWeight:700, color:col, minWidth:44 }}>{pct}%</span>
       <span style={{ fontSize:10, color:C.g }}>
-        {total === 0 ? "Sin vencimientos registrados" : `${done}/${total} completadas`}
+        {total === 0 ? "Sin pantallas registradas" : `${done}/${total} completadas`}
       </span>
     </div>
   );
@@ -455,18 +507,54 @@ function App() {
   const [svTarea, setSvTarea]           = useState(null);
   const [editFechaFin, setEditFechaFin] = useState(null);
 
+  /* Estado para pantallas dinámicas del cronograma */
+  const [cronograma, setCronograma]     = useState(CRONOGRAMA_BASE.map(p=>({...p, tareas:[...p.tareas]})));
+  const [showAddPantalla, setShowAddPantalla] = useState(false);
+  const [newPantalla, setNewPantalla]   = useState({ pantalla:"", etapa:ETAPAS_LISTA[0] });
+  const [svPantalla, setSvPantalla]     = useState(null);
+
   useEffect(() => {
     const t = setInterval(() => setToday(new Date()), 60_000);
     return () => clearInterval(t);
   }, []);
+
   useEffect(() => {
-    dbLoad().then(d => { setDt(d); setLd(false); }).catch(e => { setErr("No se pudo conectar con Supabase."); setLd(false); console.error(e); });
+    Promise.all([
+      dbLoad(),
+      dbLoadTareas(),
+      dbLoadPantallaConfig(),
+      dbLoadPantallasCronograma(),
+    ]).then(([d, tareas, pconf, pantallasDin]) => {
+      setDt(d);
+      setTareaOv(tareas);
+      setPantallaConfig(pconf);
+
+      /* Merge: base hardcodeada (no eliminadas) + dinámicas de Supabase */
+      const deletedHardcoded = new Set(
+        Object.entries(pconf).filter(([,v])=>v.deleted).map(([k])=>k)
+      );
+      const baseViva = CRONOGRAMA_BASE.filter(p => !deletedHardcoded.has(p.pantalla));
+
+      /* Pantallas dinámicas que no existen ya en base */
+      const pantallaNames = new Set(baseViva.map(p=>p.pantalla));
+      const extras = pantallasDin
+        .filter(p => !pantallaNames.has(p.pantalla))
+        .map(p => ({ id:p.id, etapa:p.etapa, pantalla:p.pantalla, hardcoded:false, tareas:[] }));
+
+      setCronograma([...baseViva, ...extras]);
+      setLd(false);
+    }).catch(e => { setErr("No se pudo conectar con Supabase."); setLd(false); console.error(e); });
   }, []);
-  useEffect(() => { dbLoadTareas().then(m => setTareaOv(m)).catch(console.error); }, []);
-  useEffect(() => { dbLoadPantallaConfig().then(m => setPantallaConfig(m)).catch(console.error); }, []);
 
   const wd = dt[wk] || {};
   const wc = WEEKS[wk - 1];
+
+  /* Datacenter Desarrollo stats */
+  const datacenterDevStats = useMemo(() => {
+    const p = cronograma.find(p => p.pantalla === PANTALLA_DATACENTER_DEV);
+    if (!p) return { completadas:0, total:0, pct:0 };
+    return calcularAvanceDatacenterDev(p.tareas, tareaOv);
+  }, [cronograma, tareaOv]);
 
   const startEd = id => {
     const d = wd[id];
@@ -475,7 +563,6 @@ function App() {
     setFm({ blocked:d?.blocked||"", decision:d?.decision||"", confidence:d?.confidence||"Green" });
   };
 
-  /* Bug fix: capturar memberId antes de setear null */
   const saveEd = async () => {
     const memberId   = ed;
     const memberData = { items:fi, ...fm };
@@ -492,13 +579,44 @@ function App() {
   const rmI  = i  => setFi(p=>p.filter((_,j)=>j!==i));
   const upI  = (i,f,v) => setFi(p=>p.map((x,j)=>j===i?{...x,[f]:v}:x));
 
+  /* ─── Eliminar pantalla del cronograma ─── */
+  const eliminarPantalla = async (p) => {
+    if (!confirm(`¿Eliminar la pantalla "${p.pantalla}"? Esta acción no se puede deshacer.`)) return;
+    setSvPantalla("saving");
+    try {
+      if (p.hardcoded) {
+        await dbSoftDeletePantallaHardcoded(p.pantalla);
+        setPantallaConfig(prev => ({ ...prev, [p.pantalla]:{ ...prev[p.pantalla], deleted:true } }));
+      } else {
+        await dbDeletePantallaCronograma(p.id);
+      }
+      setCronograma(prev => prev.filter(x => x.pantalla !== p.pantalla));
+      setSvPantalla("ok"); setTimeout(()=>setSvPantalla(null),2000);
+    } catch(e) { console.error("Error eliminando pantalla:",e); setSvPantalla("error"); setTimeout(()=>setSvPantalla(null),3000); }
+  };
+
+  /* ─── Agregar pantalla al cronograma ─── */
+  const agregarPantalla = async () => {
+    if (!newPantalla.pantalla.trim()) return alert("El nombre de la pantalla es obligatorio.");
+    if (cronograma.find(p => p.pantalla.toLowerCase() === newPantalla.pantalla.trim().toLowerCase())) return alert("Ya existe una pantalla con ese nombre.");
+    const nuevoId = "pnt_" + uid();
+    const payload = { pantalla:newPantalla.pantalla.trim(), etapa:newPantalla.etapa, orden:cronograma.length, deleted:false };
+    setSvPantalla("saving");
+    try {
+      await dbUpsertPantallaCronograma(nuevoId, payload);
+      setCronograma(prev => [...prev, { id:nuevoId, etapa:newPantalla.etapa, pantalla:newPantalla.pantalla.trim(), hardcoded:false, tareas:[] }]);
+      setNewPantalla({ pantalla:"", etapa:ETAPAS_LISTA[0] });
+      setShowAddPantalla(false);
+      setSvPantalla("ok"); setTimeout(()=>setSvPantalla(null),2000);
+    } catch(e) { console.error("Error agregando pantalla:",e); setSvPantalla("error"); setTimeout(()=>setSvPantalla(null),3000); }
+  };
+
   const borrarTarea = async (tarea, pantalla) => {
     if (!confirm(`¿Borrar "${tarea.nombre}"?`)) return;
     setSvTarea("saving");
     try {
       await dbUpsertTarea(tarea.id, { nombre:tarea.nombre, pantalla, progreso:0, estado:"Pendiente", responsable:"", inicio:null, fin:null, comentario:"", deleted:true, updated_by:"Usuario" });
-      const idx = CRONOGRAMA.findIndex(p => p.pantalla === pantalla);
-      if (idx !== -1) CRONOGRAMA[idx].tareas = CRONOGRAMA[idx].tareas.filter(t => t.id !== tarea.id);
+      setCronograma(prev => prev.map(p => p.pantalla===pantalla ? { ...p, tareas:p.tareas.filter(t=>t.id!==tarea.id) } : p));
       setTareaOv(prev => { const n={...prev}; delete n[tarea.id]; return n; });
       setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
     } catch(e) { console.error("Error borrando:",e); setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
@@ -508,7 +626,7 @@ function App() {
     const p = normalizarProgreso(campos.progreso);
     if (p<0||p>100) return alert("El progreso debe ser entre 0 y 100.");
     if (campos.fin&&campos.inicio&&campos.fin<campos.inicio) return alert("La fecha de fin no puede ser menor a la de inicio.");
-    const pantallaDeTarea = CRONOGRAMA.find(pt => pt.tareas.some(t2 => t2.id === tarea.id))?.pantalla || null;
+    const pantallaDeTarea = cronograma.find(pt => pt.tareas.some(t2 => t2.id === tarea.id))?.pantalla || null;
     const payload = { nombre:tarea.nombre, pantalla:pantallaDeTarea, progreso:p, estado:estadoTarea(p), responsable:campos.responsable||"", inicio:campos.inicio||null, fin:campos.fin||null, comentario:campos.comentario||"", updated_by:"Usuario" };
     setSvTarea("saving");
     try {
@@ -527,21 +645,19 @@ function App() {
     setSvTarea("saving");
     try {
       await dbUpsertTarea(nuevoId, payload);
-      const idx = CRONOGRAMA.findIndex(p2=>p2.pantalla===pantalla);
-      if (idx!==-1) CRONOGRAMA[idx].tareas.push({ id:nuevoId, nombre:newForm.nombre, progreso:p, responsable:newForm.responsable||"", inicio:newForm.inicio||"", fin:newForm.fin||"", comentario:newForm.comentario||"" });
+      setCronograma(prev => prev.map(pt => pt.pantalla===pantalla ? { ...pt, tareas:[...pt.tareas, { id:nuevoId, nombre:newForm.nombre, progreso:p, responsable:newForm.responsable||"", inicio:newForm.inicio||"", fin:newForm.fin||"", comentario:newForm.comentario||"" }] } : pt));
       setTareaOv(prev=>({...prev,[nuevoId]:payload}));
       setSvTarea("ok"); setTimeout(()=>setSvTarea(null),2000);
       setNewTarea(null); setNewForm({ nombre:"", progreso:0, responsable:"", inicio:"", fin:"", comentario:"" });
     } catch(e) { console.error("Error agregando:",e); setSvTarea("error"); setTimeout(()=>setSvTarea(null),3000); }
   };
 
-  /* Datos para pantalla Avance */
-  const etapas = [...new Set(CRONOGRAMA.map(p=>p.etapa))];
+  const etapas = [...new Set(cronograma.map(p=>p.etapa))];
   const responsablesBase  = TEAM.map(m => m.name);
-  const responsablesExtra = [...new Set(CRONOGRAMA.flatMap(p=>p.tareas).map(t=>(tareaOv[t.id]?.responsable||t.responsable||"").trim()).filter(r=>r&&!responsablesBase.includes(r)))];
+  const responsablesExtra = [...new Set(cronograma.flatMap(p=>p.tareas).map(t=>(tareaOv[t.id]?.responsable||t.responsable||"").trim()).filter(r=>r&&!responsablesBase.includes(r)))];
   const responsablesLista = [...responsablesBase, ...responsablesExtra];
 
-  const pantallasVisibles = CRONOGRAMA.filter(p => {
+  const pantallasVisibles = cronograma.filter(p => {
     const matchBusq   = p.pantalla.toLowerCase().includes(busqueda.toLowerCase());
     const matchEtapa  = filtroEtapa==="Todas" || p.etapa===filtroEtapa;
     const avance      = calcularAvancePantalla(p.tareas, tareaOv);
@@ -549,20 +665,19 @@ function App() {
     const matchEstado = filtroEstado==="Todos" || estado===filtroEstado;
     return matchBusq && matchEtapa && matchEstado;
   });
-  const _tts = CRONOGRAMA.flatMap(p=>p.tareas);
+
+  const _tts = cronograma.flatMap(p=>p.tareas);
   const avanceGlobal = _tts.length ? Math.round(_tts.reduce((s,t)=>{ const ov=tareaOv[t.id]; return s+(ov?normalizarProgreso(ov.progreso):normalizarProgreso(t.progreso)); },0)/_tts.length) : 0;
+
   const indicadoresHoy = useMemo(() => {
     const ahora = new Date(today); ahora.setHours(23,59,59,999);
     const hoyMs = ahora.getTime();
-    const todasTareas    = CRONOGRAMA.flatMap(p => p.tareas);
+    const todasTareas    = cronograma.flatMap(p => p.tareas);
     const tareasAcum     = todasTareas.filter(t => { const ms=toEndOfDayMs(tareaOv[t.id]?.fin||t.fin); return ms!==null&&ms<=hoyMs; });
     const tareasAcumDone = tareasAcum.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso) >= 100);
     const pctTareas = tareasAcum.length>0 ? Math.round((tareasAcumDone.length/tareasAcum.length)*100) : 0;
-    const pantallasAcum     = CRONOGRAMA.filter(p => { const ms=toEndOfDayMs(pantallaConfig[p.pantalla]?.fecha_fin); return ms!==null&&ms<=hoyMs; });
-    const pantallasAcumDone = pantallasAcum.filter(p => calcularAvancePantalla(p.tareas,tareaOv) >= 100);
-    const pctPantallas = pantallasAcum.length>0 ? Math.round((pantallasAcumDone.length/pantallasAcum.length)*100) : 0;
-    return { pctTareas, tareasTotal:tareasAcum.length, tareasDone:tareasAcumDone.length, pctPantallas, pantallasTotal:pantallasAcum.length, pantallasDone:pantallasAcumDone.length };
-  }, [tareaOv, pantallaConfig, today]);
+    return { pctTareas, tareasTotal:tareasAcum.length, tareasDone:tareasAcumDone.length };
+  }, [tareaOv, pantallaConfig, today, cronograma]);
 
   const sum = useMemo(() => {
     const all=[];
@@ -648,8 +763,7 @@ function App() {
         const colAvance      = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?C.grn:a>0?C.gold:C.g; };
         const estadoPantalla = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?"Completada":a>0?"En curso":"Pendiente"; };
 
-        /* Contador — excluye PANTALLAS_AREA */
-        const tareasParaContar   = CRONOGRAMA.filter(p => !PANTALLAS_AREA.includes(p.pantalla));
+        const tareasParaContar   = cronograma.filter(p => !PANTALLAS_AREA.includes(p.pantalla));
         const totalInd           = tareasParaContar.reduce((s,p) => s+p.tareas.length, 0);
         const completadosInd     = tareasParaContar.reduce((s,p) => s+p.tareas.filter(t=>normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso)>=100).length, 0);
         const enCursoInd         = tareasParaContar.reduce((s,p) => s+p.tareas.filter(t=>{const v=normalizarProgreso(tareaOv[t.id]?.progreso!==undefined?tareaOv[t.id].progreso:t.progreso);return v>0&&v<100;}).length, 0);
@@ -667,8 +781,9 @@ function App() {
             {PH("AVANCE DE PANTALLAS")}
 
             {/* Barras + contador */}
-            <div style={{ background:C.navy, padding:"12px 28px", display:"flex", flexDirection:"column", gap:12, borderBottom:`1px solid ${C.bd}` }}>
-              {/* Avance desarrollo indicadores */}
+            <div style={{ background:C.navy, padding:"16px 28px", display:"flex", flexDirection:"column", gap:14, borderBottom:`1px solid ${C.bd}` }}>
+
+              {/* Avance promedio indicadores */}
               <div style={{ display:"flex", alignItems:"center", gap:14 }}>
                 <span style={{ fontSize:11, color:C.g, minWidth:250 }}>AVANCE PROMEDIO DE INDICADORES</span>
                 <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
@@ -676,10 +791,42 @@ function App() {
                 </div>
                 <span style={{ fontSize:15, fontWeight:700, color:C.teal, minWidth:44 }}>{avanceGlobal}%</span>
                 {svTarea && <span style={{ fontSize:10, color:svTarea==="ok"?C.gl:svTarea==="error"?C.rl:C.gold, marginLeft:"auto" }}>{svTarea==="saving"?"Guardando…":svTarea==="ok"?"✓ Guardado":"⚠ Error al guardar"}</span>}
+                {svPantalla && <span style={{ fontSize:10, color:svPantalla==="ok"?C.gl:svPantalla==="error"?C.rl:C.gold, marginLeft: svTarea?"8px":"auto" }}>{svPantalla==="saving"?"Guardando pantalla…":svPantalla==="ok"?"✓ Pantalla guardada":"⚠ Error"}</span>}
               </div>
-              {/* Avance acumulado */}
-              <BarAcum label="AVANCE ACUMULADO A LA FECHA" pct={indicadoresHoy.pctTareas} done={indicadoresHoy.tareasDone} total={indicadoresHoy.tareasTotal}/>
-              {/* Contador total indicadores */}
+
+              {/* Avance acumulado a la fecha */}
+              <BarAcum
+                label="AVANCE ACUMULADO A LA FECHA"
+                pct={indicadoresHoy.pctTareas}
+                done={indicadoresHoy.tareasDone}
+                total={indicadoresHoy.tareasTotal}
+              />
+
+              {/* ── NUEVA BARRA: Datacenter Desarrollo ── */}
+              <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                <span style={{ fontSize:11, color:C.g, minWidth:250 }}>
+                  DATACENTER (DESARROLLO)
+                </span>
+                <div style={{ flex:1, maxWidth:260, height:7, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
+                  <div style={{
+                    width:`${datacenterDevStats.pct}%`,
+                    height:"100%",
+                    background: datacenterDevStats.pct>=100 ? C.gl : datacenterDevStats.pct>0 ? "#7c4dff" : C.g,
+                    borderRadius:99,
+                    transition:"width .5s"
+                  }}/>
+                </div>
+                <span style={{ fontSize:15, fontWeight:700, color: datacenterDevStats.pct>=100 ? C.gl : datacenterDevStats.pct>0 ? "#7c4dff" : C.g, minWidth:44 }}>
+                  {datacenterDevStats.pct}%
+                </span>
+                <span style={{ fontSize:10, color:C.g }}>
+                  {datacenterDevStats.total === 0
+                    ? "Sin pantallas registradas"
+                    : `${datacenterDevStats.completadas}/${datacenterDevStats.total} pantallas completadas`}
+                </span>
+              </div>
+
+              {/* Contador indicadores */}
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                 <span style={{ fontSize:11, color:C.g, minWidth:250 }}>TOTAL INDICADORES</span>
                 <div style={{ display:"flex", gap:8 }}>
@@ -726,12 +873,14 @@ function App() {
                 return (
                   <div key={p.pantalla} style={{ background:C.w, borderRadius:6, marginBottom:10, border:`1px solid ${isExp?C.teal:"#e0e0e0"}`, overflow:"hidden", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
                     {/* Cabecera */}
-                    <div onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }}
-                      style={{ padding:"14px 18px", cursor:"pointer", display:"flex", alignItems:"center", gap:14 }}>
-                      <div style={{ flex:1 }}>
+                    <div style={{ padding:"14px 18px", display:"flex", alignItems:"center", gap:14 }}>
+                      {/* Zona clickeable para expandir */}
+                      <div onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }}
+                        style={{ flex:1, cursor:"pointer" }}>
                         <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
                           <span style={{ fontSize:14, fontWeight:700, color:C.navy }}>{p.pantalla}</span>
                           <span style={{ fontSize:10, color:C.g }}>{p.etapa}</span>
+                          {!p.hardcoded && <span style={{ fontSize:9, padding:"1px 6px", borderRadius:99, background:"rgba(0,188,212,0.1)", color:C.teal, fontWeight:600 }}>DINÁMICA</span>}
                           <span style={{ padding:"2px 8px", borderRadius:99, fontSize:9, fontWeight:700, background:estado==="Completada"?"rgba(46,125,50,0.1)":estado==="En curso"?"rgba(232,168,56,0.1)":"rgba(144,164,174,0.15)", color:estado==="Completada"?C.grn:estado==="En curso"?"#b8860b":C.g, marginLeft:"auto" }}>{estado}</span>
                         </div>
                         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -767,10 +916,17 @@ function App() {
                           </span>
                         </div>
                       </div>
-                      <span style={{ fontSize:16, color:C.g, userSelect:"none" }}>{isExp?"▲":"▼"}</span>
+                      {/* Botón eliminar pantalla — fuera de la zona clickeable */}
+                      <button
+                        onClick={e=>{ e.stopPropagation(); eliminarPantalla(p); }}
+                        title="Eliminar pantalla"
+                        style={{ padding:"5px 9px", border:"1px solid rgba(198,40,40,0.2)", background:"rgba(198,40,40,0.06)", color:C.red, borderRadius:4, fontSize:12, cursor:"pointer", flexShrink:0 }}>
+                        🗑️
+                      </button>
+                      <span onClick={()=>{ setExpandedP(isExp?null:p.pantalla); if(isExp){setNewTarea(null);setEditTarea(null);} }} style={{ fontSize:16, color:C.g, userSelect:"none", cursor:"pointer" }}>{isExp?"▲":"▼"}</span>
                     </div>
 
-                    {/* Detalle */}
+                    {/* Detalle expandido */}
                     {isExp && (
                       <div style={{ borderTop:`1px solid #f0f0f0` }}>
                         <div style={{ overflowX:"auto" }}>
@@ -854,6 +1010,8 @@ function App() {
                             </tbody>
                           </table>
                         </div>
+
+                        {/* Agregar indicador/pantalla */}
                         {isAddingHere
                           ? <div style={{ padding:"12px 16px", background:"rgba(0,188,212,0.04)", borderTop:"1px solid #e0f7fa" }}>
                               <div style={{ fontSize:11, fontWeight:700, color:C.teal, marginBottom:8 }}>+ {esPantallaArea?"Nueva Pantalla de Área":"Nuevo indicador"} en {p.pantalla}</div>
@@ -895,7 +1053,55 @@ function App() {
                   </div>
                 );
               })}
-              {pantallasVisibles.length===0 && <div style={{ textAlign:"center", padding:40, color:"#90a4ae", fontSize:13 }}>No se encontraron pantallas con esos filtros.</div>}
+
+              {pantallasVisibles.length===0 && !showAddPantalla && (
+                <div style={{ textAlign:"center", padding:40, color:"#90a4ae", fontSize:13 }}>No se encontraron pantallas con esos filtros.</div>
+              )}
+
+              {/* ── BOTÓN Y FORMULARIO: Agregar pantalla al cronograma ── */}
+              <div style={{ marginTop:8 }}>
+                {showAddPantalla ? (
+                  <div style={{ background:C.w, borderRadius:6, border:`2px dashed ${C.teal}`, padding:"18px 20px" }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:C.teal, marginBottom:14 }}>+ Nueva pantalla al cronograma</div>
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
+                      <div>
+                        <label style={{ fontSize:10, fontWeight:600, color:C.g, display:"block", marginBottom:4 }}>NOMBRE DE LA PANTALLA *</label>
+                        <input
+                          value={newPantalla.pantalla}
+                          onChange={e=>setNewPantalla(f=>({...f,pantalla:e.target.value}))}
+                          placeholder="Ej: Gestión de Contratos"
+                          style={{ width:"100%", padding:"7px 10px", border:`1px solid ${newPantalla.pantalla?"#dde":C.rl}`, borderRadius:4, fontSize:12, fontFamily:"inherit" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize:10, fontWeight:600, color:C.g, display:"block", marginBottom:4 }}>ETAPA</label>
+                        <select
+                          value={newPantalla.etapa}
+                          onChange={e=>setNewPantalla(f=>({...f,etapa:e.target.value}))}
+                          style={{ width:"100%", padding:"7px 10px", border:"1px solid #dde", borderRadius:4, fontSize:12, background:"#fff" }}>
+                          {ETAPAS_LISTA.map(et=><option key={et} value={et}>{et}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ display:"flex", gap:8 }}>
+                      <button onClick={agregarPantalla}
+                        style={{ padding:"8px 20px", background:C.teal, color:C.w, border:"none", borderRadius:4, fontSize:12, fontWeight:700, cursor:"pointer" }}>
+                        Guardar pantalla
+                      </button>
+                      <button onClick={()=>{ setShowAddPantalla(false); setNewPantalla({ pantalla:"", etapa:ETAPAS_LISTA[0] }); }}
+                        style={{ padding:"8px 14px", background:"#eee", border:"none", borderRadius:4, fontSize:12, cursor:"pointer" }}>
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={()=>setShowAddPantalla(true)}
+                    style={{ width:"100%", padding:"14px", border:`2px dashed ${C.teal}`, borderRadius:6, background:"rgba(0,188,212,0.04)", color:C.teal, fontSize:13, fontWeight:600, cursor:"pointer", letterSpacing:0.3 }}>
+                    + Agregar nueva pantalla al cronograma
+                  </button>
+                )}
+              </div>
             </div>
             {PF}
           </div>
