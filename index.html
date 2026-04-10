@@ -493,6 +493,10 @@ function BarAcum({ label, pct, done, total, color }) {
 
 function App() {
   const [pg,  setPg]  = useState("avance");
+  const [auth, setAuth] = useState(false);
+  const [pwd, setPwd]   = useState("");
+  const [pwdErr, setPwdErr] = useState(false);
+  const APP_PASS = "RTIC2026";
   const [wk,  setWk]  = useState(1);
   const [dt,  setDt]  = useState(INIT);
   const [ed,  setEd]  = useState(null);
@@ -729,6 +733,31 @@ function App() {
       <div style={{ width:36, height:36, border:`3px solid ${C.bd}`, borderTop:`3px solid ${C.teal}`, borderRadius:"50%", animation:"sp 1s linear infinite" }}/>
       <div style={{ color:C.teal, fontSize:13 }}>Conectando con Supabase…</div>
       <style>{`@keyframes sp{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  if (!auth) return (
+    <div style={{ fontFamily:"'Segoe UI',sans-serif", background:C.navy, minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <div style={{ background:C.nl, border:`1px solid ${C.bd}`, borderRadius:8, padding:"40px 36px", maxWidth:360, width:"100%", textAlign:"center" }}>
+        <h1 style={{ fontSize:20, fontWeight:300, color:C.w, marginBottom:6 }}>RTIC Dashboard</h1>
+        <div style={{ width:60, height:3, background:C.teal, margin:"0 auto 24px" }}/>
+        <div style={{ fontSize:11, color:C.g, marginBottom:18 }}>Ingresá la contraseña para continuar</div>
+        <input
+          type="password"
+          value={pwd}
+          onChange={e=>{ setPwd(e.target.value); setPwdErr(false); }}
+          onKeyDown={e=>{ if(e.key==="Enter"){ if(pwd===APP_PASS){setAuth(true);}else{setPwdErr(true);} } }}
+          placeholder="Contraseña"
+          style={{ width:"100%", padding:"10px 14px", border:`1px solid ${pwdErr?C.rl:C.bd}`, borderRadius:4, fontSize:13, background:"rgba(255,255,255,0.05)", color:C.w, outline:"none", marginBottom:12, boxSizing:"border-box" }}
+        />
+        {pwdErr && <div style={{ fontSize:11, color:C.rl, marginBottom:10 }}>Contraseña incorrecta</div>}
+        <button
+          onClick={()=>{ if(pwd===APP_PASS){setAuth(true);}else{setPwdErr(true);} }}
+          style={{ width:"100%", padding:"10px", background:C.teal, color:C.w, border:"none", borderRadius:4, fontSize:13, fontWeight:600, cursor:"pointer" }}>
+          Ingresar
+        </button>
+        <div style={{ fontSize:9, color:C.g, marginTop:16 }}>PRIVADO — USO INTERNO</div>
+      </div>
     </div>
   );
 
