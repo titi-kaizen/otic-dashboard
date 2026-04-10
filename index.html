@@ -492,7 +492,7 @@ function BarAcum({ label, pct, done, total, color }) {
 }
 
 function App() {
-  const [pg,  setPg]  = useState("cover");
+  const [pg,  setPg]  = useState("avance");
   const [wk,  setWk]  = useState(1);
   const [dt,  setDt]  = useState(INIT);
   const [ed,  setEd]  = useState(null);
@@ -737,7 +737,7 @@ function App() {
 
       {/* NAV */}
       <div style={{ background:C.navy, display:"flex", alignItems:"center", padding:"0 10px", borderBottom:`2px solid ${C.teal}`, position:"sticky", top:0, zIndex:100, flexWrap:"wrap" }}>
-        {[["cover","Portada"],["input","Carga Semanal"],["avance","Avance"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
+        {[["input","Carga Semanal"],["avance","Avance"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
           <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px", border:"none", background:pg===k?C.nl:"transparent", color:pg===k?C.teal:C.gl2, fontSize:12, fontWeight:pg===k?600:400, cursor:"pointer", borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
         ))}
         <div style={{ marginLeft:"auto", padding:"6px 0" }}>
@@ -747,25 +747,6 @@ function App() {
           </select>
         </div>
       </div>
-
-      {pg==="cover" && (
-        <div style={{ background:C.navy, minHeight:"calc(100vh - 46px)", display:"flex", flexDirection:"column", justifyContent:"center", padding:"50px 70px", position:"relative" }}>
-          <div style={{ maxWidth:750 }}>
-            <h1 style={{ fontSize:48, fontWeight:300, color:C.w, lineHeight:1.1, margin:0 }}>REAL TIME INTELLIGENCE CENTER</h1>
-            <div style={{ width:350, height:4, background:C.teal, margin:"28px 0" }}/>
-            <h2 style={{ fontSize:24, fontWeight:300, color:C.teal, margin:"0 0 40px" }}>Resumen Ejecutivo Semanal</h2>
-            <div style={{ background:C.nl, border:`1px solid ${C.bd}`, borderRadius:4, padding:"22px 26px", maxWidth:460 }}>
-              {[["SEMANA",`N°${wk} — ${wc.sf} al ${wc.ef}`],["RESPONSABLE","Claus Drescher"],["ÁREA","Supply Chain — Performance"],["VERSIÓN","v1.0"]].map(([l,v])=>(
-                <div key={l} style={{ marginBottom:11 }}>
-                  <span style={{ fontSize:11, fontWeight:700, color:C.teal, letterSpacing:1.5, marginRight:10 }}>{l}</span>
-                  <span style={{ fontSize:13, color:C.w }}>{v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{ position:"absolute", bottom:24, left:0, right:0, textAlign:"center", fontSize:11, color:C.g }}>PRIVADO — USO INTERNO</div>
-        </div>
-      )}
 
       {pg==="avance" && (() => {
         const colAvance      = p => { const a=calcularAvancePantalla(p.tareas,tareaOv); return a>=100?C.grn:a>0?C.gold:C.g; };
