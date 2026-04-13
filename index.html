@@ -766,7 +766,7 @@ function App() {
 
       {/* NAV */}
       <div style={{ background:C.navy, display:"flex", alignItems:"center", padding:"0 10px", borderBottom:`2px solid ${C.teal}`, position:"sticky", top:0, zIndex:100, flexWrap:"wrap" }}>
-        {[["input","Carga Semanal"],["avance","Avance"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
+        {[["input","Carga Semanal"],["avance","Avance"],["semanal","Avance Semanal"],["calendar","Calendario"],["resumen","Resumen Ejecutivo"],["metricas","Métricas"],["admin","⚙"]].map(([k,l])=>(
           <button key={k} onClick={()=>setPg(k)} style={{ padding:"12px 14px", border:"none", background:pg===k?C.nl:"transparent", color:pg===k?C.teal:C.gl2, fontSize:12, fontWeight:pg===k?600:400, cursor:"pointer", borderBottom:pg===k?`2px solid ${C.teal}`:"2px solid transparent" }}>{l}</button>
         ))}
         <div style={{ marginLeft:"auto", padding:"6px 0" }}>
@@ -1191,6 +1191,124 @@ function App() {
                 )}
               </div>
               </React.Fragment>}
+            </div>
+            {PF}
+          </div>
+        );
+      })()}
+
+      {/* ── AVANCE SEMANAL ── */}
+      {pg==="semanal" && (() => {
+        const wStart = new Date(2026, 2, 5 + (wk-1)*7);
+        const wEnd   = new Date(wStart); wEnd.setDate(wEnd.getDate() + 4);
+        const wStartStr = wStart.toISOString().slice(0,10);
+        const wEndStr   = wEnd.toISOString().slice(0,10);
+
+        const tareasSemanales = cronograma
+          .filter(p => !PANTALLAS_AREA.includes(p.pantalla))
+          .flatMap(p => p.tareas.map(t => ({ ...t, pantalla: p.pantalla })))
+          .filter(t => {
+            const fin = (tareaOv[t.id]?.fin || t.fin || "").slice(0,10);
+            return fin >= wStartStr && fin <= wEndStr;
+          });
+
+        const total      = tareasSemanales.length;
+        const completadas = tareasSemanales.filter(t => normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso) >= 100).length;
+        const enCurso    = tareasSemanales.filter(t => { const v = normalizarProgreso(tareaOv[t.id]?.progreso !== undefined ? tareaOv[t.id].progreso : t.progreso); return v > 0 && v < 100; }).length;
+        const pendientes = total - completadas - enCurso;
+        const pct        = total > 0 ? Math.round((completadas / total) * 100) : 0;
+        const colPct     = pct >= 100 ? C.gl : pct >= 50 ? C.gold : pct > 0 ? C.rl : C.g;
+
+        const fmtDate = d => d.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" });
+
+        return (
+          <div style={{ background:"#e8ecf1" }}>
+            {PH("AVANCE SEMANAL")}
+
+            <div style={{ background:C.navy, padding:"20px 28px", borderBottom:`1px solid ${C.bd}` }}>
+              <div style={{ fontSize:11, color:C.g, marginBottom:12, letterSpacing:1 }}>
+                SEMANA {wk} — {fmtDate(wStart)} al {fmtDate(wEnd)} (Lun a Vie)
+              </div>
+
+              <div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:16 }}>
+                <div style={{ textAlign:"center", padding:"16px 28px", borderRadius:8, background:"rgba(0,188,212,0.08)", border:`1px solid ${C.teal}44` }}>
+                  <div style={{ fontSize:42, fontWeight:700, color:colPct, lineHeight:1 }}>{pct}%</div>
+                  <div style={{ fontSize:11, color:C.g, marginTop:6 }}>Completado</div>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+                    <div style={{ flex:1, height:10, background:"rgba(255,255,255,0.1)", borderRadius:99 }}>
+                      <div style={{ width:`${pct}%`, height:"100%", background:colPct, borderRadius:99, transition:"width .4s" }}/>
+                    </div>
+                    <span style={{ fontSize:13, fontWeight:700, color:colPct }}>{completadas}/{total}</span>
+                  </div>
+                  <div style={{ display:"flex", gap:12 }}>
+                    {[
+                      { v:total, l:"Total", col:C.teal, bg:"rgba(0,188,212,0.12)" },
+                      { v:completadas, l:"Completados", col:C.gl, bg:"rgba(76,175,80,0.12)" },
+                      { v:enCurso, l:"En curso", col:C.gold, bg:"rgba(232,168,56,0.12)" },
+                      { v:pendientes, l:"Pendientes", col:C.rl, bg:"rgba(239,83,80,0.12)" },
+                    ].map(s => (
+                      <div key={s.l} style={{ textAlign:"center", padding:"8px 16px", borderRadius:6, background:s.bg, border:`1px solid ${s.col}44`, flex:1 }}>
+                        <div style={{ fontSize:22, fontWeight:700, color:s.col, lineHeight:1 }}>{s.v}</div>
+                        <div style={{ fontSize:10, color:s.col, marginTop:4, fontWeight:500 }}>{s.l}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding:"18px 24px" }}>
+              {total === 0 ? (
+                <div style={{ textAlign:"center", padding:40, color:"#90a4ae", fontSize:13 }}>
+                  No hay indicadores con fecha de fin en esta semana.
+                </div>
+              ) : (
+                <div style={{ background:C.w, borderRadius:6, overflow:"hidden", border:"1px solid #e0e0e0" }}>
+                  <div style={{ overflowX:"auto" }}>
+                    <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                      <thead>
+                        <tr style={{ background:"#f7f9fb" }}>
+                          {["Pantalla","Indicador","Progreso","Estado","Responsable","Fin","Comentario"].map(h => (
+                            <th key={h} style={{ padding:"8px", textAlign:"left", color:C.g, fontWeight:600, fontSize:10, borderBottom:"1px solid #eee" }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tareasSemanales.map(t => {
+                          const ov     = tareaOv[t.id] || {};
+                          const prog   = normalizarProgreso(ov.progreso !== undefined ? ov.progreso : t.progreso);
+                          const est    = estadoTarea(prog);
+                          const resp   = ov.responsable || t.responsable;
+                          const fin2   = ov.fin || t.fin;
+                          const coment = ov.comentario !== undefined ? ov.comentario : t.comentario;
+                          return (
+                            <tr key={t.id} style={{ borderBottom:"1px solid #f5f5f5" }}>
+                              <td style={{ padding:"8px", color:C.teal, fontSize:10, fontWeight:600 }}>{t.pantalla}</td>
+                              <td style={{ padding:"8px", color:C.navy, maxWidth:220 }}>{t.nombre}</td>
+                              <td style={{ padding:"8px" }}>
+                                <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                                  <div style={{ width:60, height:5, background:"#f0f0f0", borderRadius:99 }}>
+                                    <div style={{ width:`${prog}%`, height:"100%", background:prog >= 100 ? C.grn : prog > 0 ? C.gold : C.g, borderRadius:99 }}/>
+                                  </div>
+                                  <span style={{ fontWeight:700, color:prog >= 100 ? C.grn : prog > 0 ? "#b8860b" : C.g }}>{prog}%</span>
+                                </div>
+                              </td>
+                              <td style={{ padding:"8px" }}>
+                                <span style={{ padding:"2px 6px", borderRadius:3, fontSize:9, fontWeight:700, background:est === "Completada" ? "rgba(46,125,50,0.1)" : est === "En curso" ? "rgba(232,168,56,0.1)" : "rgba(144,164,174,0.1)", color:est === "Completada" ? C.grn : est === "En curso" ? "#b8860b" : C.g }}>{est}</span>
+                              </td>
+                              <td style={{ padding:"8px", color:"#546e7a" }}>{resp}</td>
+                              <td style={{ padding:"8px", color:"#90a4ae" }}>{fin2}</td>
+                              <td style={{ padding:"8px", color:"#90a4ae", fontStyle:"italic", maxWidth:160 }}>{coment || "—"}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
             {PF}
           </div>
