@@ -1200,9 +1200,10 @@ function App() {
       {/* ── AVANCE SEMANAL ── */}
       {pg==="semanal" && (() => {
         const wStart = new Date(2026, 2, 5 + (wk-1)*7);
-        const wEnd   = new Date(wStart); wEnd.setDate(wEnd.getDate() + 4);
-        const wStartStr = wStart.toISOString().slice(0,10);
-        const wEndStr   = wEnd.toISOString().slice(0,10);
+        const wEnd   = new Date(wStart); wEnd.setDate(wEnd.getDate() + 6);
+        const pad = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const wStartStr = pad(wStart);
+        const wEndStr   = pad(wEnd);
 
         const tareasSemanales = cronograma
           .filter(p => !PANTALLAS_AREA.includes(p.pantalla))
@@ -1227,7 +1228,7 @@ function App() {
 
             <div style={{ background:C.navy, padding:"20px 28px", borderBottom:`1px solid ${C.bd}` }}>
               <div style={{ fontSize:11, color:C.g, marginBottom:12, letterSpacing:1 }}>
-                SEMANA {wk} — {fmtDate(wStart)} al {fmtDate(wEnd)} (Lun a Vie)
+                SEMANA {wk} — {fmtDate(wStart)} al {fmtDate(wEnd)}
               </div>
 
               <div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:16 }}>
