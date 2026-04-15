@@ -791,7 +791,7 @@ function App() {
           { v:completadosInd, l:"Completados",   col:C.gl,   bg:"rgba(76,175,80,0.12)" },
           { v:enCursoInd,     l:"En curso",      col:C.gold, bg:"rgba(232,168,56,0.12)" },
           { v:pendientesInd,  l:"Pendientes",    col:C.rl,   bg:"rgba(239,83,80,0.12)" },
-          { v:18,             l:"Indicadores Agregados", col:"#546e7a", bg:"rgba(255,255,255,0.9)" },
+          { v:15,             l:"Indicadores Agregados", col:"#546e7a", bg:"rgba(255,255,255,0.9)" },
         ];
 
         return (
@@ -941,7 +941,7 @@ function App() {
                                 <td style={{ padding:"8px", color:"#546e7a" }}>{resp}</td>
                                 <td style={{ padding:"8px", color:"#90a4ae" }}>{ini}</td>
                                 <td style={{ padding:"8px", color:"#90a4ae" }}>{fin2}</td>
-                                <td style={{ padding:"8px", color:"#90a4ae", fontStyle:"italic", maxWidth:160 }}>{coment||"—"}</td>
+                                <td style={{ padding:"8px", color:C.navy, fontStyle:"italic", maxWidth:160 }}>{coment||"—"}</td>
                               </tr>
                             );
                           })}
@@ -1080,7 +1080,7 @@ function App() {
                                       {isEditing
                                         ? <input value={editTarea.comentario} onChange={e=>setEditTarea(p=>({...p,comentario:e.target.value}))}
                                             style={{ width:"100%", padding:"3px 5px", border:"1px solid #dde", borderRadius:3, fontSize:11 }}/>
-                                        : <span style={{ color:"#90a4ae", fontStyle:"italic" }}>{coment||"—"}</span>}
+                                        : <span style={{ color:C.navy, fontStyle:"italic" }}>{coment||"—"}</span>}
                                     </td>
                                     <td style={{ padding:"8px", whiteSpace:"nowrap" }}>
                                       {isEditing
@@ -1301,7 +1301,7 @@ function App() {
                               </td>
                               <td style={{ padding:"8px", color:"#546e7a" }}>{resp}</td>
                               <td style={{ padding:"8px", color:"#90a4ae" }}>{fin2}</td>
-                              <td style={{ padding:"8px", color:"#90a4ae", fontStyle:"italic", maxWidth:160 }}>{coment || "—"}</td>
+                              <td style={{ padding:"8px", color:C.navy, fontStyle:"italic", maxWidth:160 }}>{coment || "—"}</td>
                             </tr>
                           );
                         })}
